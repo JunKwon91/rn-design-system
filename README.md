@@ -109,14 +109,6 @@ npm run ios      # 또는 npm run android
 | **아이콘** | `lucide-react-native` 1.x + `react-native-svg` |
 | **경로 별칭** | `babel-plugin-module-resolver` (`@/*` → `src/*`) |
 
-## Figma Library
-
-| Light | Dark |
-|---|---|
-| TBD — 공개 예정 | TBD — 공개 예정 |
-
-상세 패턴 매핑은 [docs/figma-link.md](docs/figma-link.md) 참고.
-
 ## 사용 예시
 
 ### Text
