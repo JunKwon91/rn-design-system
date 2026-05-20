@@ -77,25 +77,25 @@ npm run ios      # 또는 npm run android
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
-| **primitives** | `Text` | 10 variants × 5 colors · displayLg/headlineMd/headlineSm/bodyBase/bodySm/bodyXs/labelSm/labelMd/labelLg/labelCaps/numericMd |
-| | `Spacer` | xs/sm/md/lg/xl/2xl × vertical·horizontal |
-| | `Divider` | subtle/default/strong × horizontal·vertical · inset 옵션 |
-| **surface** | `Screen` | SafeAreaView + ScrollView + 표준 padding/배경 |
-| | `Card` | default/elevated × default/compact density · title·meta·showDivider |
-| | `Section` | 카테고리 컨테이너 · default/compact/roomy spacing · action prop |
-| **action** | `Button` | primary/secondary/destructive × sm/md/lg · loading·disabled·fullWidth·leftIcon |
-| | `IconButton` | sm/md/lg × primary/secondary/muted/accent |
-| **input** | `Input` | label · helper/error · disabled · focus state · forwardRef |
-| | `SearchInput` | 좌측 search 아이콘 + 우측 X 클리어 버튼 |
-| **display** | `DataTable` | Generic\<T\> · default/compact density · sortable 헤더 |
-| | `SegmentedControl` | Generic\<T extends string\> · 2~N segments |
-| | `Tabs` | Generic\<T extends string\> · Material 3 underline · 가로 스크롤 |
-| **list** | `SettingsRow` | 5 kinds: default/toggle/picker/link/action (discriminated union) |
-| **feedback** | `EmptyState` | standard/subtle tone · icon·title·description·action |
-| | `ErrorView` | default AlertCircle + state.error · title·description·action |
-| | `LoadingView` | ActivityIndicator + 선택 message · small/large |
-| | `Toast` | success/error/info × queue max 3 (`<ToastHost />` 마운트) |
-| | `Dialog` | info/confirm(+destructive)/prompt × Promise 반환 (`<DialogHost />` 마운트) |
+| **primitives** | `Text` | 타이포그래피 시스템 (11 variant, 5 color tone) |
+| | `Spacer` | 표준화된 간격 컨트롤 (vertical·horizontal) |
+| | `Divider` | 시각적 구분선 (subtle·default·strong) |
+| **surface** | `Screen` | 안전 영역 + 표준 padding + 배경을 적용한 화면 컨테이너 |
+| | `Card` | 컨텐츠 그룹화 표면 (제목·메타·구분선 옵션) |
+| | `Section` | 페이지 내 시멘틱 섹션 컨테이너 |
+| **action** | `Button` | 액션 버튼 (primary·secondary·destructive) |
+| | `IconButton` | 아이콘 기반 액션 버튼 |
+| **input** | `Input` | 라벨·헬퍼·에러 메시지 지원 텍스트 입력 |
+| | `SearchInput` | 검색 아이콘 + 클리어 버튼이 있는 검색 입력 |
+| **display** | `DataTable` | 타입 안전한 데이터 테이블 (정렬·밀도 옵션) |
+| | `SegmentedControl` | 균등 분할 옵션 선택기 |
+| | `Tabs` | Material 3 underline 가로 탭 |
+| **list** | `SettingsRow` | 설정 화면용 행 (5가지 유형) |
+| **feedback** | `EmptyState` | 빈 상태 표현 |
+| | `ErrorView` | 오류 상태 표현 |
+| | `LoadingView` | 로딩 상태 표현 |
+| | `Toast` | 일시적 알림 메시지 (큐잉 + 자동 닫힘) |
+| | `Dialog` | 모달 다이얼로그 (Promise 반환) |
 
 ## 기술 스택
 
