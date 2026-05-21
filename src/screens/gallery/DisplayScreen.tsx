@@ -19,19 +19,21 @@ import {
 import { Spacer, Text } from '@/components/primitives';
 import { Screen, Section } from '@/components/surface';
 
+type SampleStatus = 'active' | 'pending' | 'archived';
+
 type SampleRow = {
   id: number;
   count: number;
   daysAgo: number;
-  trend: 'up' | 'down' | null;
+  status: SampleStatus;
 };
 
 const sampleData: SampleRow[] = [
-  { id: 24, count: 142, daysAgo: 12, trend: 'up' },
-  { id: 7, count: 138, daysAgo: 3, trend: null },
-  { id: 43, count: 135, daysAgo: 28, trend: null },
-  { id: 11, count: 120, daysAgo: 45, trend: 'down' },
-  { id: 33, count: 118, daysAgo: 7, trend: null },
+  { id: 24, count: 142, daysAgo: 12, status: 'active' },
+  { id: 7, count: 138, daysAgo: 3, status: 'pending' },
+  { id: 43, count: 135, daysAgo: 28, status: 'archived' },
+  { id: 11, count: 120, daysAgo: 45, status: 'active' },
+  { id: 33, count: 118, daysAgo: 7, status: 'pending' },
 ];
 
 const SECTIONS = [
@@ -171,25 +173,18 @@ export default function DisplayScreen() {
       sortable: true,
     },
     {
-      key: 'trend',
-      header: 'Trend',
+      key: 'status',
+      header: 'Status',
       render: row => {
-        if (row.trend === 'up') {
-          return (
-            <Text variant="labelCaps" style={{ color: theme.colors.state.hot }}>
-              up
-            </Text>
-          );
-        }
-        if (row.trend === 'down') {
-          return (
-            <Text variant="labelCaps" style={{ color: theme.colors.state.cold }}>
-              down
-            </Text>
-          );
-        }
+        const colorMap: Record<SampleStatus, string> = {
+          active: theme.colors.state.success,
+          pending: theme.colors.state.warning,
+          archived: theme.colors.text.muted,
+        };
         return (
-          <Text variant="bodySm" color="muted">—</Text>
+          <Text variant="labelCaps" style={{ color: colorMap[row.status] }}>
+            {row.status}
+          </Text>
         );
       },
       flex: 0.8,
