@@ -31,6 +31,16 @@
 |:---:|:---:|
 | ![input light](docs/screenshots/05-input-light.png) | ![input dark](docs/screenshots/05-input-dark.png) |
 
+### Input — Checkbox (체크박스)
+| Light | Dark |
+|:---:|:---:|
+| ![checkbox light](docs/screenshots/checkbox-light.png) | ![checkbox dark](docs/screenshots/checkbox-dark.png) |
+
+### Input — Radio (라디오 + 그룹)
+| Light | Dark |
+|:---:|:---:|
+| ![radio light](docs/screenshots/radio-light.png) | ![radio dark](docs/screenshots/radio-dark.png) |
+
 ### Display — DataTable (데이터 테이블)
 | Light | Dark |
 |:---:|:---:|
