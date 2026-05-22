@@ -7,9 +7,17 @@
 
 import { useMemo, useState } from 'react';
 import { ScrollView } from 'react-native';
-import { useTheme } from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
+
+const BadgeRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+`;
 
 import {
+  Badge,
   DataTable,
   SegmentedControl,
   Tabs,
@@ -40,6 +48,7 @@ const SECTIONS = [
   { value: 'datatable', label: 'DataTable (데이터 테이블)' },
   { value: 'segmented', label: 'SegmentedControl (분할 컨트롤)' },
   { value: 'tabs', label: 'Tabs (탭)' },
+  { value: 'badge', label: 'Badge (배지)' },
 ] as const;
 
 type SectionValue = typeof SECTIONS[number]['value'];
@@ -282,6 +291,57 @@ export default function DisplayScreen() {
             <TabsDemo5 />
             <Spacer size="2xl" />
             <TabsDemo8 />
+          </>
+        )}
+
+        {activeSection === 'badge' && (
+          <>
+            <Section title="Badge · dot (4 colors × 2 sizes)">
+              <BadgeRow>
+                <Badge type="dot" color="primary" />
+                <Badge type="dot" color="destructive" />
+                <Badge type="dot" color="success" />
+                <Badge type="dot" color="warning" />
+                <Badge type="dot" color="primary" size="sm" />
+                <Badge type="dot" color="destructive" size="sm" />
+                <Badge type="dot" color="success" size="sm" />
+                <Badge type="dot" color="warning" size="sm" />
+              </BadgeRow>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Badge · count (1-99, 100+ → 99+)">
+              <BadgeRow>
+                <Badge type="count" value={1} color="primary" />
+                <Badge type="count" value={9} color="destructive" />
+                <Badge type="count" value={42} color="success" />
+                <Badge type="count" value={99} color="warning" />
+                <Badge type="count" value={150} color="destructive" />
+              </BadgeRow>
+              <BadgeRow>
+                <Badge type="count" value={1} color="primary" size="sm" />
+                <Badge type="count" value={9} color="destructive" size="sm" />
+                <Badge type="count" value={42} color="success" size="sm" />
+                <Badge type="count" value={99} color="warning" size="sm" />
+                <Badge type="count" value={150} color="destructive" size="sm" />
+              </BadgeRow>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Badge · label (텍스트 라벨)">
+              <BadgeRow>
+                <Badge type="label" value="NEW" color="primary" />
+                <Badge type="label" value="HOT" color="destructive" />
+                <Badge type="label" value="OK" color="success" />
+                <Badge type="label" value="BETA" color="warning" />
+              </BadgeRow>
+              <BadgeRow>
+                <Badge type="label" value="NEW" color="primary" size="sm" />
+                <Badge type="label" value="HOT" color="destructive" size="sm" />
+                <Badge type="label" value="OK" color="success" size="sm" />
+                <Badge type="label" value="BETA" color="warning" size="sm" />
+              </BadgeRow>
+            </Section>
           </>
         )}
       </ScrollView>
