@@ -12,3 +12,6 @@ export type { RadioProps, RadioSize } from './Radio';
 
 export { default as RadioGroup } from './RadioGroup';
 export type { RadioGroupProps } from './RadioGroup';
+
+export { default as Switch } from './Switch';
+export type { SwitchProps, SwitchSize } from './Switch';
