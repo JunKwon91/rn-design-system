@@ -19,13 +19,11 @@
 // Label: typography.bodyBase, color text.primary
 // Value: typography.bodyBase, color text.secondary
 // 보조 아이콘 (ChevronRight·ExternalLink): 18px, strokeWidth 2, color text.muted
-// Toggle: track 44×24 radius.full, handle 20×20 radius.full, padding 2
-//   On  — track primary.action / handle primary.onAction (우측)
-//   Off — track border.default / handle primary.onAction (좌측)
+// Toggle: input.Switch 컴포넌트 인스턴스 (size=md, M3 filled track + thumb 변화)
 //
 // [Kind별 우측 컨텐츠]
 //   default: Value 텍스트만
-//   toggle:  Toggle 스위치 (Row 전체 탭이 onChange 트리거)
+//   toggle:  Switch (Row 전체 탭이 onChange 트리거)
 //   picker:  Value + ChevronRight
 //   link:    ExternalLink 아이콘
 //   action:  ChevronRight 아이콘
@@ -35,6 +33,7 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { ChevronRight, ExternalLink } from 'lucide-react-native';
 import styled, { useTheme } from 'styled-components/native';
 
+import { Switch } from '@/components/input';
 import Text from '@/components/primitives/Text';
 
 const RowBase = styled.View`
@@ -54,24 +53,6 @@ const PressableRowBase = styled.Pressable`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-`;
-
-const ToggleTrack = styled.View<{ $on: boolean }>`
-  width: 44px;
-  height: 24px;
-  padding: 2px;
-  flex-direction: row;
-  border-radius: ${({ theme }) => theme.radius.full}px;
-  background-color: ${({ theme, $on }) =>
-    $on ? theme.colors.primary.action : theme.colors.border.default};
-`;
-
-const ToggleHandle = styled.View<{ $on: boolean }>`
-  width: 20px;
-  height: 20px;
-  border-radius: ${({ theme }) => theme.radius.full}px;
-  background-color: ${({ theme }) => theme.colors.primary.onAction};
-  margin-left: ${({ $on }) => ($on ? 20 : 0)}px;
 `;
 
 const PickerRight = styled.View`
@@ -121,14 +102,6 @@ export type SettingsRowProps = SettingsRowCommon &
       }
   );
 
-function Toggle({ value }: { value: boolean }) {
-  return (
-    <ToggleTrack $on={value}>
-      <ToggleHandle $on={value} />
-    </ToggleTrack>
-  );
-}
-
 /**
  * 설정 화면 단일 행.
  *
@@ -149,7 +122,9 @@ export default function SettingsRow(props: SettingsRowProps) {
           </Text>
         );
       case 'toggle':
-        return <Toggle value={props.value} />;
+        return (
+          <Switch value={props.value} onValueChange={props.onChange} size="md" />
+        );
       case 'picker':
         return (
           <PickerRight>
