@@ -57,10 +57,13 @@ export default function InputScreen() {
   const [smChecked, setSmChecked] = useState(false);
   const [mdChecked, setMdChecked] = useState(true);
   const [lgChecked, setLgChecked] = useState(false);
+  const [checkNoLabelOff, setCheckNoLabelOff] = useState(false);
+  const [checkNoLabelOn, setCheckNoLabelOn] = useState(true);
 
   // Radio 시연 상태
   const [plan, setPlan] = useState<Plan>('pro');
   const [size, setSize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [individualPick, setIndividualPick] = useState<'x' | 'y'>('x');
 
   // Switch 시연 상태
   const [notif, setNotif] = useState(true);
@@ -184,10 +187,13 @@ export default function InputScreen() {
             </Section>
             <Spacer size="2xl" />
 
-            <Section title="Checkbox · no label (라벨 없음)">
+            <Section title="Checkbox · no label (라벨 없음 · 4 시각 상태)">
+              <Text variant="labelSm" color="muted">
+                좌부터 Off · On · Disabled-Off · Disabled-On (앞 2개만 탭 가능)
+              </Text>
               <RowNoLabel>
-                <Checkbox value={false} onValueChange={() => {}} />
-                <Checkbox value onValueChange={() => {}} />
+                <Checkbox value={checkNoLabelOff} onValueChange={setCheckNoLabelOff} />
+                <Checkbox value={checkNoLabelOn} onValueChange={setCheckNoLabelOn} />
                 <Checkbox value={false} disabled />
                 <Checkbox value disabled />
               </RowNoLabel>
@@ -241,12 +247,14 @@ export default function InputScreen() {
 
             <Section title="Radio · individual disabled (개별 잠금)">
               <Text variant="labelSm" color="muted">
-                개별 Radio에 disabled — 일부 항목만 비활성
+                선택된 값: {individualPick} — 'z'는 disabled로 선택 불가
               </Text>
-              <RadioGroup value="x" onValueChange={() => {}}>
-                <Radio value="x" label="기본 옵션" />
+              <RadioGroup value={individualPick} onValueChange={setIndividualPick}>
+                <Radio value="x" label="기본 옵션 A" />
                 <Spacer size="md" />
-                <Radio value="y" label="잠긴 옵션" disabled />
+                <Radio value="y" label="기본 옵션 B" />
+                <Spacer size="md" />
+                <Radio value="z" label="잠긴 옵션" disabled />
               </RadioGroup>
             </Section>
           </>
