@@ -9,7 +9,7 @@ import { ScrollView } from 'react-native';
 import { ChevronLeft, Plus, Settings, Star, X } from 'lucide-react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import { Button, IconButton } from '@/components/action';
+import { Button, FAB, IconButton } from '@/components/action';
 import { Tabs } from '@/components/display';
 import { Spacer, Text } from '@/components/primitives';
 import { Card, Screen, Section } from '@/components/surface';
@@ -24,6 +24,7 @@ const Row = styled.View`
 const SECTIONS = [
   { value: 'button', label: 'Button (버튼)' },
   { value: 'iconbutton', label: 'IconButton (아이콘 버튼)' },
+  { value: 'fab', label: 'FAB (Floating Action Button)' },
 ] as const;
 
 type SectionValue = typeof SECTIONS[number]['value'];
@@ -144,6 +145,37 @@ export default function ActionScreen() {
                   <IconButton icon={<X />} accessibilityLabel="닫기" onPress={noop} />
                   <Spacer size="md" axis="horizontal" />
                   <IconButton icon={<X />} disabled accessibilityLabel="닫기 disabled" onPress={noop} />
+                </Row>
+              </Card>
+            </Section>
+          </>
+        )}
+
+        {activeSection === 'fab' && (
+          <>
+            <Section title="FAB · 4 variants (small / default / large / extended)">
+              <Card>
+                <Row>
+                  <FAB variant="small" icon={<Plus />} accessibilityLabel="추가 small" onPress={noop} />
+                  <Spacer size="lg" axis="horizontal" />
+                  <FAB variant="default" icon={<Plus />} accessibilityLabel="추가 default" onPress={noop} />
+                  <Spacer size="lg" axis="horizontal" />
+                  <FAB variant="large" icon={<Plus />} accessibilityLabel="추가 large" onPress={noop} />
+                </Row>
+                <Spacer size="lg" />
+                <Row>
+                  <FAB variant="extended" icon={<Plus />} label="글쓰기" onPress={noop} />
+                </Row>
+              </Card>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="FAB · disabled (비활성)">
+              <Card>
+                <Row>
+                  <FAB variant="default" icon={<Plus />} accessibilityLabel="비활성 default" onPress={noop} disabled />
+                  <Spacer size="lg" axis="horizontal" />
+                  <FAB variant="extended" icon={<Plus />} label="비활성" onPress={noop} disabled />
                 </Row>
               </Card>
             </Section>
