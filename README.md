@@ -1,6 +1,6 @@
 # rn-design-system-starter
 
-> React Native 0.85 디자인 시스템 스타터 — 23개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
+> React Native 0.85 디자인 시스템 스타터 — 25개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
 
 ## Screenshots
 
@@ -25,6 +25,11 @@
 | Light | Dark |
 |:---:|:---:|
 | ![button light](docs/screenshots/button-light.png) | ![button dark](docs/screenshots/button-dark.png) |
+
+### Action — FAB (Floating Action Button)
+| Light | Dark |
+|:---:|:---:|
+| ![fab light](docs/screenshots/fab-light.png) | ![fab dark](docs/screenshots/fab-dark.png) |
 
 ### Input — Input (입력)
 | Light | Dark |
@@ -61,6 +66,11 @@
 |:---:|:---:|
 | ![tabs light](docs/screenshots/tabs-light.png) | ![tabs dark](docs/screenshots/tabs-dark.png) |
 
+### Display — Badge (배지)
+| Light | Dark |
+|:---:|:---:|
+| ![badge light](docs/screenshots/badge-light.png) | ![badge dark](docs/screenshots/badge-dark.png) |
+
 ### List — SettingsRow (설정 행)
 | Light | Dark |
 |:---:|:---:|
@@ -88,7 +98,7 @@ npm run ios      # 또는 npm run android
 
 요구사항: Node.js 22.11+, Xcode 16+ (iOS), Android Studio + JDK 17+ (Android).
 
-## 포함 컴포넌트 (23종, 7 카테고리)
+## 포함 컴포넌트 (25종, 7 카테고리)
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
@@ -100,6 +110,7 @@ npm run ios      # 또는 npm run android
 | | `Section` | 페이지 내 시멘틱 섹션 컨테이너 |
 | **action** | `Button` | 액션 버튼 (primary·secondary·destructive) |
 | | `IconButton` | 아이콘 기반 액션 버튼 |
+| | `FAB` | Material 3 Floating Action Button (4 variants: small·default·large·extended, 정원형) |
 | **input** | `Input` | 라벨·헬퍼·에러 메시지 지원 텍스트 입력 |
 | | `SearchInput` | 검색 아이콘 + 클리어 버튼이 있는 검색 입력 |
 | | `Checkbox` | Material 3 둥근 사각형 체크박스 (3 size, label 옵션) |
@@ -108,6 +119,7 @@ npm run ios      # 또는 npm run android
 | **display** | `DataTable` | 타입 안전한 데이터 테이블 (정렬·밀도 옵션) |
 | | `SegmentedControl` | 균등 분할 옵션 선택기 |
 | | `Tabs` | Material 3 underline 가로 탭 |
+| | `Badge` | 상태·카운트·라벨 표시 (3 types × 2 sizes × 4 colors, 99+ 자동 처리) |
 | **list** | `SettingsRow` | 설정 화면용 행 (5가지 유형) |
 | **feedback** | `EmptyState` | 빈 상태 표현 |
 | | `ErrorView` | 오류 상태 표현 |
@@ -196,6 +208,27 @@ const [dark, setDark] = useState(false);
 <Switch value={dark} onValueChange={setDark} label="다크 모드" />
 <Switch value={dark} onValueChange={setDark} size="lg" />
 <Switch value disabled />
+```
+
+### Badge
+```tsx
+import { Badge } from '@/components/display';
+
+<Badge type="dot" color="success" />
+<Badge type="count" value={3} color="destructive" />
+<Badge type="count" value={150} />        // → "99+" 자동
+<Badge type="label" value="NEW" color="warning" />
+```
+
+### FAB
+```tsx
+import { Plus } from 'lucide-react-native';
+import { FAB } from '@/components/action';
+
+<FAB icon={<Plus />} accessibilityLabel="추가" onPress={openSheet} />
+<FAB variant="small" icon={<Plus />} accessibilityLabel="추가" onPress={...} />
+<FAB variant="large" icon={<Plus />} accessibilityLabel="새 항목" onPress={...} />
+<FAB variant="extended" icon={<Plus />} label="글쓰기" onPress={...} />
 ```
 
 ## Toast & Dialog
