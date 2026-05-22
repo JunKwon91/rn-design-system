@@ -145,3 +145,39 @@
 - **선택**: Light 색만 `primitives.slate[400] #94A3B8` → `primitives.slate[500] #64748B` 교체. 대비 2.56 → **4.76** ✓.
 - **포기한 옵션**: Button만 별도 토큰 (사용처 분기 증가), Light/Dark 둘 다 변경 (Dark는 이미 양호), `border/strong`을 `border/control`로 통합 (3-tier 구조에서 strong과 control은 의미가 다름 — strong=강조 outline, control=interactive 컨트롤).
 - **근거**: Divider 3-tier(subtle/default/strong) 톤 격차가 자연스럽게 확대 (default `#CBD5E1` → strong `#64748B`). Tailwind slate-500은 이미 `text/muted` Light와 동일 — 같은 raw 색을 두 의미(muted 텍스트 + strong 보더)로 재사용해도 의미 충돌 없음. 영향 11건 (Button 6 / Divider 2 / Dialog 3) 모두 의도된 강조 강화.
+
+---
+
+## ADR-17: Switch — Material 3 filled track + thumb 사이즈 변화
+
+- **상황**: Switch 컴포넌트 신규 추가. M3 표준 outlined track / iOS-style filled track / RN Switch wrap 중 선택. 라이브러리 디자인 분석 결과 22 컴포넌트 중 M3 우세(13/22), input 카테고리는 100% M3.
+- **선택**: **M3 filled track 변형** — SettingsRow의 iOS filled track 시각 패턴 + M3 thumb 사이즈 변화 시그니처 결합. track off `border/default` filled / on `primary/action` filled. thumb 정원 흰색 (`primary/onAction`), off→on 시 사이즈 + 위치 동시 변화 (sm 14→16, md 20→24, lg 24→28). 200ms Animated transition (RN core `Animated`, useNativeDriver false).
+- **포기한 옵션**: M3 표준 outlined track (off 트랙 보더만 + 작은 보더 thumb), RN Switch wrap (플랫폼별 시각 다름 — iOS·Android 일관성 깨짐), Reanimated 도입 (의존성 추가 대비 효과 미미 — 200ms 단순 transition에 core Animated로 충분).
+- **근거**: outlined track은 라이브러리 surface/container wrapper 위에서 가독성 약함(border/control 대비 4.51이지만 시각 인지력 부족) — 사용자 시각 검증 후 filled로 재설계. SettingsRow inline toggle도 동일 사양(`<Switch size="md" />`)으로 교체해 라이브러리 단일 진실 확보. Reanimated 미설치 상태에서 core Animated로 충분히 부드러운 transition 가능.
+
+---
+
+## ADR-18: SegmentedControl — M3 Segmented Button 정합
+
+- **상황**: 라이브러리에서 유일하게 iOS HIG 시그니처를 남기던 컴포넌트 (외곽 pillbox + 내부 pillbox active fill — iOS Segmented Control 표준). M3 우세(13/22)인 라이브러리 디자인 언어와 불일치.
+- **선택**: **M3 Segmented Button 패턴 (옵션 B)** — 외곽 cornerRadius height/2 (pillbox, fully rounded), padding 0, background transparent, border 1.5px `border/strong`, `overflow: hidden`으로 segments 자동 clip. 각 segment cornerRadius 0 (외곽이 clip 처리), active fill `primary/action` 유지, inactive transparent 유지.
+- **포기한 옵션**: M3 Filter Chip 그룹 (외곽 묶음 컨테이너 의미 손실), 현재 iOS 유지(M3 정합 안 됨), 외곽 fill 유지하면서 미세 조정만(M3 시그니처 약함).
+- **근거**: active 패턴(primary.action filled)은 그대로 유지해 Button/Switch와 일관성 보존. 외곽 stroke + pillbox로 M3 시그니처 명확화 (Button Secondary가 사용하는 `border/strong`과 동일 토큰). API 변경 없음 — `segments`/`value`/`onChange` 그대로. 사용처 INSTANCE 0건 확인 — 영향 격리.
+
+---
+
+## ADR-19: `color/border/default` scope 확장 (STROKE → STROKE + FRAME_FILL + SHAPE_FILL)
+
+- **상황**: Switch off track + SettingsRow off track에 사용할 mid-tone gray 필요. 색은 `border/default`와 동일(Light #CBD5E1 / Dark #424754)이지만 scope가 `STROKE_COLOR`로 제한되어 Fill 패널에서 선택 불가.
+- **선택**: **`border/default` scope 확장** — `['STROKE_COLOR', 'FRAME_FILL', 'SHAPE_FILL']`. 단일 색을 border 용도 + Switch off track 용도 양쪽에서 재사용. 토큰 추가 없음.
+- **포기한 옵션**: 신규 토큰 `color/surface/inactive` 또는 `color/track/off` 추가 (색은 동일한데 별도 토큰 — 토큰 폭발), `ALL_SCOPES` 사용 (anti-pattern, 의도 외 사용 가능성 높음).
+- **근거**: ADR-15에서 새 `border/control` 토큰을 도입한 것과 대조적으로, default border 색은 의미가 명확한 mid-gray로 inactive surface와 자연스럽게 호환. 색이 동일한데 토큰만 분리하면 향후 색 변경 시 두 곳을 같이 바꿔야 하는 번거로움 발생. scope 확장은 의미를 약간 넓히지만 raw 색 통일을 우선.
+
+---
+
+## ADR-20: SettingsRow toggle을 신규 `Switch` 컴포넌트 인스턴스로 교체
+
+- **상황**: SettingsRow.tsx 내부에 `ToggleTrack` / `ToggleHandle` styled-components가 인라인으로 정의돼 있었고, 새 `Switch` 컴포넌트 신규 추가 후 같은 시각 패턴이 두 곳에서 중복 정의됨.
+- **선택**: **SettingsRow의 내장 `Toggle` 함수와 `ToggleTrack`/`ToggleHandle` styled 정의 제거**, `kind: 'toggle'` 분기에서 `<Switch size="md" value onValueChange />` 인스턴스 렌더. `onChange` 콜백을 `onValueChange`로 그대로 전달.
+- **포기한 옵션**: 내장 toggle 코드 유지 + 시각만 새 Switch 사양으로 변경 (코드 중복), Switch에 `presentation: 'inline'` 같은 prop 추가 (Switch API 복잡화).
+- **근거**: 시각 사양이 동일한 컴포넌트를 두 곳에서 정의하면 향후 변경(예: 애니메이션 추가, 토큰 변경) 시 두 곳 동기화 부담. Switch 컴포넌트가 단일 진실(single source of truth) — SettingsRow는 그 인스턴스를 호출만 함. accessibilityRole `'switch'`는 Row level에서 이미 부여하고 있어 중첩되지만 RN의 accessibility는 부모 노드 우선이라 문제 없음.
