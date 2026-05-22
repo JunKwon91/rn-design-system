@@ -181,3 +181,21 @@
 - **선택**: **SettingsRow의 내장 `Toggle` 함수와 `ToggleTrack`/`ToggleHandle` styled 정의 제거**, `kind: 'toggle'` 분기에서 `<Switch size="md" value onValueChange />` 인스턴스 렌더. `onChange` 콜백을 `onValueChange`로 그대로 전달.
 - **포기한 옵션**: 내장 toggle 코드 유지 + 시각만 새 Switch 사양으로 변경 (코드 중복), Switch에 `presentation: 'inline'` 같은 prop 추가 (Switch API 복잡화).
 - **근거**: 시각 사양이 동일한 컴포넌트를 두 곳에서 정의하면 향후 변경(예: 애니메이션 추가, 토큰 변경) 시 두 곳 동기화 부담. Switch 컴포넌트가 단일 진실(single source of truth) — SettingsRow는 그 인스턴스를 호출만 함. accessibilityRole `'switch'`는 Row level에서 이미 부여하고 있어 중첩되지만 RN의 accessibility는 부모 노드 우선이라 문제 없음.
+
+---
+
+## ADR-21: Badge — 3 types × 2 sizes × 4 colors + 99+ 자동 처리
+
+- **상황**: Badge 신규 추가. 단일 type vs 다중 type, 텍스트 길이 처리 방식 결정.
+- **선택**: **3 type 분리** (dot/count/label) — 각 type이 의미적으로 다른 사용 케이스. **2 sizes** (sm/md). **4 colors** (primary/destructive/success/warning). count는 `value > 99 → "99+"` 자동 처리. dot은 텍스트 없음(정원), count는 정원 + min-width로 1자리/2자리 모두 정원형 유지, label은 pill(height/2) + paddingHorizontal로 width hug.
+- **포기한 옵션**: 단일 Badge (`variant` prop 없이 props로 분기 — API 모호), 자유 텍스트 길이 (count=120 그대로 표시 시 정원 깨짐 + 시각 비대칭), color 7개(state.info 포함 — info Badge는 의미상 primary와 중복).
+- **근거**: dot/count/label 3 type은 시각·의미·layout이 모두 달라 단일 type 분기가 어색(Material 3도 small/large badge 분리). 99+ 패턴은 모바일 알림 UX의 사실상 표준(Material 3·iOS HIG 공통). 4 colors는 라이브러리 `primary/error/success/warning` 토큰과 1:1 정합. 위치는 display 카테고리 — 상태 표시이지 액션 트리거가 아니므로.
+
+---
+
+## ADR-22: FAB — 4 variants 정원형, 1 color, M3 + 모바일 RN 패턴
+
+- **상황**: FAB(Floating Action Button) 신규 추가. M3 표준 둥근 사각형 vs 모바일 RN 정원형, color variant 수 결정.
+- **선택**: **4 variants** (small 40 / default 56 / large 96 / extended) **× primary 단일 color**. 모든 variant `cornerRadius = height/2` (정원형 / extended는 pill). M3 Elevation 3 dual-shadow(iOS shadowColor + Android elevation 6). 아이콘은 `cloneElement`로 size·color 자동 주입(IconButton 패턴 일관).
+- **포기한 옵션**: M3 표준 둥근 사각형(default cornerRadius 16) — 시각 인지 모호(IconButton과 혼동), 2 colors(primary + secondary) — secondary FAB 사용 빈도 낮음 + surface fill이 라이브러리 wrapper 위 가독성 약함, color/icon 별도 prop — IconButton과 일관성 부족.
+- **근거**: react-native-paper FAB가 정원형(M3 적용 + 모바일 RN 사용자 익숙)이고 본인 사이클 시각 검증에서 정원형이 인지 명확. extended pill 모양도 정원 연장(height/2)으로 시각 일관. 1 color는 FAB의 본질("primary action 강조 buton") 정합 — secondary는 일반 Button으로 대체 가능. action 카테고리 — 액션 트리거 컴포넌트이므로.
