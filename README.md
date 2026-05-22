@@ -1,6 +1,6 @@
 # rn-design-system-starter
 
-> React Native 0.85 디자인 시스템 스타터 — 22개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
+> React Native 0.85 디자인 시스템 스타터 — 23개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
 
 ## Screenshots
 
@@ -9,27 +9,27 @@
 ### Gallery Home (갤러리 홈)
 | Light | Dark |
 |:---:|:---:|
-| ![home light](docs/screenshots/01-home-light.png) | ![home dark](docs/screenshots/01-home-dark.png) |
+| ![home light](docs/screenshots/home-light.png) | ![home dark](docs/screenshots/home-dark.png) |
 
 ### Primitives — Text (텍스트)
 | Light | Dark |
 |:---:|:---:|
-| ![text light](docs/screenshots/02-text-light.png) | ![text dark](docs/screenshots/02-text-dark.png) |
+| ![text light](docs/screenshots/text-light.png) | ![text dark](docs/screenshots/text-dark.png) |
 
 ### Surface — Card (카드)
 | Light | Dark |
 |:---:|:---:|
-| ![card light](docs/screenshots/03-card-light.png) | ![card dark](docs/screenshots/03-card-dark.png) |
+| ![card light](docs/screenshots/card-light.png) | ![card dark](docs/screenshots/card-dark.png) |
 
 ### Action — Button (버튼)
 | Light | Dark |
 |:---:|:---:|
-| ![button light](docs/screenshots/04-button-light.png) | ![button dark](docs/screenshots/04-button-dark.png) |
+| ![button light](docs/screenshots/button-light.png) | ![button dark](docs/screenshots/button-dark.png) |
 
 ### Input — Input (입력)
 | Light | Dark |
 |:---:|:---:|
-| ![input light](docs/screenshots/05-input-light.png) | ![input dark](docs/screenshots/05-input-dark.png) |
+| ![input light](docs/screenshots/input-light.png) | ![input dark](docs/screenshots/input-dark.png) |
 
 ### Input — Checkbox (체크박스)
 | Light | Dark |
@@ -41,35 +41,40 @@
 |:---:|:---:|
 | ![radio light](docs/screenshots/radio-light.png) | ![radio dark](docs/screenshots/radio-dark.png) |
 
+### Input — Switch (스위치)
+| Light | Dark |
+|:---:|:---:|
+| ![switch light](docs/screenshots/switch-light.png) | ![switch dark](docs/screenshots/switch-dark.png) |
+
 ### Display — DataTable (데이터 테이블)
 | Light | Dark |
 |:---:|:---:|
-| ![datatable light](docs/screenshots/06-datatable-light.png) | ![datatable dark](docs/screenshots/06-datatable-dark.png) |
+| ![datatable light](docs/screenshots/datatable-light.png) | ![datatable dark](docs/screenshots/datatable-dark.png) |
 
 ### Display — SegmentedControl (분할 컨트롤)
 | Light | Dark |
 |:---:|:---:|
-| ![segmented light](docs/screenshots/11-segmented-light.png) | ![segmented dark](docs/screenshots/11-segmented-dark.png) |
+| ![segmented light](docs/screenshots/segmented-control-light.png) | ![segmented dark](docs/screenshots/segmented-control-dark.png) |
 
 ### Display — Tabs (탭)
 | Light | Dark |
 |:---:|:---:|
-| ![tabs light](docs/screenshots/07-tabs-light.png) | ![tabs dark](docs/screenshots/07-tabs-dark.png) |
+| ![tabs light](docs/screenshots/tabs-light.png) | ![tabs dark](docs/screenshots/tabs-dark.png) |
 
 ### List — SettingsRow (설정 행)
 | Light | Dark |
 |:---:|:---:|
-| ![list light](docs/screenshots/08-list-light.png) | ![list dark](docs/screenshots/08-list-dark.png) |
+| ![list light](docs/screenshots/settings-row-light.png) | ![list dark](docs/screenshots/settings-row-dark.png) |
 
 ### Feedback — Toast (토스트)
 | Light | Dark |
 |:---:|:---:|
-| ![toast light](docs/screenshots/09-toast-light.png) | ![toast dark](docs/screenshots/09-toast-dark.png) |
+| ![toast light](docs/screenshots/toast-light.png) | ![toast dark](docs/screenshots/toast-dark.png) |
 
 ### Feedback — Dialog (다이얼로그)
 | Light | Dark |
 |:---:|:---:|
-| ![dialog light](docs/screenshots/10-dialog-light.png) | ![dialog dark](docs/screenshots/10-dialog-dark.png) |
+| ![dialog light](docs/screenshots/dialog-light.png) | ![dialog dark](docs/screenshots/dialog-dark.png) |
 
 ## Quick Start
 
@@ -83,7 +88,7 @@ npm run ios      # 또는 npm run android
 
 요구사항: Node.js 22.11+, Xcode 16+ (iOS), Android Studio + JDK 17+ (Android).
 
-## 포함 컴포넌트 (22종, 7 카테고리)
+## 포함 컴포넌트 (23종, 7 카테고리)
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
@@ -99,6 +104,7 @@ npm run ios      # 또는 npm run android
 | | `SearchInput` | 검색 아이콘 + 클리어 버튼이 있는 검색 입력 |
 | | `Checkbox` | Material 3 둥근 사각형 체크박스 (3 size, label 옵션) |
 | | `Radio` / `RadioGroup` | 정원형 라디오 + 그룹 컨테이너 (단일 선택 + 접근성) |
+| | `Switch` | Material 3 토글 스위치 (filled track + thumb 사이즈 변화 + 200ms transition) |
 | **display** | `DataTable` | 타입 안전한 데이터 테이블 (정렬·밀도 옵션) |
 | | `SegmentedControl` | 균등 분할 옵션 선택기 |
 | | `Tabs` | Material 3 underline 가로 탭 |
@@ -179,6 +185,17 @@ const [plan, setPlan] = useState<Plan>('pro');
   <Radio value="pro" label="Pro" />
   <Radio value="team" label="Team" disabled />
 </RadioGroup>
+```
+
+### Switch
+```tsx
+import { Switch } from '@/components/input';
+
+const [dark, setDark] = useState(false);
+
+<Switch value={dark} onValueChange={setDark} label="다크 모드" />
+<Switch value={dark} onValueChange={setDark} size="lg" />
+<Switch value disabled />
 ```
 
 ## Toast & Dialog
