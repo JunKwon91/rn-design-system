@@ -47,6 +47,10 @@ const ButtonCell = styled.View`
   flex: 1;
 `;
 
+const DescriptionText = styled(Text)`
+  margin-top: ${({ theme }) => theme.spacing.xs}px;
+`;
+
 /**
  * Prompt 자동 포커스 지연 (ms). DialogHost enter 애니메이션(200ms) +
  * KAV layout 안정화 여유. 너무 짧으면 RN의 KAV+autoFocus+Animated 충돌로
@@ -79,13 +83,9 @@ export default function Dialog({ config, onResolve }: DialogProps) {
           {config.title}
         </Text>
         {config.description !== undefined && (
-          <Text
-            variant="bodySm"
-            color="secondary"
-            style={{ marginTop: 4 }}
-          >
+          <DescriptionText variant="bodySm" color="secondary">
             {config.description}
-          </Text>
+          </DescriptionText>
         )}
       </View>
 
