@@ -30,13 +30,13 @@ const CATEGORIES: CategoryEntry[] = [
   { route: 'Surface', label: 'Surface (표면)', subtitle: 'Screen · Card · Section', count: 3 },
   { route: 'Action', label: 'Action (액션)', subtitle: 'Button · IconButton · FAB', count: 3 },
   { route: 'Input', label: 'Input (입력)', subtitle: 'Input · SearchInput · Checkbox · Radio · RadioGroup · Switch', count: 6 },
-  { route: 'Display', label: 'Display (표시)', subtitle: 'DataTable · SegmentedControl · Tabs · Badge', count: 4 },
+  { route: 'Display', label: 'Display (표시)', subtitle: 'DataTable · SegmentedControl · Tabs · Badge · Chip', count: 5 },
   { route: 'List', label: 'List (리스트)', subtitle: 'SettingsRow', count: 1 },
   {
     route: 'Feedback',
     label: 'Feedback (피드백)',
-    subtitle: 'EmptyState · ErrorView · LoadingView · Toast · Dialog',
-    count: 5,
+    subtitle: 'EmptyState · ErrorView · LoadingView · Skeleton · Toast · Dialog',
+    count: 6,
   },
 ];
 
