@@ -6,9 +6,41 @@
 // ============================================================================
 
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import { Inbox, Search, Star } from 'lucide-react-native';
-import { useTheme } from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
+
+const SkeletonRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+`;
+
+const SkeletonCard = styled.View`
+  background-color: ${({ theme }) => theme.colors.surface.container};
+  border-radius: 16px;
+  padding: 24px;
+`;
+
+const SkeletonListRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+`;
+
+const SkeletonCommentRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+`;
+
+const SkeletonCommentLines = styled.View`
+  flex: 1;
+`;
+
+const StackedButtons = styled.View`
+  gap: 8px;
+`;
 
 import { Button } from '@/components/action';
 import { Tabs } from '@/components/display';
@@ -16,6 +48,7 @@ import {
   EmptyState,
   ErrorView,
   LoadingView,
+  Skeleton,
 } from '@/components/feedback';
 import { Spacer } from '@/components/primitives';
 import { Screen, Section } from '@/components/surface';
@@ -26,6 +59,7 @@ const GROUPS = [
   { value: 'empty-state', label: 'EmptyState (빈 상태)' },
   { value: 'error-view', label: 'ErrorView (오류)' },
   { value: 'loading-view', label: 'LoadingView (로딩)' },
+  { value: 'skeleton', label: 'Skeleton (스켈레톤)' },
   { value: 'toast', label: 'Toast (토스트)' },
   { value: 'dialog', label: 'Dialog (다이얼로그)' },
 ] as const;
@@ -69,7 +103,8 @@ export default function FeedbackScreen() {
                 description="다른 키워드로 다시 검색해 보세요."
                 action={{
                   label: '검색 초기화',
-                  onPress: () => console.log('reset search'),
+                  onPress: () =>
+                    Alert.alert('EmptyState', '검색 초기화 클릭됨'),
                 }}
               />
             </Section>
@@ -101,7 +136,7 @@ export default function FeedbackScreen() {
                 description="서버에 일시적인 문제가 발생했을 수 있습니다."
                 action={{
                   label: '다시 시도',
-                  onPress: () => console.log('retry'),
+                  onPress: () => Alert.alert('ErrorView', '다시 시도 클릭됨'),
                 }}
               />
             </Section>
@@ -131,10 +166,67 @@ export default function FeedbackScreen() {
           </>
         )}
 
+        {activeGroup === 'skeleton' && (
+          <>
+            <Section title="Skeleton · variants (rect / circle / text)">
+              <SkeletonRow>
+                <Skeleton type="rect" width={200} height={16} />
+                <Skeleton type="circle" size={40} />
+              </SkeletonRow>
+              <Spacer size="lg" />
+              <Skeleton type="text" />
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Skeleton · Card placeholder (Title + Avatar + 3 lines)">
+              <SkeletonCard>
+                <SkeletonRow>
+                  <Skeleton type="circle" size={40} />
+                  <Skeleton type="rect" width={180} height={20} />
+                </SkeletonRow>
+                <Spacer size="md" />
+                <Skeleton type="text" lines={3} lineWidths={['100%', '80%', '60%']} />
+              </SkeletonCard>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Skeleton · List item placeholder (3 rows)">
+              <SkeletonCard>
+                <SkeletonListRow>
+                  <Skeleton type="circle" size={24} />
+                  <Skeleton type="text" lines={2} lineWidths={['100%', '65%']} lineHeight={10} />
+                </SkeletonListRow>
+                <Spacer size="md" />
+                <SkeletonListRow>
+                  <Skeleton type="circle" size={24} />
+                  <Skeleton type="text" lines={2} lineWidths={['100%', '65%']} lineHeight={10} />
+                </SkeletonListRow>
+                <Spacer size="md" />
+                <SkeletonListRow>
+                  <Skeleton type="circle" size={24} />
+                  <Skeleton type="text" lines={2} lineWidths={['100%', '65%']} lineHeight={10} />
+                </SkeletonListRow>
+              </SkeletonCard>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Skeleton · Comment placeholder (Avatar + 3 lines)">
+              <SkeletonCard>
+                <SkeletonCommentRow>
+                  <Skeleton type="circle" size={40} />
+                  <SkeletonCommentLines>
+                    <Skeleton type="text" lines={3} lineWidths={['100%', '90%', '70%']} />
+                  </SkeletonCommentLines>
+                </SkeletonCommentRow>
+              </SkeletonCard>
+            </Section>
+          </>
+        )}
+
         {activeGroup === 'toast' && (
           <>
             <Section title="Toast · 3 types (3가지 유형)">
-              <View style={{ gap: 8 }}>
+              <StackedButtons>
                 <Button
                   label="Success Toast"
                   variant="primary"
@@ -159,7 +251,7 @@ export default function FeedbackScreen() {
                     toast.info('새 데이터 도착', '결과가 업데이트되었습니다.')
                   }
                 />
-              </View>
+              </StackedButtons>
             </Section>
             <Spacer size="2xl" />
 
@@ -226,7 +318,7 @@ export default function FeedbackScreen() {
             <Spacer size="2xl" />
 
             <Section title="Dialog · Confirm (확인)">
-              <View style={{ gap: 8 }}>
+              <StackedButtons>
                 <Button
                   label="Show Confirm (Destructive)"
                   variant="primary"
@@ -252,7 +344,7 @@ export default function FeedbackScreen() {
                     console.log('Confirm 결과:', confirmed);
                   }}
                 />
-              </View>
+              </StackedButtons>
             </Section>
             <Spacer size="2xl" />
 

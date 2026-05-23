@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
-import { ScrollView } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import { ChevronLeft, Plus, Settings, Star, X } from 'lucide-react-native';
 import styled, { useTheme } from 'styled-components/native';
 
@@ -14,7 +14,8 @@ import { Tabs } from '@/components/display';
 import { Spacer, Text } from '@/components/primitives';
 import { Card, Screen, Section } from '@/components/surface';
 
-const noop = () => {};
+const alertPress = (component: string, label: string) =>
+  () => Alert.alert(component, `${label} 클릭됨`);
 
 const Row = styled.View`
   flex-direction: row;
@@ -54,36 +55,36 @@ export default function ActionScreen() {
           <>
             <Section title="Button · variants × sizes (변형 × 크기)">
               <Card>
-                <Button label="Primary sm" variant="primary" size="sm" onPress={noop} />
+                <Button label="Primary sm" variant="primary" size="sm" onPress={alertPress('Button · primary · sm', 'Primary sm')} />
                 <Spacer size="sm" />
-                <Button label="Primary md" variant="primary" size="md" onPress={noop} />
+                <Button label="Primary md" variant="primary" size="md" onPress={alertPress('Button · primary · md', 'Primary md')} />
                 <Spacer size="sm" />
-                <Button label="Primary lg" variant="primary" size="lg" onPress={noop} />
+                <Button label="Primary lg" variant="primary" size="lg" onPress={alertPress('Button · primary · lg', 'Primary lg')} />
               </Card>
               <Card>
-                <Button label="Secondary sm" variant="secondary" size="sm" onPress={noop} />
+                <Button label="Secondary sm" variant="secondary" size="sm" onPress={alertPress('Button · secondary · sm', 'Secondary sm')} />
                 <Spacer size="sm" />
-                <Button label="Secondary md" variant="secondary" size="md" onPress={noop} />
+                <Button label="Secondary md" variant="secondary" size="md" onPress={alertPress('Button · secondary · md', 'Secondary md')} />
                 <Spacer size="sm" />
-                <Button label="Secondary lg" variant="secondary" size="lg" onPress={noop} />
+                <Button label="Secondary lg" variant="secondary" size="lg" onPress={alertPress('Button · secondary · lg', 'Secondary lg')} />
               </Card>
             </Section>
             <Spacer size="2xl" />
 
             <Section title="Button · states & options (상태와 옵션)">
               <Card>
-                <Button label="disabled" disabled onPress={noop} />
+                <Button label="disabled" disabled onPress={alertPress('Button · disabled', 'disabled')} />
                 <Spacer size="sm" />
-                <Button label="loading" loading onPress={noop} />
+                <Button label="loading" loading onPress={alertPress('Button · loading', 'loading')} />
                 <Spacer size="sm" />
-                <Button label="fullWidth" fullWidth onPress={noop} />
+                <Button label="fullWidth" fullWidth onPress={alertPress('Button · fullWidth', 'fullWidth')} />
               </Card>
               <Card>
                 <Button
                   label="추가하기"
                   size="sm"
                   leftIcon={<Plus size={14} color={theme.colors.primary.onAction} />}
-                  onPress={noop}
+                  onPress={() => Alert.alert("Action", "클릭됨")}
                 />
                 <Spacer size="sm" />
                 <Button
@@ -91,7 +92,7 @@ export default function ActionScreen() {
                   variant="secondary"
                   size="sm"
                   leftIcon={<Plus size={14} color={theme.colors.text.secondary} />}
-                  onPress={noop}
+                  onPress={() => Alert.alert("Action", "클릭됨")}
                 />
               </Card>
             </Section>
@@ -105,35 +106,35 @@ export default function ActionScreen() {
                 <Text variant="labelSm" color="muted">sm (24×24)</Text>
                 <Spacer size="sm" />
                 <Row>
-                  <IconButton icon={<Settings />} size="sm" color="primary" accessibilityLabel="설정 primary" onPress={noop} />
+                  <IconButton icon={<Settings />} size="sm" color="primary" accessibilityLabel="설정 primary" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<Settings />} size="sm" color="secondary" accessibilityLabel="설정 secondary" onPress={noop} />
+                  <IconButton icon={<Settings />} size="sm" color="secondary" accessibilityLabel="설정 secondary" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<Settings />} size="sm" color="muted" accessibilityLabel="설정 muted" onPress={noop} />
+                  <IconButton icon={<Settings />} size="sm" color="muted" accessibilityLabel="설정 muted" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<Settings />} size="sm" color="accent" accessibilityLabel="설정 accent" onPress={noop} />
+                  <IconButton icon={<Settings />} size="sm" color="accent" accessibilityLabel="설정 accent" onPress={() => Alert.alert("Action", "클릭됨")} />
                 </Row>
                 <Text variant="labelSm" color="muted">md (32×32) — default</Text>
                 <Spacer size="sm" />
                 <Row>
-                  <IconButton icon={<ChevronLeft />} color="primary" accessibilityLabel="뒤로 primary" onPress={noop} />
+                  <IconButton icon={<ChevronLeft />} color="primary" accessibilityLabel="뒤로 primary" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<ChevronLeft />} color="secondary" accessibilityLabel="뒤로 secondary" onPress={noop} />
+                  <IconButton icon={<ChevronLeft />} color="secondary" accessibilityLabel="뒤로 secondary" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<ChevronLeft />} color="muted" accessibilityLabel="뒤로 muted" onPress={noop} />
+                  <IconButton icon={<ChevronLeft />} color="muted" accessibilityLabel="뒤로 muted" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<ChevronLeft />} color="accent" accessibilityLabel="뒤로 accent" onPress={noop} />
+                  <IconButton icon={<ChevronLeft />} color="accent" accessibilityLabel="뒤로 accent" onPress={() => Alert.alert("Action", "클릭됨")} />
                 </Row>
                 <Text variant="labelSm" color="muted">lg (44×44) — Apple HIG 권장</Text>
                 <Spacer size="sm" />
                 <Row>
-                  <IconButton icon={<Star />} size="lg" color="primary" accessibilityLabel="별표 primary" onPress={noop} />
+                  <IconButton icon={<Star />} size="lg" color="primary" accessibilityLabel="별표 primary" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<Star />} size="lg" color="secondary" accessibilityLabel="별표 secondary" onPress={noop} />
+                  <IconButton icon={<Star />} size="lg" color="secondary" accessibilityLabel="별표 secondary" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<Star />} size="lg" color="muted" accessibilityLabel="별표 muted" onPress={noop} />
+                  <IconButton icon={<Star />} size="lg" color="muted" accessibilityLabel="별표 muted" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<Star />} size="lg" color="accent" accessibilityLabel="별표 accent" onPress={noop} />
+                  <IconButton icon={<Star />} size="lg" color="accent" accessibilityLabel="별표 accent" onPress={() => Alert.alert("Action", "클릭됨")} />
                 </Row>
               </Card>
             </Section>
@@ -142,9 +143,9 @@ export default function ActionScreen() {
             <Section title="IconButton · disabled (비활성)">
               <Card>
                 <Row>
-                  <IconButton icon={<X />} accessibilityLabel="닫기" onPress={noop} />
+                  <IconButton icon={<X />} accessibilityLabel="닫기" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="md" axis="horizontal" />
-                  <IconButton icon={<X />} disabled accessibilityLabel="닫기 disabled" onPress={noop} />
+                  <IconButton icon={<X />} disabled accessibilityLabel="닫기 disabled" onPress={() => Alert.alert("Action", "클릭됨")} />
                 </Row>
               </Card>
             </Section>
@@ -156,15 +157,15 @@ export default function ActionScreen() {
             <Section title="FAB · 4 variants (small / default / large / extended)">
               <Card>
                 <Row>
-                  <FAB variant="small" icon={<Plus />} accessibilityLabel="추가 small" onPress={noop} />
+                  <FAB variant="small" icon={<Plus />} accessibilityLabel="추가 small" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="lg" axis="horizontal" />
-                  <FAB variant="default" icon={<Plus />} accessibilityLabel="추가 default" onPress={noop} />
+                  <FAB variant="default" icon={<Plus />} accessibilityLabel="추가 default" onPress={() => Alert.alert("Action", "클릭됨")} />
                   <Spacer size="lg" axis="horizontal" />
-                  <FAB variant="large" icon={<Plus />} accessibilityLabel="추가 large" onPress={noop} />
+                  <FAB variant="large" icon={<Plus />} accessibilityLabel="추가 large" onPress={() => Alert.alert("Action", "클릭됨")} />
                 </Row>
                 <Spacer size="lg" />
                 <Row>
-                  <FAB variant="extended" icon={<Plus />} label="글쓰기" onPress={noop} />
+                  <FAB variant="extended" icon={<Plus />} label="글쓰기" onPress={() => Alert.alert("Action", "클릭됨")} />
                 </Row>
               </Card>
             </Section>
@@ -173,9 +174,9 @@ export default function ActionScreen() {
             <Section title="FAB · disabled (비활성)">
               <Card>
                 <Row>
-                  <FAB variant="default" icon={<Plus />} accessibilityLabel="비활성 default" onPress={noop} disabled />
+                  <FAB variant="default" icon={<Plus />} accessibilityLabel="비활성 default" onPress={() => Alert.alert("Action", "클릭됨")} disabled />
                   <Spacer size="lg" axis="horizontal" />
-                  <FAB variant="extended" icon={<Plus />} label="비활성" onPress={noop} disabled />
+                  <FAB variant="extended" icon={<Plus />} label="비활성" onPress={() => Alert.alert("Action", "클릭됨")} disabled />
                 </Row>
               </Card>
             </Section>

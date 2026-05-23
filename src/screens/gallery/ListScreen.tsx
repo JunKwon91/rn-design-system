@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { SettingsRow } from '@/components/list';
@@ -37,33 +38,39 @@ export default function ListScreen() {
             kind="toggle"
             label="다크 모드"
             value={darkOn}
-            onChange={setDarkOn}
+            onChange={v => {
+              setDarkOn(v);
+              Alert.alert('SettingsRow · toggle', `다크 모드 ${v ? '켜짐' : '꺼짐'}`);
+            }}
           />
           <Divider color="subtle" />
           <SettingsRow
             kind="toggle"
             label="알림"
             value={notifyOn}
-            onChange={setNotifyOn}
+            onChange={v => {
+              setNotifyOn(v);
+              Alert.alert('SettingsRow · toggle', `알림 ${v ? '켜짐' : '꺼짐'}`);
+            }}
           />
           <Divider color="subtle" />
           <SettingsRow
             kind="picker"
             label="기본값"
             value="옵션 A"
-            onPress={() => console.log('picker pressed')}
+            onPress={() => Alert.alert('SettingsRow · picker', '기본 회차 클릭됨')}
           />
           <Divider color="subtle" />
           <SettingsRow
             kind="link"
             label="개인정보 처리방침"
-            onPress={() => console.log('link pressed')}
+            onPress={() => Alert.alert('SettingsRow · link', '개인정보 클릭됨')}
           />
           <Divider color="subtle" />
           <SettingsRow
             kind="action"
             label="약관 보기"
-            onPress={() => console.log('action pressed')}
+            onPress={() => Alert.alert('SettingsRow · action', '약관 클릭됨')}
           />
         </SettingsRowPanel>
       </Section>

@@ -6,7 +6,7 @@
 // ============================================================================
 
 import { useMemo, useState } from 'react';
-import { ScrollView } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 const BadgeRow = styled.View`
@@ -16,8 +16,18 @@ const BadgeRow = styled.View`
   gap: 16px;
 `;
 
+const ChipRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+import { Plus, Star } from 'lucide-react-native';
+
 import {
   Badge,
+  Chip,
   DataTable,
   SegmentedControl,
   Tabs,
@@ -49,6 +59,7 @@ const SECTIONS = [
   { value: 'segmented', label: 'SegmentedControl (분할 컨트롤)' },
   { value: 'tabs', label: 'Tabs (탭)' },
   { value: 'badge', label: 'Badge (배지)' },
+  { value: 'chip', label: 'Chip (칩)' },
 ] as const;
 
 type SectionValue = typeof SECTIONS[number]['value'];
@@ -267,6 +278,10 @@ export default function DisplayScreen() {
                 value={sortOrder}
                 onChange={setSortOrder}
               />
+              <Spacer size="md" />
+              <Text variant="bodySm" color="muted">
+                선택: {sortOrder}
+              </Text>
             </Section>
             <Spacer size="2xl" />
 
@@ -280,6 +295,10 @@ export default function DisplayScreen() {
                 value={themeMode}
                 onChange={setThemeMode}
               />
+              <Spacer size="md" />
+              <Text variant="bodySm" color="muted">
+                선택: {themeMode}
+              </Text>
             </Section>
           </>
         )}
@@ -344,7 +363,133 @@ export default function DisplayScreen() {
             </Section>
           </>
         )}
+
+        {activeSection === 'chip' && <ChipDemo />}
       </ScrollView>
     </Screen>
+  );
+}
+
+function ChipDemo() {
+  const [filterMd, setFilterMd] = useState(false);
+  const [filterSm, setFilterSm] = useState(true);
+  const [tags, setTags] = useState<string[]>(['#디자인', '#개발', '#모바일']);
+
+  return (
+    <>
+      <Section title="Chip · Filter (toggle 가능)">
+        <ChipRow>
+          <Chip
+            variant="filter"
+            label="필터"
+            selected={filterMd}
+            onPress={() => {
+              setFilterMd(s => !s);
+              Alert.alert('Chip · Filter', '필터 클릭됨 (toggle 가능)');
+            }}
+          />
+          <Chip
+            variant="filter"
+            label="비활성"
+            disabled
+            onPress={() => Alert.alert('Chip · Filter', '비활성 클릭됨')}
+          />
+          <Chip
+            variant="filter"
+            label="작게"
+            size="sm"
+            selected={filterSm}
+            onPress={() => {
+              setFilterSm(s => !s);
+              Alert.alert('Chip · Filter · sm', '작게 클릭됨');
+            }}
+          />
+        </ChipRow>
+      </Section>
+      <Spacer size="2xl" />
+
+      <Section title="Chip · Assist (단발 액션 + leading 아이콘)">
+        <ChipRow>
+          <Chip
+            variant="assist"
+            label="추가"
+            icon={<Plus />}
+            onPress={() => Alert.alert('Chip · Assist', '추가 액션 클릭됨')}
+          />
+          <Chip
+            variant="assist"
+            label="비활성"
+            icon={<Plus />}
+            disabled
+            onPress={() => Alert.alert('Chip · Assist', '비활성 클릭됨')}
+          />
+          <Chip
+            variant="assist"
+            label="작게"
+            icon={<Plus />}
+            size="sm"
+            onPress={() => Alert.alert('Chip · Assist · sm', '작게 클릭됨')}
+          />
+        </ChipRow>
+      </Section>
+      <Spacer size="2xl" />
+
+      <Section title="Chip · Input (사용자 입력 결과 + close X)">
+        <Text variant="labelSm" color="muted">
+          icon은 선택 — hashtag 태그는 아이콘 없이, 즐겨찾기는 ★ 아이콘
+        </Text>
+        <ChipRow>
+          {tags.map(t => (
+            <Chip
+              key={t}
+              variant="input"
+              label={t}
+              onPress={() => Alert.alert('Chip · Input · 본체', `${t} 본체 클릭됨`)}
+              onClose={() => {
+                setTags(prev => prev.filter(x => x !== t));
+                Alert.alert('Chip · Input · close', `${t} 제거 클릭됨`);
+              }}
+            />
+          ))}
+          <Chip
+            variant="input"
+            label="즐겨찾기"
+            icon={<Star />}
+            onPress={() => Alert.alert('Chip · Input · 본체', '즐겨찾기 본체 클릭됨')}
+            onClose={() => Alert.alert('Chip · Input · close', '즐겨찾기 제거')}
+          />
+          <Chip
+            variant="input"
+            label="잠금"
+            icon={<Star />}
+            disabled
+            onClose={() => Alert.alert('Chip · Input · close', '잠금 제거')}
+          />
+        </ChipRow>
+      </Section>
+      <Spacer size="2xl" />
+
+      <Section title="Chip · Suggestion (옅은 보조 제안)">
+        <ChipRow>
+          <Chip
+            variant="suggestion"
+            label="제안"
+            onPress={() => Alert.alert('Chip · Suggestion', '제안 채택됨')}
+          />
+          <Chip
+            variant="suggestion"
+            label="비활성"
+            disabled
+            onPress={() => Alert.alert('Chip · Suggestion', '비활성 채택됨')}
+          />
+          <Chip
+            variant="suggestion"
+            label="작게"
+            size="sm"
+            onPress={() => Alert.alert('Chip · Suggestion · sm', '작게 채택됨')}
+          />
+        </ChipRow>
+      </Section>
+    </>
   );
 }
