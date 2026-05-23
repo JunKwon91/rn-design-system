@@ -18,3 +18,6 @@ export type { TabsProps, TabItem } from './Tabs';
 
 export { default as Badge } from './Badge';
 export type { BadgeProps, BadgeType, BadgeSize, BadgeColor } from './Badge';
+
+export { default as Chip } from './Chip';
+export type { ChipProps, ChipVariant, ChipSize } from './Chip';
