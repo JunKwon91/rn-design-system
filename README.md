@@ -1,6 +1,6 @@
 # rn-design-system-starter
 
-> React Native 0.85 디자인 시스템 스타터 — 28개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
+> React Native 0.85 디자인 시스템 스타터 — 29개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
 
 ## Screenshots
 
@@ -96,6 +96,11 @@
 |:---:|:---:|
 | ![toast light](docs/screenshots/toast-light.png) | ![toast dark](docs/screenshots/toast-dark.png) |
 
+### Feedback — Tooltip (도구 설명)
+| Light | Dark |
+|:---:|:---:|
+| ![tooltip light](docs/screenshots/tooltip-light.png) | ![tooltip dark](docs/screenshots/tooltip-dark.png) |
+
 ### Feedback — Dialog (다이얼로그)
 | Light | Dark |
 |:---:|:---:|
@@ -113,7 +118,7 @@ npm run ios      # 또는 npm run android
 
 요구사항: Node.js 22.11+, Xcode 16+ (iOS), Android Studio + JDK 17+ (Android).
 
-## 포함 컴포넌트 (28종, 7 카테고리)
+## 포함 컴포넌트 (29종, 7 카테고리)
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
@@ -142,6 +147,7 @@ npm run ios      # 또는 npm run android
 | | `LoadingView` | 로딩 상태 표현 |
 | | `Skeleton` | 콘텐츠 로딩 placeholder (3 types: rect/circle/text, backgroundColor pulse 애니메이션 1.5초) |
 | | `LinearProgress` / `CircularProgress` | M3 진행률 표시 (3 sizes × determinate/indeterminate, Reanimated v4 + react-native-svg, 12시 시작 시계 방향) |
+| | `Tooltip` | M3 Plain 도구 설명 (4 position, 롱프레스 발동 + visible 외부 제어, max-width 200dp, 1500ms 자동 dismiss) |
 | | `Toast` | 일시적 알림 메시지 (큐잉 + 자동 닫힘) |
 | | `Dialog` | 모달 다이얼로그 (Promise 반환) |
 
@@ -287,6 +293,41 @@ import { LinearProgress, CircularProgress } from '@/components/feedback';
 <LinearProgress variant="indeterminate" />
 <CircularProgress variant="indeterminate" size="sm" />
 ```
+
+### Tooltip
+```tsx
+import { Tooltip } from '@/components/feedback';
+import { Settings } from 'lucide-react-native';
+
+// 자동 모드 (롱프레스 → 1500ms 자동 dismiss)
+<Tooltip text="설정 메뉴">
+  <IconButton icon={<Settings />} onPress={openSettings} accessibilityLabel="설정" />
+</Tooltip>
+
+// position 지정 (4방향)
+<Tooltip text="삭제합니다" position="bottom">
+  <IconButton icon={<Trash />} onPress={handleDelete} accessibilityLabel="삭제" />
+</Tooltip>
+
+// 외부 제어 (visible prop) — onboarding 시나리오
+const [hint, setHint] = useState(true);
+<Tooltip text="여기를 눌러보세요!" visible={hint}>
+  <Button label="시작" onPress={onStart} />
+</Tooltip>
+```
+
+#### 호환 children
+Tooltip의 children은 `onLongPress` prop을 수용하는 element 필수:
+
+| children 타입 | 호환 | 비고 |
+|---|---|---|
+| 라이브러리 인터랙티브 컴포넌트 (IconButton/Button/FAB/Chip/Switch) | ✓ | `InteractivePressableProps` Pick 상속(v1.x 7번째 표준 패턴)으로 자동 |
+| RN `Pressable` | ✓ | 표준 onLongPress 수용 |
+| RN `TouchableOpacity` | ✓ | 표준 onLongPress 수용 |
+| 외부 라이브러리 컴포넌트 | ✓ | onLongPress prop 수용 시 |
+| RN `View` (비-인터랙티브) | ❌ | RN Touch Responder System 본질 한계 — `Pressable`로 직접 wrap 후 사용 |
+
+→ 비-인터랙티브 element wrap 시 권장 패턴: `<Tooltip><Pressable onPress={...}>{content}</Pressable></Tooltip>`. 갤러리 Tooltip sub-tab "라이브러리 종속성 검증 (3 케이스)" 섹션 참조.
 
 ## Toast & Dialog
 
