@@ -15,7 +15,7 @@
 // Track:
 //   sm 40×20 / md 52×32 / lg 64×40, cornerRadius = height/2 (pillbox)
 //   Off — fill border.default
-//   On  — fill primary.action (Animated transition)
+//   On  — fill primary.action (Reanimated transition)
 // Thumb (정원):
 //   sm off 14 / on 16
 //   md off 20 / on 24
@@ -28,18 +28,25 @@
 //   disabled — text.secondary opacity 0.7
 //
 // [애니메이션]
-// RN core Animated.Value (200ms ease in/out)
-//   - track backgroundColor interpolation (off color → on color)
-//   - thumb width/height interpolation (thumbOff → thumbOn)
-//   - thumb left (좌측 padding → 우측 padding) — transform 대신 layout left 사용
-//     해 thumb 좌측 모서리 기준 정확한 위치 보장
-//   - thumb top (off padY → on padY)
-//   useNativeDriver: false (color · width · height · layout은 JS 스레드 필요)
+// Reanimated v4 useSharedValue + withTiming (200ms, Easing.inOut(Easing.ease))
+//   - track backgroundColor — interpolateColor (off color → on color)
+//   - thumb width/height/borderRadius — interpolate (thumbOff → thumbOn)
+//   - thumb left — interpolate (좌측 padding → 우측 padding)
+//   - thumb top — interpolate (off padY → on padY)
+//   - 전부 UI 스레드 worklet 실행 (v4 기본)
 // ============================================================================
 
-import { useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, Pressable } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components/native';
 
 import Text from '@/components/primitives/Text';
@@ -114,77 +121,47 @@ function Switch({
   const padOff = (spec.trackH - spec.thumbOff) / 2;
   const padOn = (spec.trackH - spec.thumbOn) / 2;
 
-  const anim = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    Animated.timing(anim, {
-      toValue: value ? 1 : 0,
+    progress.value = withTiming(value ? 1 : 0, {
       duration: 200,
       easing: Easing.inOut(Easing.ease),
-      useNativeDriver: false,
-    }).start();
-  }, [value, anim]);
+    });
+  }, [value, progress]);
 
-  const trackColor = useMemo(
-    () =>
-      anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [
-          theme.colors.border.default,
-          theme.colors.primary.action,
-        ],
-      }),
-    [anim, theme],
-  );
-  const thumbX = useMemo(
-    () =>
-      anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [padOff, spec.trackW - spec.thumbOn - padOn],
-      }),
-    [anim, padOff, padOn, spec.trackW, spec.thumbOn],
-  );
-  const thumbY = useMemo(
-    () =>
-      anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [padOff, padOn],
-      }),
-    [anim, padOff, padOn],
-  );
-  const thumbSize = useMemo(
-    () =>
-      anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [spec.thumbOff, spec.thumbOn],
-      }),
-    [anim, spec.thumbOff, spec.thumbOn],
-  );
-  const thumbRadius = useMemo(
-    () =>
-      anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [spec.thumbOff / 2, spec.thumbOn / 2],
-      }),
-    [anim, spec.thumbOff, spec.thumbOn],
-  );
+  const trackStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [theme.colors.border.default, theme.colors.primary.action],
+    ),
+  }), [theme]);
 
-  const trackStyle = useMemo(
-    () => ({ backgroundColor: trackColor }),
-    [trackColor],
-  );
-  const thumbStyle = useMemo(
-    () => ({
-      position: 'absolute' as const,
-      width: thumbSize,
-      height: thumbSize,
-      borderRadius: thumbRadius,
+  const thumbStyle = useAnimatedStyle(() => {
+    const thumbW = interpolate(
+      progress.value,
+      [0, 1],
+      [spec.thumbOff, spec.thumbOn],
+    );
+    return {
+      position: 'absolute',
+      width: thumbW,
+      height: thumbW,
+      borderRadius: interpolate(
+        progress.value,
+        [0, 1],
+        [spec.thumbOff / 2, spec.thumbOn / 2],
+      ),
       backgroundColor: theme.colors.primary.onAction,
-      left: thumbX,
-      top: thumbY,
-    }),
-    [thumbSize, thumbRadius, thumbX, thumbY, theme],
-  );
+      left: interpolate(
+        progress.value,
+        [0, 1],
+        [padOff, spec.trackW - spec.thumbOn - padOn],
+      ),
+      top: interpolate(progress.value, [0, 1], [padOff, padOn]),
+    };
+  }, [theme, spec, padOff, padOn]);
 
   const handlePress = () => {
     if (disabled) return;
