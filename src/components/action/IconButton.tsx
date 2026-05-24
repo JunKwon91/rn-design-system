@@ -46,6 +46,8 @@ import type {
 } from 'react-native';
 import { useTheme } from 'styled-components/native';
 
+import type { InteractivePressableProps } from '@/types/interactive';
+
 export type IconButtonSize =
   /** 24×24 컨테이너 · 아이콘 16px 권장 */
   | 'sm'
@@ -64,7 +66,7 @@ export type IconButtonColor =
   /** primary.action · 강조 액션 아이콘 */
   | 'accent';
 
-export interface IconButtonProps {
+export interface IconButtonProps extends InteractivePressableProps {
   /** 렌더할 아이콘 (lucide-react-native 등). color/size를 명시하지 않으면 IconButton이 자동 주입. */
   icon: ReactNode;
   /**
@@ -122,6 +124,7 @@ export default function IconButton({
   accessibilityLabel,
   onPress,
   style,
+  ...pressableProps
 }: IconButtonProps) {
   const theme = useTheme();
 
@@ -166,6 +169,7 @@ export default function IconButton({
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       accessibilityLabel={accessibilityLabel}
+      {...pressableProps}
     >
       {enhancedIcon}
     </Pressable>

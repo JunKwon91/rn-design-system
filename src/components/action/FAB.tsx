@@ -37,10 +37,11 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import Text from '@/components/primitives/Text';
+import type { InteractivePressableProps } from '@/types/interactive';
 
 export type FABVariant = 'small' | 'default' | 'large' | 'extended';
 
-export interface FABProps {
+export interface FABProps extends InteractivePressableProps {
   variant?: FABVariant;
   icon: React.ReactNode;
   /** extended variant일 때 필수 — 다른 variant에선 무시됨. */
@@ -48,7 +49,6 @@ export interface FABProps {
   onPress: () => void;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
-  testID?: string;
   /** 접근성 라벨 — extended는 label로 자동, 다른 variant는 필수. */
   accessibilityLabel?: string;
 }
@@ -131,8 +131,8 @@ function FAB({
   onPress,
   disabled = false,
   style,
-  testID,
   accessibilityLabel,
+  ...pressableProps
 }: FABProps) {
   const theme = useTheme();
   const iconColor = theme.colors.primary.onAction;
@@ -145,12 +145,12 @@ function FAB({
         accessibilityRole="button"
         accessibilityState={{ disabled }}
         accessibilityLabel={accessibilityLabel ?? label}
-        testID={testID}
         style={({ pressed }) => [
           SHADOW,
           { opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
           style,
         ]}
+        {...pressableProps}
       >
         {iconWithProps(icon, EXTENDED_ICON_SIZE, iconColor)}
         {label !== undefined && (
@@ -170,12 +170,12 @@ function FAB({
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       accessibilityLabel={accessibilityLabel}
-      testID={testID}
       style={({ pressed }) => [
         SHADOW,
         { opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
         style,
       ]}
+      {...pressableProps}
     >
       {iconWithProps(icon, spec.iconSize, iconColor)}
     </SquareFab>

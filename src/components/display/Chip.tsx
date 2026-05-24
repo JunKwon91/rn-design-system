@@ -48,11 +48,12 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import Text from '@/components/primitives/Text';
+import type { InteractivePressableProps } from '@/types/interactive';
 
 export type ChipVariant = 'filter' | 'assist' | 'input' | 'suggestion';
 export type ChipSize = 'sm' | 'md';
 
-export interface ChipProps {
+export interface ChipProps extends InteractivePressableProps {
   variant: ChipVariant;
   size?: ChipSize;
   label: string;
@@ -65,7 +66,6 @@ export interface ChipProps {
   onClose?: () => void;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
-  testID?: string;
   accessibilityLabel?: string;
 }
 
@@ -162,8 +162,8 @@ function Chip({
   onClose,
   disabled = false,
   style,
-  testID,
   accessibilityLabel,
+  ...pressableProps
 }: ChipProps) {
   const theme = useTheme();
   const spec = SIZE_SPEC[size];
@@ -233,8 +233,8 @@ function Chip({
         ...(variant === 'filter' ? { checked: selected } : {}),
       }}
       accessibilityLabel={accessibilityLabel ?? label}
-      testID={testID}
       style={style}
+      {...pressableProps}
     >
       {({ pressed }) => (
         <Row

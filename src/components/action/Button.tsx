@@ -50,6 +50,7 @@ import { useTheme } from 'styled-components/native';
 
 import Text from '@/components/primitives/Text';
 import type { TextVariant } from '@/components/primitives/Text';
+import type { InteractivePressableProps } from '@/types/interactive';
 
 export type ButtonVariant =
   /** 진한 배경 + 밝은 텍스트 (메인 액션) */
@@ -67,7 +68,7 @@ export type ButtonSize =
   /** 높이 48 · padding 20 · 17px 텍스트 */
   | 'lg';
 
-export interface ButtonProps {
+export interface ButtonProps extends InteractivePressableProps {
   /** 버튼 라벨. */
   label: string;
   /**
@@ -126,6 +127,7 @@ export default function Button({
   onPress,
   style,
   accessibilityLabel,
+  ...pressableProps
 }: ButtonProps) {
   const theme = useTheme();
   const blocked = disabled || loading;
@@ -172,6 +174,7 @@ export default function Button({
       style={computeStyle}
       disabled={blocked}
       onPress={onPress}
+      {...pressableProps}
       accessibilityRole="button"
       accessibilityState={{ disabled: blocked, busy: loading }}
       accessibilityLabel={accessibilityLabel ?? label}

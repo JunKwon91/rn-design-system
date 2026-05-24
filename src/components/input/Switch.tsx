@@ -50,17 +50,17 @@ import Animated, {
 import styled, { useTheme } from 'styled-components/native';
 
 import Text from '@/components/primitives/Text';
+import type { InteractivePressableProps } from '@/types/interactive';
 
 export type SwitchSize = 'sm' | 'md' | 'lg';
 
-export interface SwitchProps {
+export interface SwitchProps extends InteractivePressableProps {
   value: boolean;
   onValueChange?: (value: boolean) => void;
   label?: React.ReactNode;
   size?: SwitchSize;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
-  testID?: string;
   accessibilityLabel?: string;
 }
 
@@ -113,8 +113,8 @@ function Switch({
   size = 'md',
   disabled = false,
   style,
-  testID,
   accessibilityLabel,
+  ...pressableProps
 }: SwitchProps) {
   const theme = useTheme();
   const spec = SIZE_SPEC[size];
@@ -175,8 +175,8 @@ function Switch({
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled }}
       accessibilityLabel={accessibilityLabel}
-      testID={testID}
       style={style}
+      {...pressableProps}
     >
       {({ pressed }) => (
         <Row $disabled={disabled} $pressed={pressed}>
