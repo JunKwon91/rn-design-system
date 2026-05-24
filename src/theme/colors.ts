@@ -130,6 +130,7 @@ export interface ColorsShape {
     containerLow: string; // 살짝 더 어두운 컨테이너 (헤더 등)
     container: string; // 표준 카드 배경
     containerHigh: string; // 강조된 컨테이너 (선택된 항목 등)
+    inverse: string; // 반전 표면 — Tooltip 등 강조
   };
   // text = 글자 색상. 4단계 중요도 + 반전(inverse) 변형.
   text: {
@@ -190,6 +191,7 @@ export const lightColors: ColorsShape = {
     containerLow: primitives.slate[50],
     container: primitives.white,
     containerHigh: primitives.slate[100],
+    inverse: primitives.slateDark[900], // 다크 surface 빌려옴 (Tooltip 등)
   },
   text: {
     primary: primitives.slate[900], // 진한 슬레이트 (가장 어두움)
@@ -242,6 +244,7 @@ export const darkColors: ColorsShape = {
     containerLow: primitives.slateDark[850],
     container: primitives.slateDark[800],
     containerHigh: primitives.slateDark[780],
+    inverse: primitives.slate[50], // 라이트 surface 빌려옴 (Tooltip 등)
   },
   text: {
     primary: primitives.slateDark[200], // 밝은 회색 (어두운 배경 위에서 가독)
