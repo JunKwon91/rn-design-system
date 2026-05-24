@@ -26,12 +26,21 @@
 // 라인 gap: spacing.sm
 //
 // [애니메이션]
-// RN core Animated.Value(0) + Animated.loop(Animated.timing(toValue:1, 1500ms))
-// useNativeDriver: false (backgroundColor는 JS 스레드)
+// Reanimated v4 useSharedValue + withRepeat(withSequence(...)) 750ms × 2
+// useAnimatedStyle + interpolateColor — UI 스레드 worklet 실행
+// 컴포넌트 unmount 시 cancelAnimation으로 cleanup
 // ============================================================================
 
-import { useEffect, useMemo, useRef } from 'react';
-import { Animated } from 'react-native';
+import { useEffect } from 'react';
+import Animated, {
+  cancelAnimation,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components/native';
 
 export type SkeletonProps =
@@ -68,40 +77,31 @@ const TextLine = styled(Animated.View)<{ $w: number | string; $h: number }>`
   border-radius: 4px;
 `;
 
-function useShimmerColor(): Animated.AnimatedInterpolation<string> {
+function useShimmerStyle() {
   const theme = useTheme();
-  const anim = useRef(new Animated.Value(0)).current;
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(anim, {
-          toValue: 1,
-          duration: 750,
-          useNativeDriver: false,
-        }),
-        Animated.timing(anim, {
-          toValue: 0,
-          duration: 750,
-          useNativeDriver: false,
-        }),
-      ]),
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 750 }),
+        withTiming(0, { duration: 750 }),
+      ),
+      -1,
+      false,
     );
-    loop.start();
-    return () => loop.stop();
-  }, [anim]);
+    return () => {
+      cancelAnimation(progress);
+    };
+  }, [progress]);
 
-  return useMemo(
-    () =>
-      anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [
-          theme.colors.border.default,        // mid-gray placeholder 시작점
-          theme.colors.surface.containerHigh, // 한 톤 밝은 shimmer peak
-        ],
-      }),
-    [anim, theme],
-  );
+  return useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [theme.colors.border.default, theme.colors.surface.containerHigh],
+    ),
+  }), [theme]);
 }
 
 /**
@@ -115,10 +115,7 @@ function useShimmerColor(): Animated.AnimatedInterpolation<string> {
  * <Skeleton type="text" lines={3} lineWidths={['100%', '80%', '60%']} />
  */
 function Skeleton(props: SkeletonProps) {
-  const color = useShimmerColor();
-
-  // Animated style — backgroundColor만 외부 style prop (변수 참조라 lint 통과)
-  const animatedBg = useMemo(() => ({ backgroundColor: color }), [color]);
+  const animatedStyle = useShimmerStyle();
 
   if (props.type === 'rect') {
     return (
@@ -127,7 +124,7 @@ function Skeleton(props: SkeletonProps) {
         $h={props.height}
         accessibilityRole="none"
         accessibilityLabel="Loading"
-        style={animatedBg}
+        style={animatedStyle}
       />
     );
   }
@@ -138,7 +135,7 @@ function Skeleton(props: SkeletonProps) {
         $size={props.size}
         accessibilityRole="none"
         accessibilityLabel="Loading"
-        style={animatedBg}
+        style={animatedStyle}
       />
     );
   }
@@ -159,7 +156,7 @@ function Skeleton(props: SkeletonProps) {
         $h={lineHeight}
         accessibilityRole="none"
         accessibilityLabel="Loading"
-        style={animatedBg}
+        style={animatedStyle}
       />,
     );
   }
