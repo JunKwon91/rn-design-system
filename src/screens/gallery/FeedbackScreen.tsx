@@ -42,15 +42,37 @@ const StackedButtons = styled.View`
   gap: 8px;
 `;
 
+const ProgressList = styled.View`
+  gap: 16px;
+`;
+
+const ProgressColumn = styled.View`
+  gap: 6px;
+`;
+
+const CircularRow = styled.View`
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+`;
+
+const CircularItem = styled.View`
+  align-items: center;
+  gap: 8px;
+`;
+
 import { Button } from '@/components/action';
 import { Tabs } from '@/components/display';
 import {
+  CircularProgress,
   EmptyState,
   ErrorView,
+  LinearProgress,
   LoadingView,
   Skeleton,
 } from '@/components/feedback';
-import { Spacer } from '@/components/primitives';
+import { Spacer, Text } from '@/components/primitives';
 import { Screen, Section } from '@/components/surface';
 import { dialog } from '@/stores/dialogStore';
 import { toast, useToastStore } from '@/stores/toastStore';
@@ -60,6 +82,7 @@ const GROUPS = [
   { value: 'error-view', label: 'ErrorView (오류)' },
   { value: 'loading-view', label: 'LoadingView (로딩)' },
   { value: 'skeleton', label: 'Skeleton (스켈레톤)' },
+  { value: 'progress', label: 'Progress (진행률)' },
   { value: 'toast', label: 'Toast (토스트)' },
   { value: 'dialog', label: 'Dialog (다이얼로그)' },
 ] as const;
@@ -219,6 +242,129 @@ export default function FeedbackScreen() {
                   </SkeletonCommentLines>
                 </SkeletonCommentRow>
               </SkeletonCard>
+            </Section>
+          </>
+        )}
+
+        {activeGroup === 'progress' && (
+          <>
+            <Section title="Linear · determinate (3 sizes × 25/50/75%)">
+              <ProgressList>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">sm · 25%</Text>
+                  <LinearProgress value={25} size="sm" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">sm · 50%</Text>
+                  <LinearProgress value={50} size="sm" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">sm · 75%</Text>
+                  <LinearProgress value={75} size="sm" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">md · 25%</Text>
+                  <LinearProgress value={25} size="md" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">md · 50%</Text>
+                  <LinearProgress value={50} size="md" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">md · 75%</Text>
+                  <LinearProgress value={75} size="md" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">lg · 25%</Text>
+                  <LinearProgress value={25} size="lg" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">lg · 50%</Text>
+                  <LinearProgress value={50} size="lg" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">lg · 75%</Text>
+                  <LinearProgress value={75} size="lg" />
+                </ProgressColumn>
+              </ProgressList>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Linear · indeterminate (3 sizes, 1.5s 좌→우 무한 슬라이드)">
+              <ProgressList>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">sm ↻</Text>
+                  <LinearProgress variant="indeterminate" size="sm" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">md ↻</Text>
+                  <LinearProgress variant="indeterminate" size="md" />
+                </ProgressColumn>
+                <ProgressColumn>
+                  <Text variant="labelSm" color="muted">lg ↻</Text>
+                  <LinearProgress variant="indeterminate" size="lg" />
+                </ProgressColumn>
+              </ProgressList>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Circular · determinate (3 sizes × 25/50/75%)">
+              <CircularRow>
+                <CircularItem>
+                  <CircularProgress value={25} size="sm" />
+                  <Text variant="labelSm" color="muted">sm 25%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={50} size="sm" />
+                  <Text variant="labelSm" color="muted">sm 50%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={75} size="sm" />
+                  <Text variant="labelSm" color="muted">sm 75%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={25} size="md" />
+                  <Text variant="labelSm" color="muted">md 25%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={50} size="md" />
+                  <Text variant="labelSm" color="muted">md 50%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={75} size="md" />
+                  <Text variant="labelSm" color="muted">md 75%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={25} size="lg" />
+                  <Text variant="labelSm" color="muted">lg 25%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={50} size="lg" />
+                  <Text variant="labelSm" color="muted">lg 50%</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress value={75} size="lg" />
+                  <Text variant="labelSm" color="muted">lg 75%</Text>
+                </CircularItem>
+              </CircularRow>
+            </Section>
+            <Spacer size="2xl" />
+
+            <Section title="Circular · indeterminate (3 sizes, 1.5s 회전 + arc 35%)">
+              <CircularRow>
+                <CircularItem>
+                  <CircularProgress variant="indeterminate" size="sm" />
+                  <Text variant="labelSm" color="muted">sm ↻</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress variant="indeterminate" size="md" />
+                  <Text variant="labelSm" color="muted">md ↻</Text>
+                </CircularItem>
+                <CircularItem>
+                  <CircularProgress variant="indeterminate" size="lg" />
+                  <Text variant="labelSm" color="muted">lg ↻</Text>
+                </CircularItem>
+              </CircularRow>
             </Section>
           </>
         )}
