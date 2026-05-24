@@ -1,6 +1,6 @@
 # rn-design-system-starter
 
-> React Native 0.85 디자인 시스템 스타터 — 27개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
+> React Native 0.85 디자인 시스템 스타터 — 28개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
 
 ## Screenshots
 
@@ -86,6 +86,11 @@
 |:---:|:---:|
 | ![skeleton light](docs/screenshots/skeleton-light.png) | ![skeleton dark](docs/screenshots/skeleton-dark.png) |
 
+### Feedback — Progress (진행률)
+| Light | Dark |
+|:---:|:---:|
+| ![progress light](docs/screenshots/progress-light.png) | ![progress dark](docs/screenshots/progress-dark.png) |
+
 ### Feedback — Toast (토스트)
 | Light | Dark |
 |:---:|:---:|
@@ -108,7 +113,7 @@ npm run ios      # 또는 npm run android
 
 요구사항: Node.js 22.11+, Xcode 16+ (iOS), Android Studio + JDK 17+ (Android).
 
-## 포함 컴포넌트 (27종, 7 카테고리)
+## 포함 컴포넌트 (28종, 7 카테고리)
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
@@ -136,6 +141,7 @@ npm run ios      # 또는 npm run android
 | | `ErrorView` | 오류 상태 표현 |
 | | `LoadingView` | 로딩 상태 표현 |
 | | `Skeleton` | 콘텐츠 로딩 placeholder (3 types: rect/circle/text, backgroundColor pulse 애니메이션 1.5초) |
+| | `LinearProgress` / `CircularProgress` | M3 진행률 표시 (3 sizes × determinate/indeterminate, Reanimated v4 + react-native-svg, 12시 시작 시계 방향) |
 | | `Toast` | 일시적 알림 메시지 (큐잉 + 자동 닫힘) |
 | | `Dialog` | 모달 다이얼로그 (Promise 반환) |
 
@@ -266,6 +272,20 @@ const [active, setActive] = useState(false);
 <Chip variant="input" label="태그" icon={<Star />} onPress={...}
   onClose={() => removeTag()} />
 <Chip variant="suggestion" label="제안" onPress={...} />
+```
+
+### Progress
+```tsx
+import { LinearProgress, CircularProgress } from '@/components/feedback';
+
+// determinate (0~100, variant 생략 가능)
+<LinearProgress value={50} />
+<LinearProgress value={75} size="lg" />
+<CircularProgress value={50} size="md" />
+
+// indeterminate (변수 prop 명시)
+<LinearProgress variant="indeterminate" />
+<CircularProgress variant="indeterminate" size="sm" />
 ```
 
 ## Toast & Dialog
