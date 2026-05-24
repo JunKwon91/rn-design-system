@@ -3,7 +3,7 @@
 // ============================================================================
 //
 // App 루트에 단 1회만 마운트. useToastStore.displayed를 구독해 그 변화에
-// 따라 enter/exit Animated를 트리거하고 duration 종료 시 자동 dismiss.
+// 따라 enter/exit Reanimated를 트리거하고 duration 종료 시 자동 dismiss.
 //
 // 큐 처리는 store가 담당 — ToastHost는 항상 displayed 1개만 렌더한다.
 //
@@ -12,8 +12,15 @@
 // pointerEvents='box-none' — Toast 외 영역 터치 통과.
 // ============================================================================
 
-import { useEffect, useRef } from 'react';
-import { Animated, Keyboard, Platform, useWindowDimensions } from 'react-native';
+import { useEffect } from 'react';
+import { Keyboard, Platform, useWindowDimensions } from 'react-native';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
@@ -42,18 +49,18 @@ export default function ToastHost() {
   const { width: screenWidth } = useWindowDimensions();
   const toastWidth = Math.min(screenWidth - HORIZONTAL_MARGIN * 2, MAX_WIDTH);
 
-  const translateY = useRef(new Animated.Value(50)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const keyboardOffset = useRef(new Animated.Value(0)).current;
+  const translateY = useSharedValue(50);
+  const opacity = useSharedValue(0);
+  const keyboardOffset = useSharedValue(0);
 
   useEffect(() => {
     const showEvt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
     const showSub = Keyboard.addListener(showEvt, (e) => {
-      keyboardOffset.setValue(e.endCoordinates.height);
+      keyboardOffset.value = e.endCoordinates.height;
     });
     const hideSub = Keyboard.addListener(hideEvt, () => {
-      keyboardOffset.setValue(0);
+      keyboardOffset.value = 0;
     });
     return () => {
       showSub.remove();
@@ -61,20 +68,17 @@ export default function ToastHost() {
     };
   }, [keyboardOffset]);
 
+  const scheduleAfter = (after: () => void) => {
+    setTimeout(after, QUEUE_GAP);
+  };
+
   const animateExit = (after: () => void) => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 50,
-        duration: EXIT_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: EXIT_DURATION,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setTimeout(after, QUEUE_GAP);
+    translateY.value = withTiming(50, { duration: EXIT_DURATION });
+    opacity.value = withTiming(0, { duration: EXIT_DURATION }, (finished) => {
+      'worklet';
+      if (finished) {
+        runOnJS(scheduleAfter)(after);
+      }
     });
   };
 
@@ -82,20 +86,10 @@ export default function ToastHost() {
     if (!displayed) {
       return;
     }
-    translateY.setValue(50);
-    opacity.setValue(0);
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: ENTER_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: ENTER_DURATION,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    translateY.value = 50;
+    opacity.value = 0;
+    translateY.value = withTiming(0, { duration: ENTER_DURATION });
+    opacity.value = withTiming(1, { duration: ENTER_DURATION });
 
     const duration = displayed.duration ?? DEFAULT_DURATION;
     if (duration === 0) {
@@ -108,6 +102,20 @@ export default function ToastHost() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayed?.id]);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: translateY.value },
+      {
+        translateY: interpolate(
+          keyboardOffset.value,
+          [0, 1000],
+          [0, -1000],
+        ),
+      },
+    ],
+    opacity: opacity.value,
+  }));
+
   if (!displayed) {
     return null;
   }
@@ -117,20 +125,10 @@ export default function ToastHost() {
   return (
     <Host pointerEvents="box-none">
       <Animated.View
-        style={{
-          width: toastWidth,
-          paddingBottom: bottomPadding,
-          transform: [
-            { translateY },
-            {
-              translateY: keyboardOffset.interpolate({
-                inputRange: [0, 1000],
-                outputRange: [0, -1000],
-              }),
-            },
-          ],
-          opacity,
-        }}
+        style={[
+          { width: toastWidth, paddingBottom: bottomPadding },
+          animatedStyle,
+        ]}
       >
         <Toast config={displayed} onDismiss={() => animateExit(dismiss)} />
       </Animated.View>
