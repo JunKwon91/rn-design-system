@@ -13,14 +13,19 @@
 // Prompt variant는 KeyboardAvoidingView로 키보드 표시 시 카드가 위로 밀린다.
 // ============================================================================
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import {
-  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   useWindowDimensions,
 } from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import styled from 'styled-components/native';
 
 import { useDialogStore, type DialogConfig } from '@/stores/dialogStore';
@@ -59,56 +64,48 @@ export default function DialogHost() {
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = Math.min(screenWidth - HORIZONTAL_MARGIN * 2, MAX_WIDTH);
 
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const cardScale = useRef(new Animated.Value(0.95)).current;
+  const backdropOpacity = useSharedValue(0);
+  const cardOpacity = useSharedValue(0);
+  const cardScale = useSharedValue(0.95);
+
+  const scheduleAfter = (after: () => void) => {
+    setTimeout(after, QUEUE_GAP);
+  };
 
   const animateExit = (after: () => void) => {
-    Animated.parallel([
-      Animated.timing(backdropOpacity, {
-        toValue: 0,
-        duration: EXIT_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardOpacity, {
-        toValue: 0,
-        duration: EXIT_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardScale, {
-        toValue: 0.95,
-        duration: EXIT_DURATION,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setTimeout(after, QUEUE_GAP);
-    });
+    backdropOpacity.value = withTiming(0, { duration: EXIT_DURATION });
+    cardScale.value = withTiming(0.95, { duration: EXIT_DURATION });
+    cardOpacity.value = withTiming(
+      0,
+      { duration: EXIT_DURATION },
+      (finished) => {
+        'worklet';
+        if (finished) {
+          runOnJS(scheduleAfter)(after);
+        }
+      },
+    );
   };
 
   useEffect(() => {
     if (!displayed) return;
-    backdropOpacity.setValue(0);
-    cardOpacity.setValue(0);
-    cardScale.setValue(0.95);
-    Animated.parallel([
-      Animated.timing(backdropOpacity, {
-        toValue: 1,
-        duration: ENTER_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardOpacity, {
-        toValue: 1,
-        duration: ENTER_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardScale, {
-        toValue: 1,
-        duration: ENTER_DURATION,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    backdropOpacity.value = 0;
+    cardOpacity.value = 0;
+    cardScale.value = 0.95;
+    backdropOpacity.value = withTiming(1, { duration: ENTER_DURATION });
+    cardOpacity.value = withTiming(1, { duration: ENTER_DURATION });
+    cardScale.value = withTiming(1, { duration: ENTER_DURATION });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayed?.id]);
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
+  const cardAnimStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
 
   if (!displayed) return null;
 
@@ -123,7 +120,7 @@ export default function DialogHost() {
 
   return (
     <>
-      <Backdrop style={{ opacity: backdropOpacity }}>
+      <Backdrop style={backdropStyle}>
         <Pressable style={{ flex: 1 }} onPress={handleBackdropPress} />
       </Backdrop>
       <KeyboardAvoidingView
@@ -138,13 +135,7 @@ export default function DialogHost() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Center pointerEvents="box-none">
-          <Animated.View
-            style={{
-              width: cardWidth,
-              opacity: cardOpacity,
-              transform: [{ scale: cardScale }],
-            }}
-          >
+          <Animated.View style={[{ width: cardWidth }, cardAnimStyle]}>
             <Dialog config={displayed} onResolve={handleResolve} />
           </Animated.View>
         </Center>
