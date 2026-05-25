@@ -34,3 +34,8 @@ export type {
 
 export { default as Tooltip } from './Tooltip';
 export type { TooltipProps, TooltipPosition } from './Tooltip';
+
+export { default as BottomSheet } from './BottomSheet';
+export type { BottomSheetProps } from './BottomSheet';
+
+export { default as BottomSheetHost } from './BottomSheetHost';
