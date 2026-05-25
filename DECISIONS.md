@@ -226,61 +226,338 @@
 
 ---
 
-## ADR-25: 인터랙티브 컴포넌트 onPress 동작 검증 체크리스트 (9항목)
+## ADR-25: 신규 컴포넌트 검증 체크리스트
 
-- **상황**: 사이클 1·2 누적 학습 — 시각 사양만 정합 검증하다 onPress/onChange 콜백 동작 검증이 누락되는 사례 반복. 사이클 2 후반 보고-실제 불일치 4건(Skeleton CS 의도 / Input X 6·7 / Star→X 렌더링 / RN 시각 검증 누락) + SettingsRow toggle 흐름 검증 누락 + Button destructive `#FFFFFF` 하드코딩 발견 + Skeleton shimmer 토큰 갱신 시 Figma 미동기화 발견 등이 누적되어, 신규 컴포넌트 검증 절차를 단일 체크리스트로 명문화 필요. v1.x 사이클 2 정합 검증 단계에서 7항목 → 9항목으로 확장 (정합 카운트 명시 + 인라인 스타일 분류 A=0건 추가).
-- **선택**: **9항목 체크리스트** — (1) **Figma 측정 → RN 1:1 정합** — width/height/paddingH/cornerRadius/font-size/icon size 모두 px 단위 일치. (2) **Light/Dark 양 모드 시각 검증** — 토큰 매핑이 두 모드 모두 의도대로 작동(`text.primary`/`surface.containerHigh`/`primary.onAction` 등 mode-aware swap 확인). (3) **accessibility 속성** — `accessibilityRole`/`accessibilityState`/`accessibilityLabel` 누락 없음(특히 IconButton·FAB·Chip 등 텍스트 단독으로 의미 전달 어려운 컴포넌트). (4) **상태별 시각 차이** — default/pressed(opacity 0.7)/disabled(opacity 0.4~0.5)/selected/loading 각 상태가 시각 토큰으로 명확히 구별. (5) **onPress/onChange/onValueChange 콜백 시뮬레이터 검증** — 시각 변화가 있는 컴포넌트(Tabs/SegmentedControl/Switch 등)는 선택 텍스트 표시로 검증, 시각 변화가 없는 컴포넌트(Button/IconButton/FAB/EmptyState action 등)는 `Alert.alert` 시연 패턴으로 검증. disabled 인스턴스도 동일 콜백 연결 후 탭 시 Alert 안 떠야 정상. (6) **M3 48×48 터치 영역 충족** — sm 사이즈(24×24·28×28 등)는 `hitSlop` 적용 필수(IconButton sm: hitSlop 12 → 48×48). (7) **보고 기준** — "본인 직접 확인 완료" 표기 + 측정값/코드 라인 인용으로 검증 근거 명시. (8) **Figma↔RN 측정값 N/N 정합 카운트 명시 보고** — 컴포넌트 추가·변경 시 측정값 1:1 비교 표 작성 + 정합 카운트 명시(사이클 1 Switch 81/81 / 사이클 2 Chip 38/38 / Button 18/18 / Skeleton 16/16 패턴). 의도된 정정은 별도 표기(예: "53/54, 의도 정정 1건 — 사용자 결정으로 토큰 변경"). (9) **인라인 스타일 분류 A = 0건 확인** — `grep -rn "style={{" src/`로 전수 조사 후 분류: A(하드코딩 색상/토큰 우회 — 정정 필요), B(Animated 동적 / Pressable callback / 토큰 사용 — 유지), C(갤러리 시연 layout — 토큰 사용 유지), D(주석 false positive). 분류 A는 사이클 종료 전 반드시 0건 도달 — `#FFFFFF` 등 하드코딩 색상은 라이브러리 토큰으로 정정, 토큰 우회 spacing/margin은 `theme.spacing.*` 또는 styled로 분리.
-- **포기한 옵션**: 시각 사양 검증만 유지(흐름·동작 검증 미수행 — 사이클 2 첫 사용자 발견 누락 패턴), 컴포넌트별 개별 체크리스트(관리 부담 + 공통 항목 중복), 자동화 테스트 도입(`@testing-library/react-native` 의존성 추가 + v1.x 스타터 범위 초과 — 의존성 0 추가 원칙 위반), 보고 시 검증 근거 자유 형식(불일치 누적 차단 실패), 정합 카운트 비명시(사이클 1 Badge/FAB 종료 시 N/N 명시 누락 → 사이클 2 재검증에서 패턴 누락 학습), 인라인 스타일 미관리(라이브러리 품질 저하 — 토큰 시스템 우회가 보이지 않는 곳에서 누적).
-- **근거**: 사이클 2 후반 누적 실수가 모두 "수치 일치 검증"으로는 잡히지 않고 "흐름·렌더링 검증"이 필요한 케이스 — 단일 체크리스트로 통합 관리. Alert.alert 시연은 의존성 추가 없이 onPress 호출 동작을 즉시 확인 — RN core API 사용 + 갤러리 화면 내 인라인 검증 가능. hitSlop은 시각 영역과 별개로 터치 영역만 확장하므로 M3 권장 영역(48×48) 보장이 시각 사양에 영향을 주지 않음. "본인 직접 확인" 표기는 보고-실제 불일치 차단의 marker — 측정값/라인 인용 강제로 추측 보고 방지. 정합 카운트 명시(8번)는 Switch 81/81 패턴을 재현 가능한 의무 보고 형식으로 승격 — 정합 불일치 발견 시 해당 카운트의 어느 항목이 어긋났는지 즉시 식별. 인라인 스타일 분류(9번)는 토큰 시스템이 우회되는 단일 지점을 정기 점검 — 사이클 2에서 Button `'#FFFFFF'` 2건 + Dialog `marginTop: 4` 1건 발견 후 학습. 신규 의존성 0 추가 원칙(사이클 1·2 누적) 유지 — 자동화 도입은 v2.x 이후 검토.
+### 상황
+
+시각 사양 정합은 코드/Figma 비교로 검증되지만, onPress/onChange 콜백 동작 검증 누락이 사이클 2 후반에 반복 발견(Skeleton 의도 / Input 가로 정합 / Star→X 렌더링 / SettingsRow toggle 흐름 / Button destructive `#FFFFFF` 하드코딩 / Skeleton shimmer 토큰 Figma 미동기화). 검증 절차를 단일 체크리스트로 명문화.
+
+### 선택
+
+신규 컴포넌트 도입 시 다음 9항목 검증:
+
+| # | 항목 | 검증 방법 |
+|---|------|---------|
+| 1 | Figma → RN 측정값 정합 | width/height/padding/radius/font-size/icon size px 단위 일치 |
+| 2 | Light/Dark 양 모드 | mode-aware 토큰 swap 작동 (`text.primary` / `surface.containerHigh` 등) |
+| 3 | accessibility | `accessibilityRole` / `accessibilityState` / `accessibilityLabel` 누락 없음 |
+| 4 | 상태별 시각 | default / pressed (opacity 0.7) / disabled (0.4~0.5) / selected / loading |
+| 5 | 콜백 시뮬레이터 검증 | 시각 변화 있음 → 선택 텍스트 표시 / 변화 없음 → `Alert.alert` 시연 |
+| 6 | 48×48 터치 영역 | sm 사이즈는 `hitSlop` 적용 (예: IconButton sm hitSlop 12 → 48×48) |
+| 7 | Figma↔RN 정합 카운트 명시 | N/N 형식 (예: Switch 81/81). 의도된 정정은 별도 표기 |
+| 8 | 인라인 스타일 분류 A = 0 | `grep -rn "style={{" src/` 전수 점검 + 토큰 우회 정정 |
+| 9 | 측정값/코드 라인 인용 | 검증 근거 추적성 (보고 시 라인 번호 명시) |
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| 시각 사양 검증만 유지 | 콜백 누락 패턴 재발 |
+| 컴포넌트별 개별 체크리스트 | 공통 항목 중복 + 관리 부담 |
+| 자동화 테스트 (`@testing-library/react-native`) | v1.x 의존성 0 정책 위반 |
+| 정합 카운트 비명시 | 불일치 발견 시 식별 지점 부재 |
+| 인라인 스타일 미관리 | 토큰 시스템 우회 누적 |
+
+### 근거
+
+사이클 2 후반 누락 사례가 모두 단순 수치 일치로는 잡히지 않고 흐름·렌더링 검증이 필요한 케이스. `Alert.alert`는 의존성 추가 없이 RN core API로 onPress 동작을 즉시 확인. `hitSlop`은 시각 영역과 별개로 터치 영역만 확장하므로 M3 권장 영역(48×48) 보장이 시각 사양에 영향 없음. 정합 카운트는 Switch 81/81 / Chip 38/38 / Button 18/18 / Skeleton 16/16 패턴을 표준 보고 형식으로 승격 — 불일치 발견 시 즉시 식별 가능. 인라인 스타일 점검은 토큰 시스템 우회의 단일 지점 정기 검사. 자동화 테스트는 v2.x 이후 검토.
+
+### 결과
+
+- 사이클 3(Progress) 이후 본 체크리스트가 모든 신규 컴포넌트에 적용됨
+- 누적 정합 카운트 208/208 (Switch 81 + Chip 38 + Button 18 + Skeleton 16 + Progress 42 + Tooltip 13)
+- 인라인 스타일 분류 A 0건 유지 (사이클 1·2·2.5·3·4·5.1 누적)
+- 신규 의존성 0건 유지
 
 ---
 
-## ADR-26: Reanimated v4 도입 + 사이클 1·2 컴포넌트 일괄 마이그레이션 + styled-Animated 패턴 통일 (사이클 2.5)
+## ADR-26: Reanimated v4 도입 + 애니메이션 컴포넌트 일괄 마이그레이션 (사이클 2.5)
 
-- **상황**: 사이클 1·2까지 RN core `Animated` 사용 (ADR-17 Switch / ADR-23 Skeleton 등). 사이클 3 Progress 진입 직전 — Reanimated 도입 검토 단계. 사이클 5 BottomSheet에서 Reanimated 사실상 필수 (Gesture Handler + UI 스레드 worklet + drag/snap/swipe). 사용자 결정으로 사이클 3 진입 전 별도 사이클 2.5를 분리해 Reanimated 도입 + 기존 5개 애니메이션 컴포넌트(ToastHost / DialogHost / Skeleton / Switch / SegmentedControl) 일괄 전환 + styled-Animated 패턴 통일. 사이클 단위 원칙 보존 — 사이클 3에 마이그레이션 작업을 끼우지 않고 깨끗한 환경에서 Progress 진입.
-- **선택**: **Reanimated v4.3.1 + 5개 컴포넌트 일괄 전환 + styled-Animated 패턴 1 (`styled(Animated.View)`) 통일**. v4는 RN 0.85 New Architecture(Fabric) 기본값과 일치 + `react-native-worklets` 별도 peer dependency(v0.8.3) + `useNativeDriver` 옵션 자동(항상 UI 스레드 worklet). babel plugin은 `react-native-worklets/plugin` 마지막 위치. iOS Pod install 후 81 dependencies / 80 pods. 5개 컴포넌트 모두 `useRef(new Animated.Value())` → `useSharedValue()`, `Animated.timing(...).start()` → `withTiming(...)`, `anim.interpolate({...})` → `useAnimatedStyle(() => ({ ...interpolate(v.value, ...) }))`, `Animated.loop` → `withRepeat(withSequence(...), -1, false)`, exit callback은 `'worklet'; runOnJS(...)`. styled-Animated 패턴은 옵션 A (`styled(Animated.View)` 6/6) — 전수 조사 후 사용처 자연스러움·라인 절약·styled-components 관용 패턴 우선 결정. 패턴 3 직접 `<Animated.View>` 3건(ToastHost / DialogHost card / Switch thumb)은 정적 styled 부적합 케이스로 유지.
-- **포기한 옵션**: 사이클 3 안에서 Progress + 마이그레이션 동시 진행(작업 단위 폭발, 회귀 추적 어려움), 사이클 1·2 RN Animated 유지 + 사이클 3부터만 Reanimated(두 패턴 영구 공존, 라이브러리 일관성 훼손), 사이클 5까지 RN Animated 유지(BottomSheet 구현 한계 명확), Reanimated v3 채택(RN 0.85 + New Arch에서 v4 latest stable이 적절), 패턴 2 통일(`Animated.createAnimatedComponent`, 코드 라인 증가 + 사용처 `Animated` 접두 강제), 패턴 혼재 유지(전수 조사로 1+5+3 불일치 발견 — 일관성 가치 훼손), 사이클 2 "신규 의존성 0 추가" 원칙 무조건 유지(BottomSheet/Progress 등 v2.x 이후 컴포넌트 구현 한계).
-- **근거 (라이브러리 본질)**: 디자인 시스템 라이브러리의 핵심 가치는 일관성. 두 애니메이션 라이브러리 공존 또는 styled-Animated 패턴 혼재는 장기 부담. 사이클 3 진입 전이 정정 비용 최소 시점. **근거 (기술)**: Reanimated v4 UI 스레드 worklet → 60fps 보장 + JS 스레드 부담 없음. `useSharedValue` + `useAnimatedStyle` 패턴이 RN 커뮤니티 표준. Gesture Handler v2.31.2(이미 설치)와 자연스러운 통합 — 사이클 5 BottomSheet 사전 셋업. 사이클 3 Progress(width/svg/회전), 사이클 4 이후(Carousel/Drawer 등) 모두 일관 패턴. **근거 (사용자 관점)**: 사이클 3 들어가지 않았으니 우선 Reanimated 도입 + 패턴 통일 결정 — 장기 사이클(3·4·5) 일관성 우선. **근거 (검증)**: 사이클 2.5 작업 4 ADR-25 9항목 체크리스트 모두 통과 — 측정값 변경 0(Switch 81/81 + Skeleton 16/16 유지), 정합 카운트 153/153 유지, 인라인 스타일 분류 A 0건 유지(분류 B는 -4건 감소, useAnimatedStyle 통합 효과), RN core Animated 5개 파일 완전 제거, styled-Animated 패턴 6/6 통일.
-- **사이클 정책 변경**: 이전(사이클 1·2) — "신규 의존성 0개 추가" 원칙. 이후(사이클 2.5~) — "**의도된 의존성 추가 가능 (ADR로 사유 명시 필수)**". 토큰 0 추가 원칙은 유지(사이클 1·2·2.5 누적 신규 토큰 0). 의존성 추가는 신규 컴포넌트 구현 한계 또는 일관성 회복 등 명확한 사유가 있을 때만, 그 사유는 반드시 ADR로 기록.
+### 상황
+
+사이클 1·2까지 5개 컴포넌트(ToastHost / DialogHost / Skeleton / Switch / SegmentedControl)가 RN core `Animated` 사용. 사이클 5 BottomSheet에서 Reanimated가 사실상 필수(Gesture Handler + UI 스레드 worklet + drag/snap/swipe). 사이클 3(Progress) 진입 전, 별도 사이클 2.5를 분리하여 Reanimated 도입 + 기존 5개 컴포넌트 일괄 전환 + styled-Animated 패턴 통일.
+
+### 선택
+
+**Reanimated v4.3.1 도입 + 5개 컴포넌트 일괄 전환 + `styled(Animated.View)` 패턴 통일**.
+
+- v4는 RN 0.85 New Architecture(Fabric) 기본값과 정합
+- `react-native-worklets` peer dependency v0.8.3 동반 설치
+- `useNativeDriver` 옵션 자동 (항상 UI 스레드 worklet)
+- babel plugin: `react-native-worklets/plugin` 마지막 위치
+- iOS Pod install: 81 dependencies / 80 pods
+
+API 전환 패턴:
+
+| 변경 전 (RN core) | 변경 후 (Reanimated v4) |
+|------|------|
+| `useRef(new Animated.Value())` | `useSharedValue()` |
+| `Animated.timing(...).start()` | `withTiming(...)` |
+| `anim.interpolate({...})` | `useAnimatedStyle(() => ({ ... }))` + `interpolate()` |
+| `Animated.loop` | `withRepeat(withSequence(...), -1, false)` |
+| exit callback | `'worklet'; runOnJS(...)` |
+
+styled-Animated 패턴 통일: `styled(Animated.View)` 6/6 (옵션 A). 라인 절약 + styled-components 관용 패턴. 정적 styled 부적합 케이스 3건(ToastHost / DialogHost card / Switch thumb)은 직접 `<Animated.View>` 유지.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| 사이클 3에서 Progress + 마이그레이션 동시 진행 | 작업 단위 과대, 회귀 추적 어려움 |
+| 사이클 3부터만 Reanimated, 1·2는 그대로 | 두 애니메이션 라이브러리 영구 공존, 일관성 훼손 |
+| 사이클 5까지 RN core Animated 유지 | BottomSheet 구현 한계 (Gesture Handler + worklet) |
+| Reanimated v3 | RN 0.85 + New Architecture에서 v4가 적절 |
+| `Animated.createAnimatedComponent` 패턴 | 코드 라인 증가, 사용처 `Animated.` 접두 강제 |
+| "신규 의존성 0" 원칙 무조건 유지 | BottomSheet 등 후속 컴포넌트 구현 한계 |
+
+### 근거
+
+**일관성**: 디자인 시스템 라이브러리의 핵심 가치는 일관된 패턴. 두 애니메이션 라이브러리 공존 또는 styled-Animated 패턴 혼재는 장기 부담. 사이클 3 진입 전이 마이그레이션 비용 최소 시점.
+
+**기술**: Reanimated v4의 UI 스레드 worklet으로 60fps 보장 + JS 스레드 부담 없음. `useSharedValue` + `useAnimatedStyle`이 RN 커뮤니티 표준. Gesture Handler v2.31.2(이미 peer로 설치)와 자연 통합 — 사이클 5 BottomSheet 사전 셋업.
+
+**검증 결과**: ADR-25 9항목 체크리스트 통과 — 측정값 변경 0건 (Switch 81/81 + Skeleton 16/16 유지), 정합 카운트 153/153 유지, 인라인 스타일 분류 A 0건 유지(B는 -4건 감소, `useAnimatedStyle` 통합 효과), RN core Animated 5개 파일 완전 제거.
+
+### 결과
+
+- **의존성 정책 갱신**: 사이클 1·2 "신규 의존성 0 추가" → 사이클 2.5~ "정당화된 의존성 추가 가능 (ADR 사유 명시 필수)". 토큰 0 추가 원칙은 유지.
+- 사이클 3 이후 신규 컴포넌트(Progress / Tooltip / BottomSheet)가 모두 Reanimated v4 일관 패턴 적용
+- Gesture Handler 통합 준비 완료 — 사이클 5.1 BottomSheet의 `Gesture.Pan()` 즉시 활용
 
 ---
 
-## ADR-27: Progress 컴포넌트 + react-native-svg 패턴 3 정당화 + 갤러리 동적 시연 패턴 도입 (사이클 3)
+## ADR-27: Progress 컴포넌트 + react-native-svg 결합 + 갤러리 동적 시연 (사이클 3)
 
-- **상황**: 사이클 2.5 종료 후 Reanimated v4 환경 + styled-Animated 패턴 1 표준 정립. 사이클 3 Progress 진입 — M3 표준 컴포넌트, determinate + indeterminate 양 variant 필요. Linear는 View 기반(useAnimatedStyle), Circular는 SVG 기반(useAnimatedProps + react-native-svg) — 구현 본질 다름. Figma 단계에서 사용자 발견 3 이슈(SECTION wrapper 누락 → mode 토글 UI 부재 / Linear sm height 3 시각 약함 → 4로 확대 / Indeterminate 정적 한계 → ↻ 라벨 + 좌측 시작 + arc 35%), Demo Card wrapper 누락 발견(Linear/Circular Frame을 surface.container card로 감싸야 mode-aware 미리보기) — 모두 정정 후 통과. 코드 단계에서 사용자 본질 발견: "다운로드 형식으로 게이지 차오름" 시연 부재 → 동적 데모 추가.
-- **선택**: **LinearProgress + CircularProgress 별도 컴포넌트** (MUI/M3 표준), **단일 파일 `src/components/feedback/Progress.tsx`** (Skeleton 단일 파일 패턴 일관), **TypeScript discriminated union** (`{ variant?: 'determinate'; value: number } | { variant: 'indeterminate' }`), **value 범위 0~100** (MUI 퍼센트 표준) + **clamping** (`Math.max(0, Math.min(100, value))`), **Linear styled-Animated 패턴 1** (`LinearTrack = styled(Animated.View)` + `LinearFill = styled(Animated.View)`), **Circular SVG primitive 패턴 3 정당화** (`<Svg> <Circle>` from react-native-svg — primitive는 styled-components props 매핑 부적합), **CircularWrap = styled(Animated.View)** 패턴 1 (rotation 적용용), **useAnimatedProps**(strokeDashoffset 동적) — **Reanimated v4 + react-native-svg 첫 결합 패턴**, **12시 시작** `transform="rotate(-90 ${center} ${center})"` (svg rotate), **strokeLinecap='round'** (M3 표준 + Figma 정합), **갤러리 24 정적 인스턴스** (Figma 1:1 정합 42/42) + **동적 데모 2 인스턴스** (다운로드 시뮬레이션, useDownloadProgress hook 추출, 500ms +5% 10초 cycle).
-- **포기한 옵션**: API 옵션 1(value undefined → indet 암묵적, 명시성 부족 + TypeScript 추론 어려움), 단일 Progress + `type` prop(View vs SVG 본질 다름), 디렉토리 분리(`Progress/LinearProgress.tsx` 등, 단일 파일 패턴 일관성 깨짐), value 범위 0~1(react-native-paper, MUI 표준 더 보편적), Circular indet M3 표준 옵션 b(arc 길이 변화 + 회전, 복잡도 증가 — v2.x 진화), Linear indet M3 표준(두 fill 교대 슬라이드, v2.x), 갤러리 동적 시연 미적용(다운로드 본질 시연 부재 — 사용자 발견), 갤러리 interactive slider 시연(v2.x 진화).
-- **근거 (라이브러리 본질)**: Figma↔RN 정합 **42/42** (Linear 18 + Circular 24) — Switch 81/81 / Chip 38/38 / Button 18/18 / Skeleton 16/16 패턴 재현. 누적 정합 **195/195** (사이클 1·2·3). 인라인 스타일 분류 A **0건 유지** (사이클 1·2·2.5·3 누적). styled-Animated 패턴 1 + 패턴 3 정당화(SVG primitive) — 사이클 2.5 표준 일관. 신규 토큰 **0개** (사이클 1·2·2.5·3 누적 0). react-native-svg는 lucide-react-native peer로 이미 설치 — 직접 import 추가는 의존성 추가 아님.
-- **근거 (기술)**: Reanimated v4 + react-native-svg 첫 결합 패턴 검증 — `Animated.createAnimatedComponent(Circle)` + `useAnimatedProps` (strokeDashoffset 동적 60fps). determinate 300ms `withTiming` — value 변경 부드러운 transition. indeterminate `withRepeat(withTiming, -1, false)` — UI 스레드 worklet 무한 회전/슬라이드 (Linear: `translateX -fillW → trackWidth`, Circular: `rotate 0 → 360deg`). `cancelAnimation` cleanup (unmount memory leak 방지). accessibility — `progressbar` role + determinate `accessibilityValue` `{min:0, max:100, now}` / indeterminate `accessibilityState` `{busy: true}`.
-- **근거 (사용자 관점 — 사이클 3 학습)**: Figma 단계 3 이슈 발견 + Demo Card wrapper 누락 발견 → mode 미리보기 패턴 라이브러리 일관 적용. 코드 단계 본질 발견("다운로드 게이지 차오름") → 동적 데모 추가로 determinate variant 진짜 가치 시연. **Claude Code 자체 검증 통과 ≠ 사용자 시각 검증 통과** — 사용자 본질 짚기가 라이브러리 가치를 한 단계 높임. 사이클 3 학습은 ADR-25 갱신 가치 있으나 v1.x 후순위로 분리.
-- **v2.x 진화 예정**: Interactive 시연 (slider로 value 조정), Circular indet M3 표준 (arc 길이 변화 + 회전), Linear indet M3 표준 (두 fill 교대 슬라이드), buffer variant 지원 (다운로드 + 버퍼링 시나리오), determinate value smooth interpolation 옵션 prop.
+### 상황
+
+M3 표준 Progress 컴포넌트 추가. determinate + indeterminate 양 variant 필요. Linear는 View 기반(`useAnimatedStyle`), Circular는 SVG 기반(`useAnimatedProps` + react-native-svg)으로 구현 본질이 다름. Reanimated v4와 react-native-svg를 결합하는 첫 사례.
+
+### 선택
+
+**LinearProgress + CircularProgress 별도 컴포넌트, 단일 파일 (`src/components/feedback/Progress.tsx`)**.
+
+API:
+
+```ts
+type ProgressProps =
+  | { variant?: 'determinate'; value: number }   // 0~100, 자동 clamp
+  | { variant: 'indeterminate' };
+```
+
+| 사양 | LinearProgress | CircularProgress |
+|------|----------------|------------------|
+| 베이스 | View + `styled(Animated.View)` | `<Svg><Circle/>` (react-native-svg) |
+| determinate 애니메이션 | `withTiming(value, 300ms)` width % | `useAnimatedProps`로 `strokeDashoffset` |
+| indeterminate 애니메이션 | `translateX -fillW → trackWidth` 무한 반복 | `rotate 0 → 360deg` + arc 35% |
+| 시작 위치 | 좌측 | 12시 (`transform="rotate(-90 cx cy)"`) |
+| 라인 처리 | — | `strokeLinecap="round"` (M3) |
+| accessibility | `progressbar` role + `accessibilityValue {min:0, max:100, now}` (determinate) / `accessibilityState {busy: true}` (indeterminate) | 동일 |
+
+`cancelAnimation` cleanup으로 unmount 시 worklet leak 방지.
+
+갤러리: 24 정적 인스턴스 (Figma 1:1 정합 42/42) + 동적 데모 2 인스턴스 (다운로드 시뮬레이션, `useDownloadProgress` hook, 500ms +5% / 10초 cycle).
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| `value === undefined`로 indeterminate 암묵 분기 | TypeScript 추론 어려움, 명시성 부족 |
+| 단일 Progress + `type` prop | View vs SVG 본질 다름 |
+| 디렉토리 분리 (`Progress/LinearProgress.tsx` 등) | Skeleton 단일 파일 패턴 일관성 깨짐 |
+| value 범위 0~1 | MUI 퍼센트 표준이 더 보편적 |
+| Circular indeterminate M3 표준 (arc 길이 변화 + 회전) | 복잡도 증가, v2.x 진화 |
+| Linear indeterminate M3 표준 (두 fill 교대 슬라이드) | v2.x 진화 |
+| 갤러리 정적 시연만 | determinate variant의 실제 가치(value 변화) 시연 부재 |
+
+### 근거
+
+**Reanimated v4 + react-native-svg 첫 결합 패턴**: `Animated.createAnimatedComponent(Circle)` + `useAnimatedProps`로 `strokeDashoffset`을 60fps UI 스레드 worklet 처리. determinate `withTiming` 300ms로 value 변경 부드러운 transition. indeterminate `withRepeat(withTiming, -1, false)`로 무한 반복.
+
+**SVG primitive는 styled-components props 매핑 부적합** (`<Circle>` 등은 SVG attr 기반이라 styled-components의 transient props $-prefix 패턴과 충돌). 직접 사용 정당화.
+
+**갤러리 동적 시연 패턴 도입**: 정적 인스턴스만으로는 determinate variant의 핵심 가치(value 변화에 따른 부드러운 transition) 시연 불가. 다운로드 시뮬레이션 hook은 사이클 4 이후 Tooltip/BottomSheet 시연에서도 재사용.
+
+### 결과
+
+- Figma↔RN 정합 42/42 (Linear 18 + Circular 24)
+- 누적 정합 195/195 (사이클 1·2·3)
+- 인라인 스타일 분류 A 0건 유지
+- 신규 토큰 0개 (사이클 1·2·2.5·3 누적 0)
+- react-native-svg는 lucide-react-native의 peer로 이미 설치되어 직접 import만 추가 — 의존성 추가 아님
+- v2.x 진화 예정: Interactive 시연 (slider value 조정) / Circular indeterminate M3 표준 / Linear indeterminate M3 표준 / buffer variant / value smooth interpolation prop
 
 ---
 
-## ADR-28: Tooltip 컴포넌트 + `surface/inverse` 신규 토큰 + 사이클 정책 갱신 (토큰 0 → 정당화된 토큰) (사이클 4)
+## ADR-28: Tooltip + `surface/inverse` 토큰 추가 + 토큰 정책 갱신 (사이클 4)
 
-- **상황**: 사이클 3 종료 후 Tooltip 진입 (M3 표준 컴포넌트). 사이클 4 사전 조사 후 9개 안건 결정(작업 1 보고서). Figma 설계 중 본질 발견: **라이브러리에 `surface/inverse` 토큰 부재**. M3 Tooltip 표준은 inverse surface 필수 (Plain max-width 200dp + inverse 배경 + inverse on-surface 텍스트). 라이브러리 inverse 패턴은 text(3개) + primary(1개) 4개에만 있고 **surface 영역만 누락**. 사이클 1·2·2.5·3 누적 신규 토큰 0 원칙 유지 시 M3 Tooltip 정확 구현 불가 — Claude Code 큰 변경 사전 보고 의무 이행. **사이클 4 RN 코드 진행 중 본질적 정정 누적 (사용자 본질 짚기 8·9·10·11·12번째)**: 8) IconButton만 onLongPress 추가하면 다른 인터랙티브도 정정 필요 → InteractivePressableProps Pick 상속 5개 일괄 도입. 9) cloneElement 패턴이 라이브러리 외부 컴포넌트 wrap 불가 → Pressable wrap 패턴 시도. 11) Pressable wrap이 nested Pressable 충돌로 Tooltip 표시 0 → **cloneElement 패턴 복원** (RN Touch Responder System 본질 한계). 12) Tooltip 라이브러리 종속성 검증 요청 → 갤러리 검증 섹션 (RN Pressable / View / TouchableOpacity 3 케이스) 추가 + 시각 검증으로 종속 아님 명문화. 사이클 4의 본질적 학습: **환경 본질도 본질의 일부** (사용자 짚기와 RN 환경 제약의 균형).
-- **선택**: **신규 토큰 `color/surface/inverse` 1개 추가** (mode-aware: Light `#1A1F2E` / Dark `#F8FAFC`, scope `FRAME_FILL + SHAPE_FILL`). text는 **기존 `color/text/inverse` (VariableID:16:5) 재사용** — 신규 토큰 최소화. **사이클 정책 갱신**: 이전 "신규 토큰 0개 추가" → 이후 "**정당화된 토큰 추가 가능 (ADR로 사유 명시 필수)**" — ADR-26 의존성 정책 갱신과 동일 구조. **Tooltip 9개 안건 적용**: (1) 트리거 롱프레스 + visible prop, (2) position 4방향 (`'top' | 'bottom' | 'left' | 'right'` default `'top'`), (3) 표시 인라인 절대 위치, (4) dismiss 자동 1500ms, (5) 콘텐츠 string only (M3 Plain, max-width 200dp), (6) 파일 구조 단일 `Tooltip.tsx`, (7) **children wrap cloneElement** (RN nested Pressable 충돌로 Pressable wrap 부적합 — cloneElement가 본질적 해결), (8) placement 4방향, (9) arrow 미표시 (M3 표준 + motion 기반). **InteractivePressableProps Pick 상속 (v1.x 7번째 표준 패턴)**: `src/types/interactive.ts`에 `Pick<PressableProps, 'onLongPress' | 'onPressIn' | 'onPressOut' | 'delayLongPress' | 'hitSlop' | 'accessibilityHint' | 'testID'>` 정의 후 IconButton + Button + FAB + Chip + Switch 5개 `extends InteractivePressableProps` + `...pressableProps` spread → Tooltip cloneElement가 모든 라이브러리 컴포넌트에 도달 보장. **Figma 설계**: 페이지 `2226:3` (29번째, Feedback 카테고리 Progress 다음) / SECTION wrapper + bg/section-main + Light explicit mode (사이클 3 학습 — 처음부터 정확) / Demo Card surface.container + 2×2 grid 4 position 시연 / IconButton 32 target placeholder + Tooltip bubble (8h × 4v padding, cornerRadius 4) + spacing.xs 4 gap.
-- **포기한 옵션**: 옵션 1 `surface/container-highest` 재사용 (M3 inverse 의미 손실, 강조 효과 약함), 옵션 2 `bg/section-main` 재사용 (페이지 wrapper 의미와 충돌 — 향후 결합 위험), API 옵션 1 `value undefined → indet` 암묵적 (명시성 부족, TypeScript 추론 어려움), 단일 `Progress` + type prop (View vs SVG 본질 다름 — 사이클 3 ADR-27 일관), 12방향 placement (단순성 우선, v2.x), 자동 position 계산(measure + viewport flip 복잡, v2.x), TooltipHost 전역(Toast/Dialog 일관 매력있으나 Tooltip은 target 종속 본질 다름), Rich tooltip variant(title + description + action, v2.x), 신규 토큰 0 원칙 무조건 유지(M3 표준 일관 불가 + 라이브러리 inverse 패턴 미완성), **Pressable wrap 패턴** (사이클 4 진행 중 시도 — children에 자동 onLongPress 주입을 위해 외부 Pressable wrap 도입했으나 **RN nested Pressable 충돌로 inner Pressable이 모든 touch 이벤트 capture → Tooltip 표시 0** → cloneElement 패턴 복원), release 시 즉시 dismiss (M3 표준이나 사용자 의도와 다름 — 메시지 읽을 시간 부족 → 1500ms 자동 dismiss만 사용), 비-인터랙티브 element wrap 자동 지원(View 등 — RN Touch Responder System 본질 한계, v2.x Gesture Handler 검토), IconButton만 onLongPress 명시 추가 (5개 인터랙티브 모두 정정 필요 — Pick 상속이 본질).
-- **근거 (라이브러리 본질)**: M3 Tooltip 표준 정확 일관 — inverse surface 필수. 라이브러리 inverse 패턴 완성 — `text/primary-inverse` + `text/secondary-inverse` + `text/inverse` + `primary/inverse` 4개 inverse 토큰 이미 존재 → `surface/inverse` 추가가 패턴 일관 (5개 inverse 토큰 군). 신규 토큰 **1개만 추가** (text 재사용으로 최소화). 사이클 3 학습 우선 적용 — Figma 설계 단계에서 SECTION wrapper + Light/Dark mode-aware + Light/Dark 양 모드 시각 검증 처음부터 정확 (사이클 3 정정 작업 반복 0). **Tooltip 라이브러리 종속성 검증 완료**: 갤러리 검증 섹션 3 케이스(RN Pressable / View / TouchableOpacity) 시각 검증 통과 — RN 표준 PressableProps 수용 컴포넌트(라이브러리 5 인터랙티브 + 외부 라이브러리 + RN Pressable/TouchableOpacity) 모두 결합 가능, 비-인터랙티브 element(View 등)는 RN Touch Responder System 본질 한계로 silent fail (사용자가 Pressable wrap 필요). **cloneElement + InteractivePressableProps Pick 상속 조합**이 RN 환경의 본질적 해결책 — 라이브러리 5 컴포넌트는 Pick 상속으로 onLongPress 자동 수용 → cloneElement 도달 100% 보장. **Figma↔RN 정합**: Tooltip 13/13 (padding 8h/4v + cornerRadius 4 + max-width 200 + gap 4 + 4 position + 토큰 binding 2 + 폰트 size/lineHeight 2). 누적 정합 195 → **208** (사이클 4 +13).
-- **근거 (기술)**: Tooltip 9 안건 RN 환경 정합 — 롱프레스 (`Pressable.onLongPress` 500ms 표준), measure 회피 (4방향 수동 prop), inline 절대 위치 (`position: relative` 부모 + `position: absolute` Tooltip), cloneElement onLongPress 주입 (라이브러리 내 onLongPress 사용 0건 — IconButton/Button/FAB/Chip/Switch 모두 `onPress`만 — 충돌 0건). Reanimated v4 + useAnimatedStyle fade in/out 전환. accessibility — `accessibilityHint` "롱프레스로 도구 설명 표시" 또는 wrap Tooltip의 text를 target accessibilityLabel에 보강.
-- **근거 (사용자 관점)**: 사이클 4 진행 중 Claude Code 큰 변경 사전 보고 (의무 이행). 사용자 결정 — 정책 변경 정당화 + 라이브러리 가치 우선. "토큰 0 원칙"이 올바른 디자인 막으면 정책 재검토 — 사이클 정책은 라이브러리 가치를 지원하는 도구이지 절대 규칙이 아님. ADR-26 의존성 정책 갱신과 동일 학습 패턴 — 한 원칙이 라이브러리 본질과 충돌할 때 ADR로 정당화하여 정책 갱신. **사용자 본질 짚기 8~12번째 누적**: 8) "다른 버튼류도 Tooltip 사용 시?" → 표면 정정(IconButton만 onLongPress 추가) 부족. 9) "디자인 시스템 내부만 작동?" → cloneElement 한계 발견. 10) "PressableProps 상속은?" → InteractivePressableProps Pick + 5 컴포넌트 일괄 표준 패턴 확립. 11) "Tooltip 표시되지 않는다" → Pressable wrap이 RN nested Pressable 충돌로 실패 → cloneElement 복원. 12) "라이브러리 종속 아닌지" → 갤러리 검증 섹션 시각 검증 통과 → 종속 아님 명문화. **사용자 본질 짚기의 점진적 깊이가 라이브러리 가치를 본질적으로 격상**: 표면 정정(8) → 본질 발견(9·10) → 환경 본질 발견(11) → 종속성 정직 검증(12). **환경 본질도 본질의 일부** — 사용자 짚기가 옳은 방향이지만 RN 환경 제약(nested Pressable) 인정 필요. **라이브러리 정직성이 가치의 본질** — 검증으로 한계 명문화.
-- **사이클 정책 변경**: 이전 (사이클 1·2·2.5·3) — "신규 토큰 0개 추가" 원칙. 이후 (사이클 4~) — "**정당화된 토큰 추가 가능 (ADR로 사유 명시 필수)**". 사이클 1·2·2.5·3 누적 신규 토큰 **1개** (사이클 4 `surface/inverse`). 의존성 0 추가 원칙은 유지 (사이클 2.5 ADR-26 정책 변경 이후 누적 변화 없음). 정책 갱신 사례: ADR-26(의존성) + ADR-28(토큰) — "원칙이 라이브러리 본질을 막을 때 ADR로 정당화" 패턴.
-- **v2.x 진화 예정**: 12방향 placement (4방향 × start/end/center), 자동 position fallback (viewport 경계 시 flip — measure() + 계산), Rich tooltip variant (title + description + action, 320dp max-width), 외부 영역 탭 dismiss (Portal/Modal 패턴), arrow/caret 선택 prop (`hasArrow`), interactive 호버 유지 (WCAG 2.2 SC 1.4.13 — RN 환경 한계 검토), Tooltip 위치 자동 계산을 위한 라이브러리 `measure()` helper hook 추출 (Carousel/Drawer 등 다른 컴포넌트도 재사용 가능), **비-인터랙티브 element (View 등) 자동 wrap 지원** — RN Touch Responder System 우회 (Gesture Handler / onTouch raw handler 또는 children Pressable 검출 후 자동 분기), 갤러리 검증 섹션 정리 (v2.x 별도 doc 페이지 분리).
+### 상황
 
-- **사이클 4 학습 (9건 누적)**: (1) 사용자 시각 검증의 본질적 가치 — Claude Code 자체 검증(tsc/eslint) ≠ 사용자 시각 통과. (2) RN 환경 특성 — transform percentage 미지원 / useAnimatedStyle worklet 안 percentage 신뢰성 부족 / measure 후 픽셀 위치 표준. (3) **cloneElement 패턴의 RN 환경 정합** — Pressable wrap 패턴은 nested Pressable 충돌로 부적합. cloneElement가 RN 환경 본질적 해결책. (4) 갤러리 layout이 컴포넌트 시각의 본질에 영향 — 2×2 grid + 의미 pair 배치(top/bottom vertical, right/left horizontal swap). (5) 사이클 정책 갱신은 의존성·토큰 모두 동일 학습 구조 — ADR-26(의존성) ↔ ADR-28(토큰). (6) **인터랙티브 컴포넌트 PressableProps Pick 상속 표준 (InteractivePressableProps)** — v1.x 라이브러리 표준 패턴 7번째 확립. (7) 사용자 본질 짚기의 점진적 깊이 (8 → 9 → 10번째) — 표면적 정정과 본질적 정정의 차이. (8) **사용자 본질 vs 환경 본질의 균형** (사용자 짚기 11번째) — 사용자 짚기가 옳은 방향이지만 RN 환경 제약(nested Pressable)으로 부분 실현. 환경 한계도 본질의 일부. (9) **라이브러리 종속성 정직 검증** (사용자 짚기 12번째) — 갤러리 검증 섹션으로 본질 명문화. Tooltip은 RN 표준 PressableProps 수용 컴포넌트와 자유 결합, 비-인터랙티브 element는 환경 한계. 라이브러리 정직성이 가치의 본질.
+M3 표준 Tooltip(Plain variant)을 라이브러리에 추가. M3 사양은 max-width 200dp + inverse 배경 + inverse on-surface 텍스트가 필수.
+
+라이브러리의 inverse 토큰 군은 text(3개) + primary(1개) 총 4개만 있고 **`surface/inverse` 영역만 누락**. 기존 `surface/container-highest` 또는 `bg/section-main` 재사용은 M3 inverse 의미를 손실. 사이클 1·2·2.5·3 누적 신규 토큰 0 원칙을 유지하면 M3 정합 불가능.
+
+### 선택
+
+**신규 토큰 `color/surface/inverse` 1개 추가** + Tooltip 컴포넌트 도입.
+
+**토큰**: Light `#1A1F2E` / Dark `#F8FAFC`, scope `FRAME_FILL + SHAPE_FILL`. 텍스트는 기존 `color/text/inverse` 재사용 — 추가 1개로 최소화.
+
+**Tooltip API**:
+
+```tsx
+<Tooltip text="설명" position="top">
+  <IconButton icon={<Settings />} />
+</Tooltip>
+```
+
+| 항목 | 사양 |
+|------|------|
+| 트리거 | 롱프레스 (500ms, RN `Pressable.onLongPress`) + `visible` prop 외부 제어 |
+| position | `'top' \| 'bottom' \| 'left' \| 'right'`, default `'top'` |
+| 표시 위치 | 인라인 절대 위치 (`position: relative` 부모 + `position: absolute` Tooltip) |
+| dismiss | 1500ms 자동 |
+| 콘텐츠 | string, max-width 200dp (M3 Plain) |
+| children 주입 | `cloneElement`로 `onLongPress` 추가 |
+| 애니메이션 | Reanimated v4 + `useAnimatedStyle` fade in/out |
+| 파일 | 단일 `Tooltip.tsx` |
+| arrow | 미표시 (M3 표준) |
+
+**`InteractivePressableProps` Pick 상속 도입** — `cloneElement`가 라이브러리 컴포넌트에 도달하려면 `onLongPress`를 받아야 함. `src/types/interactive.ts`에 다음 정의 후 IconButton / Button / FAB / Chip / Switch 5개에 적용:
+
+```ts
+type InteractivePressableProps = Pick<
+  PressableProps,
+  | 'onLongPress' | 'onPressIn' | 'onPressOut'
+  | 'delayLongPress' | 'hitSlop'
+  | 'accessibilityHint' | 'testID'
+>;
+```
+
+5개 컴포넌트가 `extends InteractivePressableProps` + 내부 `Pressable`에 `...pressableProps` spread.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| `surface/container-highest` 재사용 | M3 inverse 의미 손실, 강조 효과 약함 |
+| `bg/section-main` 재사용 | 페이지 wrapper 의미와 충돌, 향후 결합 위험 |
+| 신규 토큰 0 원칙 무조건 유지 | M3 정합 불가, inverse 토큰 군 불완전 |
+| `Pressable` wrap 패턴 | children을 외부 `Pressable`로 감싸면 children이 `Pressable`일 때 RN nested Pressable 충돌 — inner `Pressable`이 모든 touch 이벤트 capture → Tooltip 표시 0. `cloneElement` 패턴으로 복원 |
+| `IconButton`만 `onLongPress` 명시 추가 | 5개 인터랙티브 모두 동일 필요 — Pick 상속이 일관 |
+| release 시 즉시 dismiss (M3 기본) | 메시지 읽을 시간 부족 — 1500ms 자동 dismiss만 사용 |
+| 12방향 placement | 단순성 우선, v2.x |
+| 자동 position fallback (viewport flip) | `measure()` + 계산 복잡, v2.x |
+| TooltipHost 전역 | Tooltip은 target 종속이라 Toast/Dialog 호스트 패턴과 본질 다름 |
+| Rich variant (title + description + action) | v2.x |
+| 비-인터랙티브 element (`View` 등) 자동 wrap | RN Touch Responder System 한계 — 사용자가 `Pressable` wrap 필요. v2.x Gesture Handler 검토 |
+
+### 근거
+
+**inverse 토큰 군 완성**: 기존 `text/primary-inverse` + `text/secondary-inverse` + `text/inverse` + `primary/inverse` 4개에 `surface/inverse`를 추가하여 5개 inverse 토큰 군 완결. M3 표준 정합 + 라이브러리 패턴 일관.
+
+**`cloneElement` + Pick 상속 조합**: `Pressable` wrap이 nested Pressable 충돌로 실패한 후 `cloneElement`로 복원. 라이브러리 5개 인터랙티브 컴포넌트가 `InteractivePressableProps` Pick 상속으로 `onLongPress`를 자동 수용하므로 `cloneElement` 도달이 보장됨. 라이브러리 내 `onLongPress` 사용 0건이라 prop 충돌 없음.
+
+**RN Touch Responder System 한계**: `View` 등 비-인터랙티브 element는 wrap만으로 `onLongPress`를 받지 못함. 갤러리 검증 섹션(`Pressable` / `View` / `TouchableOpacity` 3 케이스 시연)으로 종속성 명문화 — RN 표준 `PressableProps` 수용 컴포넌트(라이브러리 5개 + RN core + 외부 라이브러리)와 자유 결합 가능, 비-인터랙티브는 `Pressable` wrap 필요.
+
+**기술 상세**: 4방향 수동 prop으로 `measure()` 회피. inline 절대 위치(`position: relative` 부모). `accessibilityHint`로 롱프레스 안내.
+
+### 결과
+
+- **토큰 정책 갱신**: 이전 "신규 토큰 0 추가" → 이후 "정당화된 토큰 추가 가능 (ADR 사유 명시 필수)". ADR-26(의존성)과 동일 구조. 누적 신규 토큰 1개(`surface/inverse`).
+- **인터랙티브 컴포넌트 5개에 `InteractivePressableProps` Pick 상속 표준화** — IconButton / Button / FAB / Chip / Switch 모두 RN `Pressable` props 일부를 일관 수용. 외부 컴포넌트 wrap도 동일 패턴 제공 가능.
+- Figma↔RN 정합 13/13 (padding 8h/4v + cornerRadius 4 + max-width 200 + gap 4 + 4 position + 토큰 binding 2 + 폰트 2)
+- 누적 정합 195 → 208
+- 인라인 스타일 분류 A 0건 유지
+- v2.x 진화 예정: 12방향 placement / 자동 viewport flip / Rich variant / 외부 영역 탭 dismiss / arrow prop / hover 유지 (WCAG 2.2 SC 1.4.13) / 비-인터랙티브 element 자동 wrap (Gesture Handler) / `measure()` helper hook 추출
 
 ---
 
-## ADR-29: BottomSheet 자체 구현 결정 + 의존성 종류별 본질 분류 (인프라 vs 컴포넌트) + 단일 snap (사이클 5.1) + 애니메이션 본질 정정 (사이클 5.1)
+## ADR-29: BottomSheet 자체 구현 (사이클 5.1)
 
-- **상황**: 사이클 4 종료 후 BottomSheet 진입(M3 Modal Bottom Sheet 표준). 사이클 5 사전 조사 단계에서 두 본질적 선택지 발생: 옵션 A `@gorhom/bottom-sheet` 의존성 추가(완성된 외부 컴포넌트 wrap) vs 옵션 B 자체 구현(DialogHost 패턴 확장). **사용자 본질 짚기 13번째**: "의존성 추가 자체 본질 검토 — @gorhom 의존 vs 라이브러리 정체성" — 사이클 4 학습 9(라이브러리 정직성) 본질적 적용 → 자체 구현 결정. **사용자 본질 짚기 14번째**: "5.2에 도입한다는건 코드상으로 구현할 때 도입한다는것인가?" — Figma vs RN 코드 본질 분리 정확 인식(Figma는 시각 사양 1회, RN 코드는 사이클별 동작 진화). 사용자 결정으로 옵션 2(완전 구현 + 사이클 분리 — 5.1 단일 snap / 5.2 다중 snap + scrollable / 5.3 키보드 정밀) 채택. 사이클 5.1 RN 코드 구현 후 사용자 시각 검증에서 **사용자 본질 짚기 15번째** 발견: "올라올 때 바운스되면서 올라온다 / 사라질 때 아래로 내려가는 애니메이션이 없이 그냥 사라져버린다" — 사이클 4 학습 1(사용자 시각 검증 본질) 본질적 반복. 애니메이션 본질 정정(spring → withTiming + Easing / `if (!isVisible) return null` 즉시 unmount → shouldRender state + 콜백 완료 후 unmount). 사이클 5.1 작업 6(커밋 분리 + push) 진행 중 **사용자 본질 짚기 16번째**: "스크린샷 캡처는 사이클 5 전체 종료 시 진행, 사이클 5가 끝나기 전엔 어차피 미완성" — 사이클 4 학습 9(라이브러리 정직성) **본질적 확장 — 시각 증거의 정직성**. 사이클 5.1 단일 snap 가이드만 README에 추가하면 라이브러리 정직성 본질 손상 가능성(부분 가이드가 완전한 BottomSheet 사양으로 오해될 위험) → 사이클 5.1·5.2·5.3 각각 코드 + ADR만, README + 스크린샷은 사이클 5 전체 종료(5.3 직후) 시점 일괄 갱신 패턴 확립.
-- **선택**: **자체 구현 완전 (사이클 5.1·5.2·5.3 분리)** — 사이클 5.1은 본 ADR(단일 snap + drag dismiss + DialogHost 패턴 확장 BottomSheetHost). **사이클 5.1 사양**: height prop **TypeScript template literal type** `'auto' | \`${number}%\` | number` (IDE 자동완성 + 잘못된 string 컴파일 차단), default `'auto'`(화면 50%), **drag dismiss 결합 임계값** 30%(drag 거리) 또는 velocity > 500px/s, **handle bar** 32×4dp + `border.default` 토큰(M3 표준), **백드롭** `overlay.scrim` 토큰(Dialog 일관), **카드** `surface.container` + top cornerRadius **28dp** + elevation 3, **content padding** 16h/24v + `paddingBottom: 24 + insets.bottom`(safe-area 자동), **enter 애니메이션** `withTiming(0, 250ms, Easing.out(Easing.cubic))` — M3 emphasized decelerate, **exit 애니메이션** `withTiming(totalHeight, 200ms, Easing.in(Easing.cubic))` + 완료 콜백 `setShouldRender(false)` — M3 emphasized accelerate, **shouldRender state 분리** (exit 애니메이션 완료 후 unmount), **표시 방식** 전역 호스트 (`BottomSheetHost`) + Zustand store + imperative API + controlled mode (DialogHost / ToastHost 패턴 일관), **PanGesture** Gesture Handler v2 (`Gesture.Pan()` + `GestureDetector`), **App.tsx GestureHandlerRootView** 최상위 마운트(Gesture.Pan 사용 필수), **BackHandler** Android 자동 dismiss, **safe-area** `useSafeAreaInsets` 하단 inset 자동, **drag cancel 복귀** `withTiming` 일관(spring overshoot 제거). API 본질: `bottomSheet.open({ children, height, onDismiss })` + `bottomSheet.close()` (imperative) + `<BottomSheet visible={state} onDismiss={...} height={...}>{children}</BottomSheet>` (controlled).
-- **포기한 옵션**: 옵션 A `@gorhom/bottom-sheet` 의존성 추가(라이브러리 정체성 손상 가능성 — 디자인 시스템이 완성된 외부 컴포넌트 wrap, 사이클 4 학습 9 본질 위배), 옵션 C v1.x BottomSheet 전체 v2.x 미루기(M3 Modal 표준의 본질적 가치 v1.x에 필요), 옵션 D v1.x 단순 자체 구현 — 단일 사이클 5 완성(사용자 결정으로 옵션 2 사이클 분리 채택 — 라이브러리 완성도와 정체성 둘 다 보존), **enter 애니메이션 옵션 b** `withSpring(0, { damping: 40, stiffness: 400, overshootClamping: true })` — overshoot 명시 차단 가능하나 DialogHost timing 패턴과 일관 깨짐, spring 물리 모델이 BottomSheet 본질에 부적합(M3 표준은 emphasized decelerate easing), **exit 옵션 DialogHost store 패턴 그대로 적용**(store dismiss를 애니메이션 완료 후 호출 — store 구조 변경 큰 작업 → 옵션 a `shouldRender` state 채택으로 컴포넌트 내부만 변경 + 본질 동일), 다중 snap point(v1.x 사이클 5.2), scrollable content(v1.x 사이클 5.2 — BottomSheetScrollView), 키보드 정밀 보정(v1.x 사이클 5.3), Standard variant(영구 표시 — v2.x), Expanded variant(전체 화면 — v2.x), 사용자 정의 핸들 prop(v2.x), Section sub-component(header/footer/divider — v2.x), Animation 정밀 제어 prop(snap point별 spring config — v2.x), enter `withSpring` 초기 구현(사이클 5.1 작업 3 단계 — 사용자 시각 검증에서 bounce/overshoot 본질 발견 → withTiming 정정), exit `if (!isVisible) return null` 즉시 unmount 초기 구현(사이클 5.1 작업 3 단계 — 사용자 시각 검증에서 "사라져버린다" 본질 발견 → shouldRender state 분리 정정).
-- **근거 (라이브러리 본질)**: **의존성 종류별 본질 분류** (사이클 5.1 신규 학습): 인프라 의존성(도구, 모든 컴포넌트가 활용 — `styled-components/native` / Reanimated v4(사이클 2.5) / `react-native-gesture-handler` / lucide / `safe-area-context` / Zustand) vs 컴포넌트 의존성(Wrap, 한 컴포넌트만 활용 — `@gorhom/bottom-sheet`). 사이클 2.5 Reanimated v4는 인프라(Toast/Dialog/Skeleton/Switch/Progress/Tooltip/BottomSheet 모두 활용) → ADR-26 정당화. 사이클 5 `@gorhom`은 컴포넌트(BottomSheet 1개만 활용) → 라이브러리 정체성 본질 의문 → 자체 구현. **자체 구현의 본질적 가치**: 라이브러리 정체성 보존 + 누적 가치 일관(208/208 정합 + 인라인 A 0건 + ADR 패턴) + 사이클 4 학습 9(라이브러리 정직성) 적용 + DialogHost 패턴 70% 재사용 + 30% 신규(drag 제스처). **v1.x 표준 패턴 8번째 확립** — 전역 호스트 패턴(DialogHost / ToastHost / BottomSheetHost): App 루트 1회 마운트 + Zustand store + imperative API + Reanimated v4 + safe-area + `withTiming` + easing 일관(spring 미사용) → modal-style 컴포넌트 표준. **M3 Material Motion 표준 적용**: enter emphasized decelerate(`Easing.out(Easing.cubic)`, 250ms — 빠르게 시작 + 부드럽게 멈춤) + exit emphasized accelerate(`Easing.in(Easing.cubic)`, 200ms — 빠르게 가속) — spring 물리 모델(overshoot/bounce)이 BottomSheet 본질에 부적합. **TypeScript template literal type 활용** `'auto' | \`${number}%\` | number` — IDE 자동완성 + 잘못된 string 컴파일 차단. **신규 의존성 0개 / 신규 토큰 0개** — 사이클 2.5 ADR-26(의존성 정책) + 사이클 4 ADR-28(토큰 정책) 정책 첫 본질적 적용 사례 — 결과는 "추가 0"(자체 구현 + 기존 토큰 활용).
-- **근거 (기술)**: **DialogHost 패턴 재분석** — enter `withTiming(1, 200ms)`(spring 미사용), exit `animateExit(after)` 함수 `withTiming` 완료 콜백 `(finished) => runOnJS(scheduleAfter)(after)` 안에서 `dismiss()` 호출 → store.displayed가 애니메이션 완료까지 살아있음 → 즉시 unmount 안 됨. BottomSheetHost는 store 구조 변경 없이 `shouldRender` state 분리로 동일 본질 구현(컴포넌트 내부 변경 + 본질 동일). **PanGesture 처리** — `onUpdate` `translationY > 0`만 반영(위쪽 drag 차단), `onEnd` 결합 임계값 검증(거리 30% OR velocity 500) → `runOnJS(close)()` 또는 `withTiming(0)` 원위치. drag cancel 복귀 `withTiming` 일관 — spring overshoot 제거. **drag dismiss와 exit 애니메이션 자연 이어짐** — drag로 이미 어느 위치에 있던 `translateY` 값에서 `withTiming(totalHeight)`로 자연 transition. **GestureHandlerRootView 최상위 마운트** — `Gesture.Pan()` 사용 필수 인프라(App.tsx flex:1 outermost). **PanGesture와 useEffect 충돌 없음** — drag onEnd에서 `runOnJS(close)()` → store.isVisible false → useEffect 발동 → exit 애니메이션이 현재 translateY 위치에서 자연 이어짐. **shouldRender 초기값 false** + `else if (shouldRender)` 가드로 첫 mount 시 exit 분기 진입 차단(idempotent). **translateY 시작 위치 재설정** `translateY.value = totalHeight` 후 `withTiming(0)` — 재오픈 또는 totalHeight 변경 케이스 대응. **의존성 배열 `[isVisible]`만** — totalHeight 변경 시 트리거 회피(사이즈 변경 도중 시트 재시작 점프 방지).
-- **근거 (사용자 관점 — 사이클 5.1 학습)**: **사용자 본질 짚기 13·14·15·16번째 누적**: 13) "의존성 추가 자체 본질 검토(@gorhom vs 라이브러리 정체성)" → 사이클 4 학습 9 본질적 적용 + 의존성 종류별 본질 분류 발견(인프라 vs 컴포넌트) + 자체 구현 결정의 본질적 기반. 14) "5.2에 도입한다는건 코드상으로 구현할 때 도입한다는것인가?" → Figma vs RN 코드 본질 분리 정확 인식(Figma는 시각 사양 1회 작성 — 3 frame 다양한 높이, RN 코드는 사이클별 동작 진화) + 사이클 분리의 본질이 RN 코드 동작 진화임을 확인. 15) "올라올 때 바운스 / 사라질 때 애니메이션 없이 그냥 사라져버린다" → 사이클 4 학습 1(사용자 시각 검증 본질) 본질적 반복 — `tsc/eslint exit 0`(Claude Code 자체 검증) ≠ 사용자 시각 체험 + 애니메이션 본질 정정(spring → `withTiming` + Easing / `if (!isVisible)` 즉시 unmount → `shouldRender` state + 콜백 완료 후 unmount) + 라이브러리 정직성("자연 슬라이드" UX 본질 명확). 16) "스크린샷 캡처는 사이클 5 전체 종료 시 진행, 사이클 5가 끝나기 전엔 어차피 미완성" → 사이클 4 학습 9(라이브러리 정직성) **본질적 확장 — 시각 증거의 정직성**. 부분 가이드/스크린샷이 완전한 BottomSheet 사양으로 오해될 위험 → 사이클 5 전체 종료(5.3 직후) 시점 README + 스크린샷 일괄 갱신 패턴 확립. **표면적 정정과 본질적 정정의 차이**를 사용자 본질 짚기 누적으로 발견(사이클 4 학습 7 일관 패턴). 라이브러리 본질의 학습 패턴은 사이클별로 본질적으로 반복되며 짚기 16번째는 **문서/스크린샷 정직성**으로 확장됨.
-- **사이클 정책 변경**: 사이클 5.1 정책 변경 **0**(의존성·토큰). 신규 의존성 **0** (Reanimated v4 + Gesture Handler + safe-area-context + Zustand 모두 기존). 신규 토큰 **0** (`surface.container` + `overlay.scrim` + `border.default` 모두 기존). 사이클 2.5 ADR-26(의존성 정책 갱신 — "정당화된 의존성 추가 가능") 첫 본질적 적용 사례 — 결과는 "의존성 추가 0"(자체 구현 결정). 사이클 4 ADR-28(토큰 정책 갱신 — "정당화된 토큰 추가 가능") 둘째 사이클 적용 — 결과는 "토큰 추가 0"(기존 토큰 충분). 누적 신규 토큰 **1개**(사이클 4 `surface/inverse`만). 누적 신규 의존성 **0**. **사이클 5 새로운 종료 패턴 확립** (사용자 짚기 16번째): 사이클 5.1·5.2·5.3 각각 종료 시점은 **코드 + ADR(DECISIONS.md)만** 커밋, **README + 스크린샷은 사이클 5 전체 종료(5.3 직후) 시점 일괄 갱신** — 라이브러리 정직성 본질 확장(시각 증거 정직성). 사이클 1·2·2.5·3·4까지는 "사이클 종료 = 코드 + ADR + README + 스크린샷" 일체 패턴이었으나 사이클 5는 분할 진행(5.1·5.2·5.3)의 본질에 맞춰 문서/스크린샷 갱신 시점도 재정의.
-- **v2.x 진화 예정**: Standard variant(영구 표시 + 메인 UI 공존 — M3 standard bottom sheet), Expanded variant(전체 화면 가까이 확장 — M3 expanded state), 자체 구현 검토(의존성 0 유지) vs `@gorhom` 도입 검토(v2.x 정책 변경 별도 ADR), `BottomSheetHandleCustom`(사용자 정의 핸들 prop), `BottomSheetSection`(라이브러리 표준 sub-component — header/footer/divider), Animation 정밀 제어(snap point별 spring config 사용자 prop), DialogHost 패턴 본질 통합(store 레벨에서 애니메이션 완료 후 unmount 처리 — shouldRender 패턴 store 레벨 격상 검토).
+### 상황
 
-- **사이클 5.1 학습 (7건)**: (1) **DialogHost 패턴 확장 (BottomSheetHost) — v1.x 표준 패턴 8번째 확립** — 전역 호스트 + Zustand store + imperative API + Reanimated v4 + safe-area + `withTiming` + easing 패턴. DialogHost / ToastHost / BottomSheetHost 일관 modal-style 컴포넌트 표준. (2) **의존성 종류별 본질 분류 (인프라 vs 컴포넌트)** — 사이클 2.5 Reanimated v4(인프라, 모든 컴포넌트 활용) vs 사이클 5 `@gorhom`(컴포넌트, 1개만 활용)의 본질적 차이 발견. 인프라는 ADR-26 정당화 가능, 컴포넌트는 라이브러리 정체성 본질 검토 필요. (3) **Figma vs RN 코드 본질 분리** (사용자 본질 짚기 14번째) — Figma는 시각 사양 1회 작성(3 frame 다양한 높이), RN 코드는 사이클별 동작 진화. v1.x 사이클 진화의 본질은 RN 코드 동작 진화(Figma는 본질적으로 변경 없음). (4) **M3 Material Motion 표준 적용** — spring 물리 모델(overshoot/bounce) → `withTiming` + easing 자연 슬라이드. enter `Easing.out(Easing.cubic)` + exit `Easing.in(Easing.cubic)` emphasized decelerate/accelerate. spring은 BottomSheet 본질에 부적합. (5) **exit 애니메이션 unmount 패턴 (shouldRender state)** (사용자 본질 짚기 15번째) — `if (!isVisible) return null` 즉시 unmount → 애니메이션 안 보임의 본질 발견. shouldRender state 분리 + 콜백 완료 후 `setShouldRender(false)` 패턴. DialogHost는 store 레벨 displayed state, BottomSheetHost는 컴포넌트 내부 shouldRender — 작업 범위 최소화 + 본질 동일. (6) **사용자 시각 검증 본질의 본질적 반복** (사이클 4 학습 1 일관) — `tsc/eslint exit 0`(Claude Code 자체 검증) ≠ 사용자 시각 체험. 라이브러리 본질의 학습 패턴은 사이클별로 본질적으로 반복. 라이브러리 정직성이 본질 — "자연 슬라이드" UX의 정확한 구현 필요. (7) **사이클 5 새로운 종료 패턴 — 라이브러리 정직성 본질 확장 (시각 증거 정직성)** (사용자 본질 짚기 16번째) — 사이클 5.1·5.2·5.3 각각 종료 시점은 코드 + ADR만, README + 스크린샷은 사이클 5 전체 종료(5.3 직후) 시점 일괄 갱신. 부분 가이드/스크린샷이 완전한 BottomSheet 사양으로 오해될 위험 차단. 사이클 1·2·2.5·3·4까지의 "사이클 종료 = 코드 + ADR + README + 스크린샷" 일체 패턴이 사이클 5의 분할 진행(5.1·5.2·5.3) 본질에 맞춰 재정의됨. 사이클 4 학습 9(라이브러리 정직성)의 영역을 코드·시연에서 문서·스크린샷으로 확장.
+M3 Modal Bottom Sheet를 라이브러리에 추가. 두 가지 구현 옵션:
+
+- (A) `@gorhom/bottom-sheet` 패키지 도입
+- (B) DialogHost / ToastHost 패턴 확장 (자체 구현)
+
+BottomSheet 사양 범위가 단일 사이클로 다루기에 큼(다중 snap / scrollable / 키보드 정밀). 작업 단위를 분할:
+
+- **5.1**: 단일 snap + drag dismiss (본 ADR)
+- **5.2**: 다중 snap + scrollable content
+- **5.3**: 키보드 정밀
+
+### 선택
+
+자체 구현. 사이클 5.1 사양:
+
+| 항목 | 사양 |
+|------|------|
+| height prop | `'auto' \| \`${number}%\` \| number` (template literal type) — default `'auto'` = 화면 50% |
+| drag dismiss | 거리 30% OR velocity > 500px/s (결합 임계값) |
+| handle bar | 32×4dp, `border.default` 토큰 |
+| 백드롭 | `overlay.scrim` 토큰 |
+| 카드 | `surface.container` 토큰, top cornerRadius 28dp, elevation 3 |
+| content padding | 16h / 24v, `paddingBottom: 24 + insets.bottom` (safe-area 자동) |
+| enter 애니메이션 | `withTiming(0, 250ms, Easing.out(Easing.cubic))` (M3 emphasized decelerate) |
+| exit 애니메이션 | `withTiming(totalHeight, 200ms, Easing.in(Easing.cubic))` + 완료 콜백 `setShouldRender(false)` (M3 emphasized accelerate) |
+| 호스트 | 전역 `BottomSheetHost` + Zustand store (DialogHost 패턴) |
+| API | imperative `bottomSheet.open / close` + controlled `<BottomSheet visible onDismiss height>` |
+| Gesture | gesture-handler v2 `Gesture.Pan()` — App 루트 `GestureHandlerRootView` 추가 |
+| BackHandler | Android 자동 dismiss |
+| safe-area | `useSafeAreaInsets` 하단 inset 자동 |
+
+```tsx
+// imperative
+bottomSheet.open({
+  height: '50%',
+  children: <SettingsForm />,
+  onDismiss: () => saveDraft(),
+});
+
+// controlled
+<BottomSheet visible={open} onDismiss={() => setOpen(false)} height={400}>
+  <Text>시트 콘텐츠</Text>
+</BottomSheet>
+```
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| `@gorhom/bottom-sheet` 도입 | 단일 컴포넌트 wrap이 디자인 시스템 정체성과 충돌. Reanimated · Gesture Handler · Zustand 같은 인프라 의존성은 다수 컴포넌트 공유, `@gorhom`은 BottomSheet 하나만 활용 |
+| v2.x로 미루기 | M3 Modal Bottom Sheet는 v1.x에 포함되어야 할 표준 |
+| 단일 사이클 완성 | 다중 snap · scrollable · 키보드를 한 번에 다루면 작업 단위 과대 |
+| enter `withSpring` | overshoot / bounce가 BottomSheet UX에 부적합. M3는 emphasized easing 표준 |
+| `withSpring + overshootClamping` | DialogHost timing 패턴과 일관 깨짐 |
+| 즉시 unmount on `isVisible=false` | exit 애니메이션 발동 불가. `shouldRender` state로 콜백 완료 후 unmount하여 해결 |
+| store 레벨 unmount 시점 제어 (DialogHost 동일) | store 구조 변경 큼. 컴포넌트 내부 `shouldRender`로 동일 효과 달성 가능 |
+| drag cancel `withSpring` 복귀 | spring overshoot로 출렁임. `withTiming` 일관 |
+
+### 근거
+
+**의존성 분류**: Reanimated · Gesture Handler · safe-area-context · Zustand는 다수 컴포넌트가 공유하는 인프라 의존성. `@gorhom/bottom-sheet`는 단일 컴포넌트 wrap. ADR-26의 의도된 의존성 정책은 전자에 한정.
+
+**호스트 패턴 일관**: DialogHost / ToastHost와 동일 구조 (Zustand + imperative API + App 루트 1회 마운트 + Reanimated v4 + safe-area). 신규 패턴 도입 없이 기존 인프라 활용.
+
+**M3 Material Motion**: spring 물리 모델 대신 emphasized decelerate / accelerate easing 적용. BottomSheet UX에 자연스러운 슬라이드 동작 보장.
+
+**unmount 처리**: DialogHost는 `store.displayed`(객체 또는 null)로 unmount 시점을 자연 제어 — exit 애니메이션 완료 콜백 안에서 `dismiss()` 호출하여 store가 null로 바뀜. BottomSheetHost는 `isVisible: boolean` 단순 구조이므로 컴포넌트 내부 `shouldRender` state로 동일 효과 달성 (store 구조 변경 회피, 변경 범위 컴포넌트 내부 한정).
+
+**기술 상세**:
+
+- `Gesture.Pan().onUpdate(e)`: `e.translationY > 0`만 반영 (위쪽 drag 차단)
+- `onEnd(e)`: 결합 임계값 검증 (거리 30% OR velocity 500) → `runOnJS(close)()` 또는 `withTiming(0)` 원위치
+- drag dismiss → store false → `useEffect` 발동 → exit 애니메이션이 현재 `translateY` 위치에서 자연 이어짐
+- `shouldRender` 초기값 false + `else if (shouldRender)` 가드 → 첫 mount 시 exit 분기 진입 차단 (idempotent)
+- `translateY.value = totalHeight` 재설정 → `withTiming(0)` — 재오픈 또는 totalHeight 변경 케이스 대응
+- 의존성 배열 `[isVisible]`만 — totalHeight 변경 시 트리거 회피 (사이즈 변경 도중 시트 재시작 점프 방지)
+
+### 결과
+
+- 의존성 추가 0건. ADR-26 의존성 정책의 첫 적용 사례 — 정책 갱신 후 결과는 "추가 없음".
+- 토큰 추가 0건. ADR-28 토큰 정책의 둘째 사이클 적용 — 기존 토큰(`surface.container` / `overlay.scrim` / `border.default`) 활용.
+- 호스트 패턴 일관: DialogHost / ToastHost / BottomSheetHost — modal-style 컴포넌트의 공통 구조.
+- TypeScript template literal type 활용 — `height` prop의 잘못된 string 컴파일 시점 차단.
+- 문서·스크린샷 갱신은 사이클 5 전체 종료(5.3 직후)에 일괄 처리. 부분 사양이 완성 가이드로 오해되는 것을 방지.
+- v2.x 진화 예정: Standard variant (영구 표시 + 메인 UI 공존) / Expanded variant (전체 화면 가까이) / 사용자 정의 handle prop / Section sub-component (header / footer / divider) / snap point별 spring config / unmount 시점 store 격상.
