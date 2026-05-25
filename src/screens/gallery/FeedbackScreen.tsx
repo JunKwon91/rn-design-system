@@ -132,9 +132,29 @@ const VerifyCase = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
+// BottomSheet 시연용 styled
+const BottomSheetCaseColumn = styled.View`
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const BottomSheetCase = styled.View`
+  gap: ${({ theme }) => theme.spacing.xs}px;
+`;
+
+const SheetContentWrap = styled.View`
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const SheetActions = styled.View`
+  flex-direction: row;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  justify-content: flex-end;
+`;
+
 import { Button, IconButton } from '@/components/action';
 import { Tabs } from '@/components/display';
 import {
+  BottomSheet,
   CircularProgress,
   EmptyState,
   ErrorView,
@@ -143,6 +163,7 @@ import {
   Skeleton,
   Tooltip,
 } from '@/components/feedback';
+import { bottomSheet } from '@/stores/bottomSheetStore';
 import { Spacer, Text } from '@/components/primitives';
 import { Screen, Section } from '@/components/surface';
 import { dialog } from '@/stores/dialogStore';
@@ -157,6 +178,7 @@ const GROUPS = [
   { value: 'tooltip', label: 'Tooltip (도구 설명)' },
   { value: 'toast', label: 'Toast (토스트)' },
   { value: 'dialog', label: 'Dialog (다이얼로그)' },
+  { value: 'bottom-sheet', label: 'BottomSheet (바텀시트)' },
 ] as const;
 
 type GroupValue = typeof GROUPS[number]['value'];
@@ -198,6 +220,46 @@ function DemoCircularDownload() {
 }
 
 // ---------------- Tooltip 자동 점멸 데모 (visible prop) ----------------
+
+// ---------------- BottomSheet controlled mode 데모 (사이클 5.1) ----------------
+
+function DemoBottomSheetControlled() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <BottomSheetCase>
+      <Text variant="labelSm" color="muted">
+        5) controlled mode (visible prop)
+      </Text>
+      <Button
+        label="controlled BottomSheet 열기 (height 60%)"
+        variant="secondary"
+        onPress={() => setIsOpen(true)}
+      />
+      <BottomSheet
+        visible={isOpen}
+        onDismiss={() => setIsOpen(false)}
+        height="60%"
+      >
+        <SheetContentWrap>
+          <Text variant="headlineSm" color="primary">
+            controlled mode
+          </Text>
+          <Text variant="bodyBase" color="secondary">
+            visible prop으로 외부 제어. drag-down · 백드롭 탭 · Android
+            BackHandler · 아래 닫기 버튼 모두 dismiss.
+          </Text>
+          <SheetActions>
+            <Button
+              label="닫기"
+              variant="secondary"
+              onPress={() => setIsOpen(false)}
+            />
+          </SheetActions>
+        </SheetContentWrap>
+      </BottomSheet>
+    </BottomSheetCase>
+  );
+}
 
 function DemoTooltipBlink() {
   const [visible, setVisible] = useState(false);
@@ -787,6 +849,145 @@ export default function FeedbackScreen() {
                   console.log('2번 완료');
                 }}
               />
+            </Section>
+          </>
+        )}
+
+        {activeGroup === 'bottom-sheet' && (
+          <>
+            <Section title="BottomSheet (단일 snap · drag dismiss · 백드롭 탭 · BackHandler)">
+              <BottomSheetCaseColumn>
+                <BottomSheetCase>
+                  <Text variant="labelSm" color="muted">
+                    1) 기본 height &apos;auto&apos; (화면 50%)
+                  </Text>
+                  <Button
+                    label="기본 BottomSheet 열기"
+                    variant="primary"
+                    onPress={() =>
+                      bottomSheet.open({
+                        children: (
+                          <SheetContentWrap>
+                            <Text variant="headlineSm" color="primary">
+                              기본 BottomSheet
+                            </Text>
+                            <Text variant="bodyBase" color="secondary">
+                              height 미지정 시 화면의 50%로 표시. handle bar를 아래로 끌어 dismiss 가능.
+                            </Text>
+                            <SheetActions>
+                              <Button
+                                label="닫기"
+                                variant="secondary"
+                                onPress={() => bottomSheet.close()}
+                              />
+                            </SheetActions>
+                          </SheetContentWrap>
+                        ),
+                      })
+                    }
+                  />
+                </BottomSheetCase>
+
+                <BottomSheetCase>
+                  <Text variant="labelSm" color="muted">
+                    2) 백분율 height (&apos;50%&apos;)
+                  </Text>
+                  <Button
+                    label="50% BottomSheet 열기"
+                    variant="secondary"
+                    onPress={() =>
+                      bottomSheet.open({
+                        height: '50%',
+                        children: (
+                          <SheetContentWrap>
+                            <Text variant="headlineSm" color="primary">
+                              50% 높이
+                            </Text>
+                            <Text variant="bodyBase" color="secondary">
+                              화면 높이의 50%로 명시적으로 지정. 반응형 — 디바이스마다 픽셀이 달라진다.
+                            </Text>
+                            <SheetActions>
+                              <Button
+                                label="닫기"
+                                variant="secondary"
+                                onPress={() => bottomSheet.close()}
+                              />
+                            </SheetActions>
+                          </SheetContentWrap>
+                        ),
+                      })
+                    }
+                  />
+                </BottomSheetCase>
+
+                <BottomSheetCase>
+                  <Text variant="labelSm" color="muted">
+                    3) 픽셀 height (400px)
+                  </Text>
+                  <Button
+                    label="400px BottomSheet 열기"
+                    variant="secondary"
+                    onPress={() =>
+                      bottomSheet.open({
+                        height: 400,
+                        children: (
+                          <SheetContentWrap>
+                            <Text variant="headlineSm" color="primary">
+                              400px 고정 높이
+                            </Text>
+                            <Text variant="bodyBase" color="secondary">
+                              디바이스 무관 고정 픽셀 높이. 컨텐츠 양이 정해진 시트에 적합.
+                            </Text>
+                            <SheetActions>
+                              <Button
+                                label="닫기"
+                                variant="secondary"
+                                onPress={() => bottomSheet.close()}
+                              />
+                            </SheetActions>
+                          </SheetContentWrap>
+                        ),
+                      })
+                    }
+                  />
+                </BottomSheetCase>
+
+                <BottomSheetCase>
+                  <Text variant="labelSm" color="muted">
+                    4) imperative API + onDismiss 콜백
+                  </Text>
+                  <Button
+                    label="onDismiss 콜백 BottomSheet"
+                    variant="secondary"
+                    onPress={() =>
+                      bottomSheet.open({
+                        height: '40%',
+                        onDismiss: () =>
+                          Alert.alert('BottomSheet dismiss', 'onDismiss 콜백 호출됨'),
+                        children: (
+                          <SheetContentWrap>
+                            <Text variant="headlineSm" color="primary">
+                              dismiss 콜백
+                            </Text>
+                            <Text variant="bodyBase" color="secondary">
+                              drag-down · 백드롭 탭 · 닫기 버튼 어느 경로로 닫혀도 onDismiss 콜백이 1회 호출된다.
+                            </Text>
+                            <SheetActions>
+                              <Button
+                                label="닫기"
+                                variant="secondary"
+                                onPress={() => bottomSheet.close()}
+                              />
+                            </SheetActions>
+                          </SheetContentWrap>
+                        ),
+                      })
+                    }
+                  />
+                </BottomSheetCase>
+
+                <DemoBottomSheetControlled />
+              </BottomSheetCaseColumn>
             </Section>
           </>
         )}
