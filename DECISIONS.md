@@ -561,3 +561,90 @@ bottomSheet.open({
 - TypeScript template literal type 활용 — `height` prop의 잘못된 string 컴파일 시점 차단.
 - 문서·스크린샷 갱신은 BottomSheet 작업 전체 종료(키보드 정밀 단계 직후)에 일괄 처리. 부분 사양이 완성 가이드로 오해되는 것을 방지.
 - v2.x 진화 예정: Standard variant (영구 표시 + 메인 UI 공존) / Expanded variant (전체 화면 가까이) / 사용자 정의 handle prop / Section sub-component (header / footer / divider) / snap point별 spring config / unmount 시점 store 격상.
+
+---
+
+## ADR-30: BottomSheet 다중 snap + drag·scroll 양립 (다중 snap 단계)
+
+### 상황
+
+BottomSheet 단일 snap (ADR-29) 기반에서 다중 snap + scrollable content 본질 확장. M3 Modal Bottom Sheet는 다중 snap이 표준 (Compact / Default / Tall 또는 임의 snapPoints array), 콘텐츠 영역이 ScrollView일 때 시트 drag와 콘텐츠 scroll의 양립 본질이 핵심.
+
+iOS SwiftUI `presentationDetents([.medium, .large])` 및 `@gorhom/bottom-sheet`의 `snapPoints` array 패턴이 다중 snap 표준에 가깝다. 본 라이브러리는 ADR-29의 자체 구현 결정을 일관 유지.
+
+### 선택
+
+**snapPoints array API + handle bar 영역만 drag + velocity projection snap 선택**. 단일 snap 단계 사양:
+
+| 항목 | 사양 |
+|------|------|
+| snapPoints prop | `BottomSheetSnap[]` — `'auto' \| \`${number}%\` \| number` 각 element. 정렬은 사용자 의도 보존 (자동 정렬 안 함) |
+| height prop 호환 | snapPoints 미지정 시 fallback. 동시 지정 시 `__DEV__` 경고 + snapPoints 우선 |
+| initialSnap | 초기 snap 인덱스 (default 0). 범위 밖이면 clamp |
+| imperative API | `bottomSheet.open({ snapPoints, initialSnap, onSnapChange, ... })` + `bottomSheet.snapTo(index)` |
+| controlled API | `<BottomSheet snapPoints={...} initialSnap onSnapChange visible onDismiss>` |
+| snap 사이 이동 | `withTiming(targetY, 250ms, Easing.out(Easing.cubic))` — 단일 snap 단계의 enter/cancel timing 일관 |
+| drag activation | `GestureDetector`를 Handle 영역(`HandleArea`)만 감싸기. Sheet body는 외부 → 콘텐츠 영역(RNGH ScrollView 등)은 native gesture 자유 |
+| snap 선택 알고리즘 | velocity > 500px/s 시 projection 0.15s 후 가장 가까운 snap, 그 외 현재 위치에서 가장 가까운 snap |
+| dismiss 본질 | 가장 낮은 snap에서 추가 거리 30% 또는 velocity > 500px/s — 단일 snap 단계 임계값 일관 |
+| scrollable 콘텐츠 | 사용자가 `react-native-gesture-handler`의 `ScrollView` 직접 wrap. BottomSheet API 변경 없음 |
+
+```tsx
+// imperative — 다중 snap + onSnapChange
+bottomSheet.open({
+  snapPoints: ['25%', '50%', '90%'],
+  initialSnap: 1,
+  onSnapChange: index => console.log('snap', index),
+  children: <SettingsForm />,
+});
+bottomSheet.snapTo(2);
+
+// controlled + scrollable
+import { ScrollView } from 'react-native-gesture-handler';
+
+<BottomSheet
+  visible={open}
+  onDismiss={() => setOpen(false)}
+  snapPoints={['50%', '90%']}
+>
+  <ScrollView>{/* 긴 콘텐츠 */}</ScrollView>
+</BottomSheet>
+```
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| snap 사이 spring | 단일 snap 단계의 timing 본질 배제 결정 일관 — spring overshoot가 라이브러리 UX 본질과 충돌 |
+| 시트 전체 drag (단일 snap 단계 동작 유지) | scrollable 양립 불가 (drag와 scroll 충돌). 단일 snap 케이스도 handle bar drag로 일관 |
+| `BottomSheetScrollView` sub-component | 라이브러리 API 단순 유지 + 의존성 0 추가. 사용자가 RNGH `ScrollView` 직접 import (v2.x sub-component 군 검토) |
+| `Gesture.Simultaneous(pan, native)` 명시 | handle bar만 GestureDetector로 감싸면 콘텐츠 영역은 자동 native gesture 우선. Simultaneous 코드 0건으로 단순 |
+| snap 선택 거리만 | velocity 무시 → 사용자 의도 정합 약함. projection 결합이 자연 |
+| closed snap을 snapPoints에 포함 | snap 선택과 dismiss 본질 혼재. dismiss는 별도 임계값(거리 30% + velocity 500)으로 단일 snap 단계 본질 보존 |
+| snapPoints 단독 API (height 제거) | 단일 snap 단계 사용자 코드 breaking change |
+| 콘텐츠 영역 조건부 drag (scroll top + 아래 방향일 때만 drag 활성) | `useAnimatedScrollHandler` worklet으로 scroll offset 추적 필요 — 구현 복잡. v2.x 또는 키보드 정밀 단계 검토 |
+
+### 근거
+
+**timing 일관**: 단일 snap 단계에서 spring 배제 결정의 본질은 overshoot/bounce 제거. snap 사이 이동도 동일 본질 적용 — `Easing.out(Easing.cubic)` 250ms로 자연 도착. M3 Material Motion의 emphasized decelerate 표준 일관.
+
+**handle bar drag activation**: `GestureDetector`를 Handle 영역만 감싸면 PanGesture가 콘텐츠 영역에 부착되지 않음. 콘텐츠 영역의 ScrollView는 native gesture 우선 처리 — RNGH `ScrollView`가 자동 통합. `Gesture.Simultaneous` 명시 불필요.
+
+**velocity projection snap 선택**: 사용자가 빠르게 위로 swipe하면 다음 snap으로 자연 이동. projection 시간 0.15s는 일반적 UX 패턴 (iOS sheet, gorhom 등 유사 값).
+
+**dismiss 본질 보존**: snapPoints에 closed 상태를 포함하면 snap 선택 알고리즘이 dismiss 케이스를 흡수해야 함. 별도 임계값(가장 낮은 snap 기준 추가 거리 30% OR velocity 500)으로 분리하면 단일 snap 단계의 dismiss UX 그대로 다중 snap에서도 작동.
+
+**호환 정규화**: `open()` 시 `snapPoints ?? [height ?? 'auto']`로 변환. 내부 로직은 항상 array. 단일 snap 케이스(`snapPoints.length === 1`)도 동일 알고리즘 — snap 선택은 단일 결과(현재 snap)로 수렴하므로 단일 snap 단계 동작 보존.
+
+### 결과
+
+- `BottomSheet` API 확장 (`snapPoints` + `initialSnap` + `onSnapChange`) — 단일 snap 단계 사용자 코드 호환 보존
+- `bottomSheetStore` 확장 (`snapPoints` array + `currentSnapIndex` + `snapTo` + `setCurrentSnapIndex` 내부 트리거)
+- `bottomSheet.snapTo(index)` imperative API 추가
+- `BottomSheetHeight` 타입 → `BottomSheetSnap`으로 의미 확장 (단일 snap에 한정되지 않음)
+- handle bar drag activation으로 모든 케이스 일관 (단일 snap 단계도 동일 패턴) — `HandleArea` + `HandleBar` 분리
+- 의존성 추가 0건. 토큰 추가 0건.
+- 인라인 스타일 분류 A 0건 유지.
+- 갤러리 BottomSheet sub-tab 9 케이스 (단일 snap 단계 5 + 다중 snap 단계 4)
+- 문서·스크린샷 갱신은 BottomSheet 작업 전체 종료(키보드 정밀 단계 직후)에 일괄 처리
+- v2.x 진화 예정: `BottomSheetScrollView` sub-component / 콘텐츠 영역 조건부 drag (scroll top + 방향 분기) / snap point별 spring config prop / snapPoints 동적 변경 (open 후 갱신)
