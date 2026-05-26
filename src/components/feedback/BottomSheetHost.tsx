@@ -263,7 +263,7 @@ export default function BottomSheetHost() {
     const visibleHeight = Math.max(0, totalHeight - translateY.value);
     return {
       height: Math.max(0, visibleHeight - HANDLE_AREA_HEIGHT),
-      paddingBottom: 24 + insets.bottom,
+      paddingBottom: 12 + insets.bottom,
     };
   });
 
