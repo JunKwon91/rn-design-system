@@ -52,6 +52,7 @@ const EXIT_EASING = Easing.in(Easing.cubic); // M3 emphasized accelerate
 const DRAG_DISTANCE_THRESHOLD = 0.3;
 const DRAG_VELOCITY_THRESHOLD = 500; // px/s
 const SNAP_PROJECTION_TIME = 0.15; // s
+const HANDLE_AREA_HEIGHT = 28; // padding 12 + handle 4 + padding 12
 
 const Backdrop = styled(Animated.View)`
   position: absolute;
@@ -90,11 +91,9 @@ const HandleBar = styled.View`
   background-color: ${({ theme }) => theme.colors.border.default};
 `;
 
-const Content = styled.View`
+const Content = styled(Animated.View)`
   padding-left: 16px;
   padding-right: 16px;
-  padding-bottom: 24px;
-  flex-shrink: 1;
 `;
 
 const BackdropPressable = styled(Pressable)`
@@ -259,6 +258,15 @@ export default function BottomSheetHost() {
     transform: [{ translateY: translateY.value }],
   }));
 
+  // Content height = 현재 가시 영역 - HandleArea — ScrollView 등 flex 자식이 가시 영역과 자연 일치
+  const contentStyle = useAnimatedStyle(() => {
+    const visibleHeight = Math.max(0, totalHeight - translateY.value);
+    return {
+      height: Math.max(0, visibleHeight - HANDLE_AREA_HEIGHT),
+      paddingBottom: 24 + insets.bottom,
+    };
+  });
+
   if (!shouldRender) return null;
 
   return (
@@ -272,7 +280,7 @@ export default function BottomSheetHost() {
             <HandleBar />
           </HandleArea>
         </GestureDetector>
-        <Content style={{ paddingBottom: 24 + insets.bottom }}>
+        <Content style={contentStyle}>
           {children}
         </Content>
       </Sheet>
