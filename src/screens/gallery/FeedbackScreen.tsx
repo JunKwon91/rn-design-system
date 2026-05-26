@@ -153,7 +153,7 @@ const SheetActions = styled.View`
 `;
 
 const SheetScrollContainer = styled(RNGHScrollView)`
-  max-height: 400px;
+  flex: 1;
 `;
 
 const ScrollItem = styled.View`
@@ -1124,24 +1124,23 @@ export default function FeedbackScreen() {
                     variant="secondary"
                     onPress={() =>
                       bottomSheet.open({
-                        snapPoints: ['50%', '90%'],
+                        snapPoints: ['25%', '50%', '90%'],
                         children: (
-                          <SheetContentWrap>
+                          <SheetScrollContainer>
                             <Text variant="headlineSm" color="primary">
                               scrollable content
                             </Text>
                             <Text variant="bodyBase" color="secondary">
-                              handle bar drag로 snap 이동, 콘텐츠는 ScrollView로 스크롤 — 양립.
+                              handle bar drag로 snap 이동, ScrollView 자체 스크롤로 모든 항목과 닫기 버튼 접근. 모든 snap에서 가시 영역과 자연 일치.
                             </Text>
-                            <SheetScrollContainer>
-                              {Array.from({ length: 50 }).map((_, i) => (
-                                <ScrollItem key={i}>
-                                  <Text variant="bodyBase" color="primary">
-                                    항목 {i + 1}
-                                  </Text>
-                                </ScrollItem>
-                              ))}
-                            </SheetScrollContainer>
+                            {Array.from({ length: 50 }).map((_, i) => (
+                              <ScrollItem key={i}>
+                                <Text variant="bodyBase" color="primary">
+                                  항목 {i + 1}
+                                </Text>
+                              </ScrollItem>
+                            ))}
+                            <Spacer size="md" />
                             <SheetActions>
                               <Button
                                 label="닫기"
@@ -1149,7 +1148,7 @@ export default function FeedbackScreen() {
                                 onPress={() => bottomSheet.close()}
                               />
                             </SheetActions>
-                          </SheetContentWrap>
+                          </SheetScrollContainer>
                         ),
                       })
                     }
