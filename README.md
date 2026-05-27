@@ -1,6 +1,6 @@
 # rn-design-system-starter
 
-> React Native 0.85 디자인 시스템 스타터 — 29개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog 호스트.
+> React Native 0.85 디자인 시스템 스타터 — 30개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog·BottomSheet 호스트.
 
 ## Screenshots
 
@@ -106,6 +106,26 @@
 |:---:|:---:|
 | ![dialog light](docs/screenshots/dialog-light.png) | ![dialog dark](docs/screenshots/dialog-dark.png) |
 
+### Feedback — BottomSheet (단일 snap)
+| Light | Dark |
+|:---:|:---:|
+| ![bottom-sheet single-snap light](docs/screenshots/bottom-sheet-single-snap-light.png) | ![bottom-sheet single-snap dark](docs/screenshots/bottom-sheet-single-snap-dark.png) |
+
+### Feedback — BottomSheet (다중 snap)
+| Light | Dark |
+|:---:|:---:|
+| ![bottom-sheet multi-snap light](docs/screenshots/bottom-sheet-multi-snap-light.png) | ![bottom-sheet multi-snap dark](docs/screenshots/bottom-sheet-multi-snap-dark.png) |
+
+### Feedback — BottomSheet (Scrollable)
+| Light | Dark |
+|:---:|:---:|
+| ![bottom-sheet scrollable light](docs/screenshots/bottom-sheet-scrollable-light.png) | ![bottom-sheet scrollable dark](docs/screenshots/bottom-sheet-scrollable-dark.png) |
+
+### Feedback — BottomSheet (키보드)
+| Light | Dark |
+|:---:|:---:|
+| ![bottom-sheet keyboard light](docs/screenshots/bottom-sheet-keyboard-light.png) | ![bottom-sheet keyboard dark](docs/screenshots/bottom-sheet-keyboard-dark.png) |
+
 ## Quick Start
 
 ```bash
@@ -118,7 +138,7 @@ npm run ios      # 또는 npm run android
 
 요구사항: Node.js 22.11+, Xcode 16+ (iOS), Android Studio + JDK 17+ (Android).
 
-## 포함 컴포넌트 (29종, 7 카테고리)
+## 포함 컴포넌트 (30종, 7 카테고리)
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
@@ -150,6 +170,7 @@ npm run ios      # 또는 npm run android
 | | `Tooltip` | 컴포넌트 길게 누르면 짧은 설명 표시 |
 | | `Toast` | 잠깐 떴다 사라지는 알림 |
 | | `Dialog` | 화면 가운데 떠서 사용자 확인을 받는 창 |
+| | `BottomSheet` | 화면 아래에서 올라오는 시트 (다중 snap · scrollable · 키보드 양립) |
 
 ## 기술 스택
 
@@ -393,6 +414,165 @@ const value = await dialog.prompt({
 });
 if (value !== null) save(value);
 ```
+
+## BottomSheet
+
+화면 아래에서 올라오는 시트. 단일 snap, 다중 snap, scrollable content, 키보드 양립을 지원합니다. M3 Modal Bottom Sheet 사양 기반.
+
+### 마운트 (App 루트, 1회만)
+
+```tsx
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetHost } from '@/components/feedback';
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider theme={theme}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+          <DialogHost />
+          <ToastHost />
+          <BottomSheetHost />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
+
+### 단일 snap
+
+```tsx
+import { bottomSheet } from '@/stores/bottomSheetStore';
+
+bottomSheet.open({
+  height: '50%',                       // 'auto' | `${number}%` | number
+  children: <Text>설정 메뉴</Text>,
+  onDismiss: () => saveDraft(),
+});
+
+bottomSheet.close();
+```
+
+- `height`: `'auto'`(화면 50%) / 백분율 문자열(`'50%'`) / 픽셀 숫자(`400`)
+- handle bar drag로 닫기 — 거리 30% 또는 velocity > 500px/s
+- 백드롭 탭 / Android BackHandler 자동 dismiss
+- enter `withTiming(250ms, Easing.out(Easing.cubic))` — M3 emphasized decelerate
+
+### 다중 snap
+
+```tsx
+bottomSheet.open({
+  snapPoints: ['25%', '50%', '90%'],
+  initialSnap: 1,
+  onSnapChange: index => console.log('snap', index),
+  children: <SettingsForm />,
+});
+
+bottomSheet.snapTo(2);    // 90%로 이동
+```
+
+- `snapPoints`: 백분율 / 픽셀 자유 혼합 array
+- handle bar drag로 snap 사이 이동 — 가장 가까운 snap 자동 선택
+- velocity > 500px/s 시 0.15s projection 후 방향 우선 snap
+- snap 도착 transition 250ms timing
+- 가장 낮은 snap에서 추가 drag 30% 또는 velocity > 500 시 dismiss
+- `bottomSheet.snapTo(index)` 외부 제어
+- `height` prop과 동시 지정 시 `snapPoints` 우선 (개발 모드에서 경고)
+
+### Scrollable content
+
+```tsx
+import { ScrollView } from 'react-native-gesture-handler';
+import { Spacer } from '@/components/primitives';
+
+bottomSheet.open({
+  snapPoints: ['25%', '50%', '90%'],
+  children: (
+    <ScrollView>
+      <Text variant="headlineSm">제목</Text>
+      {items.map(item => (
+        <ItemRow key={item.id} item={item} />
+      ))}
+      <Spacer size="md" />
+      <Button label="닫기" onPress={() => bottomSheet.close()} />
+    </ScrollView>
+  ),
+});
+```
+
+- ScrollView를 BottomSheet 자식으로 직접 사용 — RN core 또는 RNGH 자유 선택
+- handle bar 영역만 drag 활성 → 콘텐츠 영역은 native scroll 자유 (충돌 0)
+- Content height가 현재 snap의 가시 영역에 자동 동기 (useAnimatedStyle worklet) — ScrollView가 자연 fit
+- 콘텐츠 + 액션(닫기 등)을 모두 ScrollView 내부에 배치하면 모든 snap에서 스크롤로 접근 가능
+
+### 키보드 양립
+
+```tsx
+import { Input } from '@/components/input';
+
+bottomSheet.open({
+  snapPoints: ['50%', '90%'],
+  children: (
+    <View>
+      <Input label="이름" placeholder="홍길동" />
+      <Input
+        label="이메일"
+        placeholder="example@email.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <Input label="메시지" placeholder="문의 내용" multiline />
+      <Button label="제출" onPress={handleSubmit} />
+    </View>
+  ),
+});
+```
+
+- TextInput / Input focus 시 시트가 자동으로 키보드 위로 이동 (`useAnimatedKeyboard` worklet)
+- 큰 snap에서는 시트 상단이 화면 안으로 clamp되어 안정 유지
+- 다중 input focus 이동 시 키보드 유지 + 자연 전환
+- 키보드 dismiss 시 시트 자연 복귀
+- iOS / Android 자동 처리 (AndroidManifest `windowSoftInputMode="adjustResize"` 사전 설정)
+- 작은 snap(25% 등)에서 form 사용은 가시 영역이 좁아 권장하지 않음 — 50% 이상 snap 권장
+
+### Controlled mode
+
+```tsx
+const [visible, setVisible] = useState(false);
+
+<BottomSheet
+  visible={visible}
+  onDismiss={() => setVisible(false)}
+  snapPoints={['25%', '50%', '90%']}
+  initialSnap={1}
+  onSnapChange={index => console.log('snap', index)}
+>
+  <Text>콘텐츠</Text>
+</BottomSheet>
+```
+
+### Props
+
+| Prop | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `visible` | `boolean` | — | controlled 모드 표시 상태 |
+| `onDismiss` | `() => void` | — | dismiss 콜백 (swipe / 백드롭 / API close / BackHandler) |
+| `height` | `'auto' \| \`${number}%\` \| number` | `'auto'` | 단일 snap 높이 (snapPoints 미지정 시) |
+| `snapPoints` | `BottomSheetSnap[]` | — | 다중 snap 배열 (지정 시 height 무시) |
+| `initialSnap` | `number` | `0` | 초기 snap 인덱스 (snapPoints 기준) |
+| `onSnapChange` | `(index: number) => void` | — | snap 변경 콜백 (drag / snapTo 모두) |
+
+### Imperative API
+
+| 함수 | 시그니처 | 설명 |
+|------|---------|------|
+| `bottomSheet.open(config)` | `(config: BottomSheetConfig) => void` | 시트 열기 (height / snapPoints / initialSnap / onDismiss / onSnapChange / children) |
+| `bottomSheet.close()` | `() => void` | 시트 닫기 + onDismiss 호출 |
+| `bottomSheet.snapTo(index)` | `(index: number) => void` | 특정 snap 인덱스로 이동 (범위 밖 무시) |
 
 ## 설계 결정
 
