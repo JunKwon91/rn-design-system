@@ -1,6 +1,6 @@
 # rn-design-system-starter
 
-> React Native 0.85 디자인 시스템 스타터 — 30개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog·BottomSheet 호스트.
+> React Native 0.85 디자인 시스템 스타터 — 31개 컴포넌트, 2-tier 토큰, 라이트/다크 자동 전환, 전역 Toast·Dialog·BottomSheet·Popup 호스트.
 
 ## Screenshots
 
@@ -126,6 +126,21 @@
 |:---:|:---:|
 | ![bottom-sheet keyboard light](docs/screenshots/bottom-sheet-keyboard-light.png) | ![bottom-sheet keyboard dark](docs/screenshots/bottom-sheet-keyboard-dark.png) |
 
+### Modal — Popup (RadioGroup 선택)
+| Light | Dark |
+|:---:|:---:|
+| ![popup radio light](docs/screenshots/popup-radio-light.png) | ![popup radio dark](docs/screenshots/popup-radio-dark.png) |
+
+### Modal — Popup (Checkbox 다중 선택)
+| Light | Dark |
+|:---:|:---:|
+| ![popup checkbox light](docs/screenshots/popup-checkbox-light.png) | ![popup checkbox dark](docs/screenshots/popup-checkbox-dark.png) |
+
+### Modal — Popup (다중 Input form)
+| Light | Dark |
+|:---:|:---:|
+| ![popup form light](docs/screenshots/popup-form-light.png) | ![popup form dark](docs/screenshots/popup-form-dark.png) |
+
 ## Quick Start
 
 ```bash
@@ -138,7 +153,7 @@ npm run ios      # 또는 npm run android
 
 요구사항: Node.js 22.11+, Xcode 16+ (iOS), Android Studio + JDK 17+ (Android).
 
-## 포함 컴포넌트 (30종, 7 카테고리)
+## 포함 컴포넌트 (31종, 7 카테고리)
 
 | 카테고리 | 컴포넌트 | 설명 |
 |---|---|---|
@@ -171,6 +186,7 @@ npm run ios      # 또는 npm run android
 | | `Toast` | 잠깐 떴다 사라지는 알림 |
 | | `Dialog` | 화면 가운데 떠서 사용자 확인을 받는 창 |
 | | `BottomSheet` | 화면 아래에서 올라오는 시트 (다중 snap · scrollable · 키보드 양립) |
+| | `Popup` | 중앙 입력 모달 (RadioGroup · Checkbox · 다중 Input 자유 배치) |
 
 ## 기술 스택
 
@@ -573,6 +589,158 @@ const [visible, setVisible] = useState(false);
 | `bottomSheet.open(config)` | `(config: BottomSheetConfig) => void` | 시트 열기 (height / snapPoints / initialSnap / onDismiss / onSnapChange / children) |
 | `bottomSheet.close()` | `() => void` | 시트 닫기 + onDismiss 호출 |
 | `bottomSheet.snapTo(index)` | `(index: number) => void` | 특정 snap 인덱스로 이동 (범위 밖 무시) |
+
+## Popup
+
+중앙 표시 입력 모달. RadioGroup / Checkbox / 다중 Input 등 입력 컴포넌트를 자유 배치하여 form을 구성합니다. `Dialog.prompt`(단일 string 입력)와 차별화 — children 완전 자유.
+
+### 마운트 (App 루트, 1회만)
+
+```tsx
+import { PopupHost } from '@/components/modal';
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider theme={theme}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+          <DialogHost />
+          <ToastHost />
+          <BottomSheetHost />
+          <PopupHost />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
+
+### Imperative — RadioGroup 선택
+
+```tsx
+import { popup } from '@/stores/popupStore';
+import { Radio, RadioGroup } from '@/components/input';
+import { Spacer } from '@/components/primitives';
+
+function SortPopupContent() {
+  const [sort, setSort] = useState<'recent' | 'popular'>('recent');
+  return (
+    <View>
+      <Text variant="headlineSm">정렬 기준</Text>
+      <RadioGroup value={sort} onValueChange={setSort}>
+        <Radio value="recent" label="최신순" />
+        <Spacer size="md" />
+        <Radio value="popular" label="인기순" />
+      </RadioGroup>
+      <Button
+        label="적용"
+        onPress={() => { applySort(sort); popup.close(); }}
+      />
+    </View>
+  );
+}
+
+popup.open({ children: <SortPopupContent /> });
+```
+
+| Light | Dark |
+|:---:|:---:|
+| ![popup radio light](docs/screenshots/popup-radio-light.png) | ![popup radio dark](docs/screenshots/popup-radio-dark.png) |
+
+### 다중 입력 — Checkbox
+
+```tsx
+import { Checkbox } from '@/components/input';
+
+function NotificationPopupContent() {
+  const [news, setNews] = useState(true);
+  const [marketing, setMarketing] = useState(false);
+  return (
+    <View>
+      <Text variant="headlineSm">알림 설정</Text>
+      <Checkbox value={news} onValueChange={setNews} label="뉴스 알림" />
+      <Checkbox value={marketing} onValueChange={setMarketing} label="마케팅 정보" />
+      <Button label="저장" onPress={() => { save(); popup.close(); }} />
+    </View>
+  );
+}
+```
+
+- Checkbox는 자체 hit target으로 자연 간격을 가지므로 사이에 Spacer 불필요
+- Radio는 컴팩트 hit target이라 명시적 `<Spacer size="md" />` 권장 (InputScreen 패턴 일관)
+
+| Light | Dark |
+|:---:|:---:|
+| ![popup checkbox light](docs/screenshots/popup-checkbox-light.png) | ![popup checkbox dark](docs/screenshots/popup-checkbox-dark.png) |
+
+### 다중 Input form
+
+```tsx
+import { Input } from '@/components/input';
+
+function FormPopupContent() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  return (
+    <View>
+      <Text variant="headlineSm">사용자 정보</Text>
+      <Input label="이름" value={name} onChangeText={setName} />
+      <Input
+        label="이메일"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <Button
+        label="저장"
+        onPress={() => { save({ name, email }); popup.close(); }}
+      />
+    </View>
+  );
+}
+```
+
+- TextInput focus 시 카드가 자동으로 키보드 위로 이동 (`useAnimatedKeyboard` worklet)
+- 중앙 카드는 키보드 높이의 절반만큼 위로 보정 — 양쪽 여백이 자연 분산
+
+| Light | Dark |
+|:---:|:---:|
+| ![popup form light](docs/screenshots/popup-form-light.png) | ![popup form dark](docs/screenshots/popup-form-dark.png) |
+
+### Controlled mode
+
+```tsx
+const [visible, setVisible] = useState(false);
+
+<Popup visible={visible} onDismiss={() => setVisible(false)}>
+  <ThemeSelector onPick={(theme) => { applyTheme(theme); setVisible(false); }} />
+</Popup>
+```
+
+### 키보드 양립
+
+- TextInput / Input focus → 키보드 출현 → 카드가 `-keyboard.height / 2` 만큼 위로 이동
+- 키보드 dismiss → 카드 자연 복귀
+- iOS / Android 자동 처리 (AndroidManifest `windowSoftInputMode="adjustResize"` 사전 설정)
+
+### Props
+
+| Prop | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `visible` | `boolean` | — | controlled 모드 표시 상태 |
+| `onDismiss` | `() => void` | — | dismiss 콜백 (백드롭 탭 / API close / BackHandler) |
+| `children` | `ReactNode` | — | 카드 안 콘텐츠 (자유) |
+
+### Imperative API
+
+| 함수 | 시그니처 | 설명 |
+|------|---------|------|
+| `popup.open(config)` | `(config: PopupConfig) => void` | Popup 열기 (children + onDismiss) |
+| `popup.close()` | `() => void` | Popup 닫기 + onDismiss 호출 |
 
 ## 설계 결정
 
