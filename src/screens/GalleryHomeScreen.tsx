@@ -41,8 +41,8 @@ const CATEGORIES: CategoryEntry[] = [
   {
     route: 'Modal',
     label: 'Modal (모달)',
-    subtitle: 'Toast · Dialog · BottomSheet',
-    count: 3,
+    subtitle: 'Toast · Dialog · BottomSheet · Popup',
+    count: 4,
   },
 ];
 
