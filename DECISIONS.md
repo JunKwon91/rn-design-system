@@ -92,6 +92,8 @@
 - **포기한 옵션**: feedback을 overlay/inline으로 추가 분할, list를 surface 흡수, Tabs를 navigation 카테고리로 분리.
 - **근거**: 카테고리당 1~5개로 균등 분포. feedback이 5개로 가장 많지만 모두 "사용자에게 상태/결과를 알림" 의미가 일관. list는 SettingsRow 하나지만 향후 ListItem/SwipeableRow 등 확장 여지 위해 분리 유지. v1.0.0 갤러리 UX 개선 과정에서 Tabs 컴포넌트가 추가되었다 — LottoStats Figma에 Material 3 underline tabs 스타일로 디자인 후 정식 라이브러리 컴포넌트로 승격, SegmentedControl과 동일한 display 카테고리에 편입(둘 다 가로 선택 컨트롤 의미 공유, 분할/확장 방식만 다름).
 
+> **modal 카테고리 신설 갱신**: ADR-33 결정으로 modal 카테고리 신설. feedback에서 Toast/Dialog/BottomSheet 3개를 modal 카테고리로 이동. 갱신 후 분포: primitives(3) · surface(3) · action(3) · input(6) · display(5) · list(1) · feedback(6) · **modal(3)** = **30개**, 8 카테고리. feedback 잔존(EmptyState/ErrorView/LoadingView/Skeleton/Progress/Tooltip) — "사용자에게 상태/결과를 알림" 의미. modal 신설(Toast/Dialog/BottomSheet + 예정 Popup) — "화면 위에 떠 있는 인터페이스" 의미 + 전역 호스트 패턴 공통.
+
 ---
 
 ## ADR-11: Toast 큐잉 패턴 (displayed 1개 + queue max 3)
@@ -741,3 +743,64 @@ Sheet height가 가장 큰 snap 기준 고정(ADR-30)이므로, 키보드 보정
 - `keyboardBehavior` prop (`'interactive'` / `'extend'` / `'fillParent'`) — 사용자 선택 옵션
 - focus 시 자동 snap 이동 (작은 snap → 큰 snap)
 - `BottomSheetTextInput` sub-component (자동 keyboard handling + scroll into view)
+
+---
+
+## ADR-33: modal 카테고리 신설 + 카테고리 재분류
+
+### 상황
+
+전역 호스트 패턴 컴포넌트(DialogHost / ToastHost / BottomSheetHost)가 feedback 카테고리에 함께 분류되어 있었으나, 의미가 "사용자 피드백 표시"(EmptyState/ErrorView/Skeleton 등)와 "화면 위에 떠 있는 모달 인터페이스"(Toast/Dialog/BottomSheet)로 두 갈래. Popup(예정) 추가 진입 전 카테고리 의미 명확화 필요.
+
+### 선택
+
+- `src/components/modal/` 디렉토리 신설
+- 6 파일 이동(`Dialog.tsx` / `DialogHost.tsx` / `Toast.tsx` / `ToastHost.tsx` / `BottomSheet.tsx` / `BottomSheetHost.tsx`)
+- `feedback` 잔존 6개: EmptyState / ErrorView / LoadingView / Skeleton / Progress(2) / Tooltip
+- `modal` 신설 3개: Dialog / Toast / BottomSheet (Popup 추가 예정)
+- `ModalScreen.tsx` 갤러리 화면 신설 (FeedbackScreen 패턴 일관)
+- ADR-10 갱신 (7 카테고리 → 8 카테고리, 컴포넌트 30개)
+- `git mv`로 파일 history 보존
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| feedback 카테고리 유지 (현 상태) | "사용자 피드백"과 "화면 위 모달" 두 의미 혼재 — 카테고리 의미 명확성 부족 |
+| `overlay` 카테고리 명칭 | `modal`이 Material Design / iOS HIG에서 더 일반적 용어 |
+| modal에 Tooltip 포함 | Tooltip은 anchor 기반 + 짧은 안내 — 전역 호스트 패턴 없음, 모달 본질과 다름 |
+| 카테고리 재분류 v2.x 미루기 | Popup(모달 4번째) 추가 진입 전 분리가 자연 — v1.x 일관성 우선 |
+| `FeedbackScreen.tsx` 안에 모달 sub-tab 유지 | 갤러리 구조가 카테고리 분리를 반영해야 자연 — `ModalScreen.tsx` 분리가 일관 |
+
+### 근거
+
+**modal 카테고리 공통 패턴**:
+- 전역 호스트 (App 루트 1회 마운트)
+- Zustand store + imperative API (`open` / `close`)
+- Reanimated v4 worklet
+- shouldRender state (exit 애니메이션 완료 후 unmount)
+- "화면 위에 떠 있는 임시 인터페이스" 시각 패턴
+
+**feedback 잔존 패턴**:
+- 상태 / 진행 / 오류 / 안내 / 로딩 표시 (사용자 피드백)
+- 인라인 표시 (EmptyState/ErrorView/LoadingView/Skeleton/Progress) 또는 anchor 기반 (Tooltip)
+- 전역 호스트 패턴 없음
+
+두 패턴이 본질이 달라 카테고리 분리가 자연. modal 카테고리는 Popup 추가 진입 자연 영역.
+
+### 결과
+
+- 카테고리 의미 명확화: feedback 6 + modal 3 (Popup 추가 시 4)
+- 디렉토리 구조 일관: `src/components/modal/`
+- 갤러리 구조 일관: `ModalScreen.tsx` 신설, FeedbackScreen 패턴 동일
+- ADR-10 갱신: 7 카테고리 → 8 카테고리, 30개 컴포넌트
+- import path 영향 좁음 (App.tsx + index.ts + FeedbackScreen + GalleryHomeScreen + RootNavigator)
+- 사용자 API 변경 0 (`dialog.confirm` / `toast.show` / `bottomSheet.open` 등 호출 본질 그대로)
+- 신규 의존성 0 + 신규 토큰 0
+- 인라인 스타일 분류 A 0건 유지
+- `git mv`로 파일 history 보존
+
+### v2.x 진화 예정
+
+- Popup 컴포넌트 추가 (modal 4번째) — ADR-32 별도
+- 다른 모달성 컴포넌트 (Drawer / Snackbar 등) 추가 영역
