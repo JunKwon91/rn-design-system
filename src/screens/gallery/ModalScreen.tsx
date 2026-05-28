@@ -12,12 +12,13 @@ import styled, { useTheme } from 'styled-components/native';
 
 import { Button } from '@/components/action';
 import { Tabs } from '@/components/display';
-import { Input } from '@/components/input';
-import { BottomSheet } from '@/components/modal';
+import { Checkbox, Input, Radio, RadioGroup } from '@/components/input';
+import { BottomSheet, Popup } from '@/components/modal';
 import { Spacer, Text } from '@/components/primitives';
 import { Screen, Section } from '@/components/surface';
 import { bottomSheet } from '@/stores/bottomSheetStore';
 import { dialog } from '@/stores/dialogStore';
+import { popup } from '@/stores/popupStore';
 import { toast, useToastStore } from '@/stores/toastStore';
 
 const StackedButtons = styled.View`
@@ -53,13 +54,170 @@ const ScrollItem = styled.View`
   border-bottom-color: ${({ theme }) => theme.colors.border.subtle};
 `;
 
+const PopupCaseColumn = styled.View`
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const PopupCase = styled.View`
+  gap: ${({ theme }) => theme.spacing.xs}px;
+`;
+
+const PopupContentWrap = styled.View`
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const PopupActions = styled.View`
+  flex-direction: row;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  justify-content: flex-end;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+`;
+
 const GROUPS = [
   { value: 'toast', label: 'Toast (토스트)' },
   { value: 'dialog', label: 'Dialog (다이얼로그)' },
   { value: 'bottom-sheet', label: 'BottomSheet (바텀시트)' },
+  { value: 'popup', label: 'Popup (팝업)' },
 ] as const;
 
 type GroupValue = typeof GROUPS[number]['value'];
+
+// ---------------- Popup 시연용 helper 컴포넌트 ----------------
+
+type SortOption = 'recent' | 'popular' | 'rating';
+
+function PopupRadioContent() {
+  const [sort, setSort] = useState<SortOption>('recent');
+  return (
+    <PopupContentWrap>
+      <Text variant="headlineSm" color="primary">정렬 기준 선택</Text>
+      <Text variant="bodyBase" color="secondary">
+        하나의 정렬 기준을 선택하세요.
+      </Text>
+      <RadioGroup value={sort} onValueChange={setSort}>
+        <Radio value="recent" label="최신순" />
+        <Spacer size="md" />
+        <Radio value="popular" label="인기순" />
+        <Spacer size="md" />
+        <Radio value="rating" label="평점순" />
+      </RadioGroup>
+      <PopupActions>
+        <Button label="취소" variant="secondary" onPress={() => popup.close()} />
+        <Button
+          label="적용"
+          variant="primary"
+          onPress={() => {
+            Alert.alert('정렬 적용', `선택: ${sort}`);
+            popup.close();
+          }}
+        />
+      </PopupActions>
+    </PopupContentWrap>
+  );
+}
+
+function PopupCheckboxContent() {
+  const [news, setNews] = useState(true);
+  const [marketing, setMarketing] = useState(false);
+  const [updates, setUpdates] = useState(true);
+  return (
+    <PopupContentWrap>
+      <Text variant="headlineSm" color="primary">알림 설정</Text>
+      <Text variant="bodyBase" color="secondary">
+        받고 싶은 알림 종류를 선택하세요.
+      </Text>
+      <Checkbox value={news} onValueChange={setNews} label="뉴스 알림" />
+      <Checkbox value={marketing} onValueChange={setMarketing} label="마케팅 정보" />
+      <Checkbox value={updates} onValueChange={setUpdates} label="업데이트 안내" />
+      <PopupActions>
+        <Button label="취소" variant="secondary" onPress={() => popup.close()} />
+        <Button
+          label="저장"
+          variant="primary"
+          onPress={() => {
+            Alert.alert(
+              '알림 설정 저장',
+              `뉴스 ${news} / 마케팅 ${marketing} / 업데이트 ${updates}`,
+            );
+            popup.close();
+          }}
+        />
+      </PopupActions>
+    </PopupContentWrap>
+  );
+}
+
+function PopupFormContent() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  return (
+    <PopupContentWrap>
+      <Text variant="headlineSm" color="primary">사용자 정보</Text>
+      <Text variant="bodyBase" color="secondary">
+        이름과 이메일을 입력하세요.
+      </Text>
+      <Input label="이름" placeholder="홍길동" value={name} onChangeText={setName} />
+      <Input
+        label="이메일"
+        placeholder="example@email.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <PopupActions>
+        <Button label="취소" variant="secondary" onPress={() => popup.close()} />
+        <Button
+          label="저장"
+          variant="primary"
+          onPress={() => {
+            Alert.alert('사용자 정보', `${name} · ${email}`);
+            popup.close();
+          }}
+        />
+      </PopupActions>
+    </PopupContentWrap>
+  );
+}
+
+function DemoPopupControlled() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+  return (
+    <PopupCase>
+      <Text variant="labelSm" color="muted">
+        4) controlled mode (visible prop)
+      </Text>
+      <Button
+        label="controlled Popup 열기"
+        variant="secondary"
+        onPress={() => setIsOpen(true)}
+      />
+      <Popup visible={isOpen} onDismiss={() => setIsOpen(false)}>
+        <PopupContentWrap>
+          <Text variant="headlineSm" color="primary">테마 선택</Text>
+          <Text variant="bodyBase" color="secondary">
+            visible prop으로 외부 제어. 백드롭 탭 · BackHandler · 닫기 버튼 모두 dismiss.
+          </Text>
+          <RadioGroup value={theme} onValueChange={setTheme}>
+            <Radio value="light" label="라이트" />
+            <Spacer size="md" />
+            <Radio value="dark" label="다크" />
+            <Spacer size="md" />
+            <Radio value="system" label="시스템 설정" />
+          </RadioGroup>
+          <PopupActions>
+            <Button
+              label="닫기"
+              variant="secondary"
+              onPress={() => setIsOpen(false)}
+            />
+          </PopupActions>
+        </PopupContentWrap>
+      </Popup>
+    </PopupCase>
+  );
+}
 
 function DemoBottomSheetControlled() {
   const [isOpen, setIsOpen] = useState(false);
@@ -631,6 +789,94 @@ export default function ModalScreen() {
                   />
                 </BottomSheetCase>
               </BottomSheetCaseColumn>
+            </Section>
+          </>
+        )}
+
+        {activeGroup === 'popup' && (
+          <>
+            <Section title="Popup (중앙 표시 · 자유 콘텐츠 · 다중 입력)">
+              <PopupCaseColumn>
+                <PopupCase>
+                  <Text variant="labelSm" color="muted">
+                    1) RadioGroup 선택 (정렬 기준)
+                  </Text>
+                  <Button
+                    label="RadioGroup Popup 열기"
+                    variant="primary"
+                    onPress={() =>
+                      popup.open({
+                        children: <PopupRadioContent />,
+                      })
+                    }
+                  />
+                </PopupCase>
+
+                <PopupCase>
+                  <Text variant="labelSm" color="muted">
+                    2) Checkbox 다중 선택 (알림 설정)
+                  </Text>
+                  <Button
+                    label="Checkbox Popup 열기"
+                    variant="secondary"
+                    onPress={() =>
+                      popup.open({
+                        children: <PopupCheckboxContent />,
+                      })
+                    }
+                  />
+                </PopupCase>
+
+                <PopupCase>
+                  <Text variant="labelSm" color="muted">
+                    3) 다중 Input form (이름 + 이메일)
+                  </Text>
+                  <Button
+                    label="form Popup 열기"
+                    variant="secondary"
+                    onPress={() =>
+                      popup.open({
+                        children: <PopupFormContent />,
+                      })
+                    }
+                  />
+                </PopupCase>
+
+                <DemoPopupControlled />
+
+                <PopupCase>
+                  <Text variant="labelSm" color="muted">
+                    5) onDismiss 콜백
+                  </Text>
+                  <Button
+                    label="onDismiss 콜백 Popup"
+                    variant="secondary"
+                    onPress={() =>
+                      popup.open({
+                        children: (
+                          <PopupContentWrap>
+                            <Text variant="headlineSm" color="primary">
+                              dismiss 콜백
+                            </Text>
+                            <Text variant="bodyBase" color="secondary">
+                              백드롭 탭 · 닫기 버튼 · BackHandler 어느 경로로 닫혀도 onDismiss 콜백이 1회 호출된다.
+                            </Text>
+                            <PopupActions>
+                              <Button
+                                label="닫기"
+                                variant="secondary"
+                                onPress={() => popup.close()}
+                              />
+                            </PopupActions>
+                          </PopupContentWrap>
+                        ),
+                        onDismiss: () =>
+                          Alert.alert('Popup dismiss', 'onDismiss 콜백 호출됨'),
+                      })
+                    }
+                  />
+                </PopupCase>
+              </PopupCaseColumn>
             </Section>
           </>
         )}
