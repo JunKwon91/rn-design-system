@@ -804,3 +804,82 @@ Sheet height가 가장 큰 snap 기준 고정(ADR-30)이므로, 키보드 보정
 
 - Popup 컴포넌트 추가 (modal 4번째) — ADR-32 별도
 - 다른 모달성 컴포넌트 (Drawer / Snackbar 등) 추가 영역
+
+---
+
+## ADR-32: Popup 컴포넌트 (중앙 입력 모달)
+
+### 상황
+
+modal 카테고리에 "사용자 입력을 받는 중앙 모달" 영역 부재. `Dialog.prompt`는 단일 string 입력만 (`Promise<string | null>`), BottomSheet는 하단 시트(drag / snap). 다중 입력 컴포넌트(RadioGroup / Checkbox / 다중 Input / Switch)를 자유 배치하는 중앙 모달이 필요.
+
+### 선택
+
+Popup 컴포넌트 신설 — 중앙 표시 + children 완전 자유 + imperative/controlled API.
+
+- **imperative**: `popup.open({ children, onDismiss }) + popup.close()`
+- **controlled**: `<Popup visible onDismiss>{children}</Popup>`
+- **children 완전 자유** (title / footer prop 없음) — 사용자가 입력 컴포넌트 자유 배치 + state 직접 관리
+- **카드**: 중앙 표시 + `max-width: 360`, `corner-radius: 28`, `padding: 24`, `elevation: 4` + safe-area
+- **backdrop**: `overlay.scrim` 토큰 + 탭 dismiss
+- **애니메이션**: scale 0.95→1 + fade (250ms enter / 200ms exit, Dialog 일관)
+- **키보드**: `useAnimatedKeyboard` worklet — 중앙 카드 `-keyboard.height / 2` 보정 (양쪽 여백 자연 분산)
+- **PopupHost** (DialogHost 변형 ~70%) + **popupStore** (bottomSheetStore 단순화 ~80%)
+
+```ts
+// imperative
+popup.open({
+  children: (
+    <View>
+      <Input label="이름" value={name} onChangeText={setName} />
+      <RadioGroup value={plan} onValueChange={setPlan}>
+        <Radio value="free" label="Free" />
+        <Spacer size="md" />
+        <Radio value="pro" label="Pro" />
+      </RadioGroup>
+      <Button label="저장" onPress={() => { save(); popup.close(); }} />
+    </View>
+  ),
+  onDismiss: () => console.log('취소됨'),
+});
+
+// controlled
+<Popup visible={open} onDismiss={() => setOpen(false)}>
+  <FilterForm />
+</Popup>
+```
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| Promise API (`await popup.show()`) | children 자유 + 복합 입력이라 결과 타입 정의 부담 — 사용자 state 직접 관리가 자연 (BottomSheet 일관) |
+| title / footer prop 강제 | Popup 가치가 자유 콘텐츠 — prop 강제는 유연성 저해 |
+| `KeyboardAvoidingView` (Dialog 패턴) | Reanimated v4 worklet 일관(ADR-26 마이그레이션) — `useAnimatedKeyboard` 채택 |
+| anchor positioning | v2.x 영역 (중앙 표시가 v1.x 단순) |
+| `@react-native-menu/menu` 의존성 | 라이브러리 정체성 (ADR-29 자체 구현 학습) |
+| `Dialog.prompt` 확장으로 다중 입력 | 단일 string 한계 — 다중 입력은 별도 컴포넌트가 명확 |
+
+### 근거
+
+- **Dialog.prompt와 차별화**: Dialog.prompt는 단일 string만 — Popup은 다중 입력 / RadioGroup / Checkbox / 자유 콘텐츠
+- **BottomSheet와 차별화**: BottomSheet는 하단 시트 + drag/snap — Popup은 중앙 표시 + 입력 위주 (작은~중간 영역)
+- **imperative + controlled 둘 다**: BottomSheet 패턴 완전 일관 — `await` 불필요, 사용자가 children에서 state 관리
+- **`useAnimatedKeyboard`**: 중앙 카드는 키보드 높이 절반 보정(양쪽 여백 자연 분산) — 하단 기준 BottomSheet clamp와 다른 중앙 기준 보정 패턴
+- **호스트 패턴 재사용 ~75%**: PopupHost는 DialogHost(scale+fade + Backdrop + KeyboardAvoidingView를 worklet으로 대체) 변형, popupStore는 bottomSheetStore(snap/drag/currentSnapIndex 제거) 단순화
+
+### 결과
+
+- modal 카테고리 4개 완성 (Dialog / Toast / BottomSheet / Popup)
+- 호스트 패턴 재사용 ~75%
+- 컴포넌트 30 → 31
+- 신규 토큰 0 + 신규 의존성 0
+- 갤러리 ModalScreen popup sub-tab — 5 케이스 (RadioGroup / Checkbox / 다중 Input / controlled / onDismiss)
+- Checkbox 자체 hit target으로 자연 간격 / Radio는 `<Spacer size="md" />` 명시 (InputScreen 패턴 일관)
+- 인라인 스타일 분류 A 0건 유지
+
+### v2.x 진화 예정
+
+- Promise API (복합 결과 정의)
+- anchor positioning (특정 원소 기준)
+- M3 Menu sub-component (cascading menu)
