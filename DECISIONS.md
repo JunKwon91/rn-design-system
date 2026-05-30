@@ -969,3 +969,74 @@ v1.x 보강 단계에서 색상/토큰 영역 2가지 후순위 항목 처리:
 - State Layer 패턴 도입 (pressed / hover / disabled 일관화 — M3 state layer)
 - `surface.containerHighest` 토큰 추가 검토 (현재 4단, M3는 5단)
 - 다른 카테고리 색상 재검토 (primary / state 등)
+
+---
+
+## ADR-35: Pressed / Disabled opacity 토큰 일관화
+
+### 상황
+
+v1.x 보강 단계 후순위 항목 4번(Pressed/Disabled state 일관화) + 5번(State Layer 패턴 도입) 통합 영역.
+
+**10 interactive 컴포넌트 분석 결과**:
+- pressed opacity 불일관: 0.7 (9개) vs 0.85 (FAB 1개)
+- disabled opacity 불일관: 0.4 (Button / IconButton 2개) vs 0.5 (FAB / Chip / Switch / Checkbox / Radio 5개)
+- SettingsRow는 별도 패턴 — opacity 대신 배경 색상 변경 (iOS HIG row 패턴)
+
+**M3 표준**: hover 8% / focus 10% / pressed 10% / dragged 16% / disabled content 38% — 별도 overlay layer 패턴 (on-surface 색상 + opacity).
+
+**본 라이브러리 패턴**: 단순 alpha (전체 컴포넌트 opacity 적용) — M3 100% 부합은 StateLayer 컴포넌트 신설 필요.
+
+### 선택
+
+**옵션 B (토큰 추가 + 단순 alpha 일관)** — `src/theme/interaction.ts` 신설 (mode 무관, spacing / radius 패턴 일관).
+
+| 토큰 | 값 | 적용 영역 |
+|------|------|------|
+| `hoverOpacity` | 0.08 | 후속 RN-Web 호환 진입 시점 예약 (사용 0) |
+| `focusOpacity` | 0.10 | 후속 예약 (사용 0) |
+| `pressedOpacity` | 0.70 | 9 컴포넌트 일관 (FAB 0.85 → 0.70 정정) |
+| `disabledOpacity` | 0.50 | 다수 기준 (Button / IconButton 0.40 → 0.50 정정) |
+
+`AppTheme` 인터페이스에 `interaction: typeof interaction` 등록. `lightTheme` / `darkTheme` 둘 다 동일 `interaction` 객체 참조 (mode 무관).
+
+**SettingsRow 의도적 설계 인정** — iOS HIG row 패턴(Settings 앱) 유지. opacity 패턴 통일 시 시각 인상 잃음. 현재 색상 변경 패턴 그대로 + 코드 주석으로 ADR-35 참조 명시.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| 옵션 A (StateLayer + M3 overlay) | 시각 변경 큼 — 별도 작업 영역 마이그레이션 예약 |
+| 옵션 C (`useStateLayerOpacity` hook) | 토큰 영역만으로 충분, hook 추가 영역 크지 않음 |
+| 옵션 D (현재 유지 + 정정만) | 일관화 불완전, 토큰 추가가 더 명확 |
+| `pressed: 0.10` (M3 값) | 단순 alpha 패턴에서 시각 변화 거의 없음 — overlay 패턴에서만 유효 |
+| `disabled: 0.38` (M3 값) | 단순 alpha 패턴에서 너무 흐림 — 사용자 인지 영향 큼 |
+| `disabled: 0.40` (Button 기준) | 영향 영역 5 컴포넌트 (vs 0.50 → 2). 영향 영역 최소화 |
+| SettingsRow opacity 패턴 통일 | iOS HIG row 패턴 잃음. 의도적 설계 인정 |
+
+### 근거
+
+- 단순 alpha 패턴 일관 — 본 라이브러리 현 패턴 보존 (M3 부분 부합)
+- 영향 영역 최소화 — 3 컴포넌트만 시각 변경 (FAB / Button / IconButton)
+- SettingsRow 의도적 설계 보존 (iOS HIG)
+- `hover` / `focus` 토큰 예약만 — 후속 RN-Web 호환 진입 시점 활용
+
+### 결과
+
+- 신규 토큰 4개 (`interaction.*`) — v1.x 누적 신규 토큰 1 → 5
+- `src/theme/interaction.ts` 신설 (mode 무관, spacing/radius 일관 패턴)
+- `AppTheme` 인터페이스 확장 (`interaction` 영역 추가)
+- 10 interactive 컴포넌트 토큰 적용 (Button / IconButton / FAB / Chip / Tabs / SegmentedControl / Switch / Checkbox / Radio)
+- 3 컴포넌트 시각 변경 (FAB / Button / IconButton)
+- 6 컴포넌트 토큰 적용만 (값 동일)
+- SettingsRow 변경 0 + 의도적 설계 코드 주석 (ADR-35 참조 명시)
+- 사용자 API 변경 0 (토큰 이름 / 호출 본문 그대로)
+- 사용자 시각 검증 통과 (Light / Dark 양 모드)
+- Figma Variable Library에 Interaction 컬렉션 신설 (FLOAT 4 변수, mode 무관 "Value", scope `OPACITY`)
+- 신규 의존성 0
+- 인라인 스타일 분류 A 0건 유지
+
+### v2.x 진화 예정
+
+- StateLayer 컴포넌트 신설 + M3 overlay 패턴 + M3 표준 opacity 값(0.08 / 0.10 / 0.10 / 0.38) 마이그레이션
+- hover state RN-Web 호환 진입 시점 도입 — `interaction.hoverOpacity` / `focusOpacity` 활용
