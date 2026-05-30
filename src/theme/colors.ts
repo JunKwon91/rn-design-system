@@ -66,16 +66,17 @@ const primitives = {
   slateDark: {
     200: '#E1E2EC', // 다크 모드 본문 텍스트 (밝은 회색)
     300: '#C2C6D6',
+    400: '#A2A5B0', // 400은 슬레이트 표준 외 값 (Dark text.muted 전용, L*≈68)
     450: '#9CA0AD', // 450은 슬레이트 표준 외 값
     500: '#8C909F',
-    700: '#424754',
-    720: '#2F333B', // 720은 슬레이트 표준 외 값 (Dark containerHighest 전용)
-    780: '#272A31', // 780은 슬레이트 표준 외 값 (다크 컨테이너 high)
-    800: '#1D2027', // 다크 컨테이너
-    850: '#191B23', // 다크 컨테이너 low
-    870: '#1F2229', // 870은 슬레이트 표준 외 값 (Dark border.subtle 전용)
-    900: '#10131A', // 다크 모드 캔버스 배경
-    950: '#0B0E15',
+    700: '#646976', // border.default 전용
+    720: '#474B55', // 720은 슬레이트 표준 외 값 (Dark containerHighest 전용)
+    780: '#373B45', // 780은 슬레이트 표준 외 값 (다크 컨테이너 high)
+    800: '#282C35', // 다크 컨테이너
+    850: '#1C1F26', // 다크 컨테이너 low
+    870: '#21252C', // 870은 슬레이트 표준 외 값 (Dark border.subtle 전용)
+    900: '#16191F', // 다크 모드 캔버스 배경
+    950: '#0C0E14', // containerLowest 전용
   },
   // 브랜드 색상 — 앱의 정체성을 나타내는 액센트 색상
   brand: {
@@ -253,10 +254,14 @@ export const darkColors: ColorsShape = {
     containerHighest: primitives.slateDark[720], // 5단 마지막 (가장 밝은 표면)
     inverse: primitives.slate[50], // 라이트 surface 빌려옴 (Tooltip 등)
   },
+  // [containerHighest 사용 가이드]
+  // Dark containerHighest(L*≈32) 표면 위 본문 텍스트는 primary/secondary/error/info만 권장.
+  // muted/success/warning은 텍스트 대비 4.5:1 미달(UI 3:1은 통과) — 본 토큰을 시연하는
+  // 컴포넌트가 추가될 때 재검토.
   text: {
     primary: primitives.slateDark[200], // 밝은 회색 (어두운 배경 위에서 가독)
     secondary: primitives.slateDark[300],
-    muted: primitives.slateDark[500],
+    muted: primitives.slateDark[400],
     primaryInverse: primitives.slate[900], // 라이트 모드 텍스트 색상을 빌려옴
     secondaryInverse: primitives.slate[700],
   },
