@@ -131,13 +131,24 @@ export interface ColorsShape {
   // surface = 카드, 패널 등 "들어올린(elevated)" 면.
   // 캔버스(bg) 위에 올라가는 컨텐츠 컨테이너.
   // 5단 정합 (M3): Lowest → Low → container → High → Highest 순으로 단조.
+  //
+  // [containerHighest — 5단 완성용 준비 토큰]
+  // 현재 직접 사용처 0 — 의도된 준비 상태이며 미사용은 미완이 아니다.
+  // 향후 "한 단계 더 강조된 표면"(예: 선택된 행, 중첩 강조 블록)이 필요한
+  // 기능이 생길 때 자연히 사용한다. 토큰 사용 자체를 목적으로 신규 컴포넌트를
+  // 만들지 않는다(본말전도).
+  //
+  // 사용 시 주의 — 이 표면 위 본문 텍스트:
+  //   권장: primary / secondary / error / info
+  //   비권장: muted / success / warning — 텍스트 대비 4.5:1 미달(UI 3:1은 통과)
+  //   상세 측정과 결정 근거는 ADR-38 참조.
   surface: {
     base: string; // 베이스 표면 (Dialog/Toast 등 최상위)
     containerLowest: string; // 가장 밝은 컨테이너 (Input 등)
     containerLow: string; // 살짝 더 어두운 컨테이너 (헤더 등)
     container: string; // 표준 카드 배경
     containerHigh: string; // 강조된 컨테이너 (선택된 항목 등)
-    containerHighest: string; // 5단 마지막 (가장 강조된 컨테이너)
+    containerHighest: string; // 5단 마지막 (가장 강조된 컨테이너 — 위 가이드 참조)
     inverse: string; // 반전 표면 — Tooltip 등 강조
   };
   // text = 글자 색상. 4단계 중요도 + 반전(inverse) 변형.
@@ -200,7 +211,7 @@ export const lightColors: ColorsShape = {
     containerLow: primitives.slate[50], // 약간 밝음
     container: primitives.slate[100], // 표준 카드 (canvas보다 밝음, M3 단계 정합)
     containerHigh: primitives.slate[200], // 강조 컨테이너 (canvas와 동일 L)
-    containerHighest: primitives.slate[250], // 5단 마지막 (가장 어두운 표면)
+    containerHighest: primitives.slate[250], // 5단 완성용 준비 토큰 — 사용처 0 의도, 상세는 interface 주석 참조
     inverse: primitives.slateDark[900], // 다크 surface 빌려옴 (Tooltip 등)
   },
   text: {
@@ -251,13 +262,9 @@ export const darkColors: ColorsShape = {
     containerLow: primitives.slateDark[850],
     container: primitives.slateDark[800],
     containerHigh: primitives.slateDark[780],
-    containerHighest: primitives.slateDark[720], // 5단 마지막 (가장 밝은 표면)
+    containerHighest: primitives.slateDark[720], // 5단 완성용 준비 토큰 — 사용처 0 의도, 상세는 interface 주석 참조
     inverse: primitives.slate[50], // 라이트 surface 빌려옴 (Tooltip 등)
   },
-  // [containerHighest 사용 가이드]
-  // Dark containerHighest(L*≈32) 표면 위 본문 텍스트는 primary/secondary/error/info만 권장.
-  // muted/success/warning은 텍스트 대비 4.5:1 미달(UI 3:1은 통과) — 본 토큰을 시연하는
-  // 컴포넌트가 추가될 때 재검토.
   text: {
     primary: primitives.slateDark[200], // 밝은 회색 (어두운 배경 위에서 가독)
     secondary: primitives.slateDark[300],
