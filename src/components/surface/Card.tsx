@@ -46,8 +46,8 @@ import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
-import Divider from '@/components/primitives/Divider';
-import Text from '@/components/primitives/Text';
+import Divider from '../primitives/Divider';
+import Text from '../primitives/Text';
 
 export type CardVariant =
   /** 보더 있는 기본 카드 (1px border.subtle) */

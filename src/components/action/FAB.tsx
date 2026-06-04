@@ -36,8 +36,8 @@ import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import Text from '@/components/primitives/Text';
-import type { InteractivePressableProps } from '@/types/interactive';
+import Text from '../primitives/Text';
+import type { InteractivePressableProps } from '../../types/interactive';
 
 export type FABVariant = 'small' | 'default' | 'large' | 'extended';
 

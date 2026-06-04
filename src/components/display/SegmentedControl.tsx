@@ -45,7 +45,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components/native';
 
-import Text from '@/components/primitives/Text';
+import Text from '../primitives/Text';
 
 export interface SegmentedControlSegment<T extends string> {
   /** 내부 값 — onChange 콜백에 전달되는 식별자. */

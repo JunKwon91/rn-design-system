@@ -29,7 +29,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import styled from 'styled-components/native';
 
-import { usePopupStore } from '@/stores/popupStore';
+import { usePopupStore } from '../../stores/popupStore';
 
 const ENTER_DURATION = 250;
 const EXIT_DURATION = 200;

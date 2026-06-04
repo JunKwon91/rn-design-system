@@ -43,7 +43,7 @@ import styled from 'styled-components/native';
 import {
   useBottomSheetStore,
   type BottomSheetSnap,
-} from '@/stores/bottomSheetStore';
+} from '../../stores/bottomSheetStore';
 
 const ENTER_DURATION = 250;
 const EXIT_DURATION = 200;

@@ -46,8 +46,8 @@ import { Pressable, ScrollView } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import Badge from '@/components/display/Badge';
-import Text from '@/components/primitives/Text';
+import Badge from './Badge';
+import Text from '../primitives/Text';
 
 export interface TabItem<T extends string = string> {
   /** 내부 값 — onChange 콜백에 전달되는 식별자. */

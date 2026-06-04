@@ -28,7 +28,7 @@ import { ActivityIndicator } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import Text from '@/components/primitives/Text';
+import Text from '../primitives/Text';
 
 export interface LoadingViewProps {
   /** spinner 아래 보조 메시지. 생략 시 미렌더. */

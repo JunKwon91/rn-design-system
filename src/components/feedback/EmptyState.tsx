@@ -36,8 +36,8 @@ import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
-import Button from '@/components/action/Button';
-import Text from '@/components/primitives/Text';
+import Button from '../action/Button';
+import Text from '../primitives/Text';
 
 export type EmptyStateTone =
   /** 풀-스크린·큰 영역용. title이 headlineSm + primary로 강조됨 */

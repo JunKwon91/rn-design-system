@@ -39,8 +39,8 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { AlertCircle } from 'lucide-react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import Button from '@/components/action/Button';
-import Text from '@/components/primitives/Text';
+import Button from '../action/Button';
+import Text from '../primitives/Text';
 
 export interface ErrorViewAction {
   label: string;
