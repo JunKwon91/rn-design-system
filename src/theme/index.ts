@@ -30,6 +30,7 @@ import { lightColors, darkColors, type Colors } from './colors';
 import { interaction } from './interaction';
 import { spacing, radius } from './spacing';
 import { typography } from './typography';
+import './styled';
 
 // ----------------------------------------------------------------------------
 // 모드 타입 — 'light' 또는 'dark' 문자열만 허용
