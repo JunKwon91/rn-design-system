@@ -32,7 +32,7 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 
-import { usePopupStore } from '@/stores/popupStore';
+import { usePopupStore } from '../../stores/popupStore';
 
 export interface PopupProps {
   /** Popup 표시 상태 — 외부에서 제어. */

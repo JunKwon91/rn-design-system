@@ -37,8 +37,8 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { ChevronRight, ExternalLink } from 'lucide-react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import { Switch } from '@/components/input';
-import Text from '@/components/primitives/Text';
+import { Switch } from '../input';
+import Text from '../primitives/Text';
 
 const RowBase = styled.View`
   height: 56px;

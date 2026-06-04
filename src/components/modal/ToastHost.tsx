@@ -24,7 +24,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
-import { useToastStore } from '@/stores/toastStore';
+import { useToastStore } from '../../stores/toastStore';
 import Toast from './Toast';
 
 const DEFAULT_DURATION = 3000;

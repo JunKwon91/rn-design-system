@@ -32,7 +32,7 @@ import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import Text from '@/components/primitives/Text';
+import Text from '../primitives/Text';
 
 export type CheckboxSize = 'sm' | 'md' | 'lg';
 

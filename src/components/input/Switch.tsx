@@ -49,8 +49,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components/native';
 
-import Text from '@/components/primitives/Text';
-import type { InteractivePressableProps } from '@/types/interactive';
+import Text from '../primitives/Text';
+import type { InteractivePressableProps } from '../../types/interactive';
 
 export type SwitchSize = 'sm' | 'md' | 'lg';
 

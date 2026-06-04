@@ -21,9 +21,9 @@ import { Platform } from 'react-native';
 import { Check, Info, X } from 'lucide-react-native';
 import styled, { useTheme, type DefaultTheme } from 'styled-components/native';
 
-import IconButton from '@/components/action/IconButton';
-import Text from '@/components/primitives/Text';
-import type { ToastConfig, ToastType } from '@/stores/toastStore';
+import IconButton from '../action/IconButton';
+import Text from '../primitives/Text';
+import type { ToastConfig, ToastType } from '../../stores/toastStore';
 
 export interface ToastProps {
   config: ToastConfig;

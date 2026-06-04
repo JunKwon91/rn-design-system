@@ -20,10 +20,10 @@ import { useEffect, useRef, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import styled from 'styled-components/native';
 
-import Button from '@/components/action/Button';
-import Input from '@/components/input/Input';
-import Text from '@/components/primitives/Text';
-import type { DialogConfig } from '@/stores/dialogStore';
+import Button from '../action/Button';
+import Input from '../input/Input';
+import Text from '../primitives/Text';
+import type { DialogConfig } from '../../stores/dialogStore';
 
 export interface DialogProps {
   config: DialogConfig;

@@ -56,7 +56,7 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import styled, { useTheme } from 'styled-components/native';
 
-import Text from '@/components/primitives/Text';
+import Text from '../primitives/Text';
 
 export type DataTableDensity =
   /** Header 40 / Body 44 — 일반 데이터 테이블 */

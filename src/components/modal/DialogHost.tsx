@@ -28,7 +28,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import styled from 'styled-components/native';
 
-import { useDialogStore, type DialogConfig } from '@/stores/dialogStore';
+import { useDialogStore, type DialogConfig } from '../../stores/dialogStore';
 import Dialog from './Dialog';
 
 const ENTER_DURATION = 200;

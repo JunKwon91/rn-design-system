@@ -46,7 +46,7 @@ import type {
 } from 'react-native';
 import { useTheme } from 'styled-components/native';
 
-import type { InteractivePressableProps } from '@/types/interactive';
+import type { InteractivePressableProps } from '../../types/interactive';
 
 export type IconButtonSize =
   /** 24×24 컨테이너 · 아이콘 16px 권장 */

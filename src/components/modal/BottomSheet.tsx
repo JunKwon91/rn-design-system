@@ -38,7 +38,7 @@ import type { ReactNode } from 'react';
 import {
   useBottomSheetStore,
   type BottomSheetSnap,
-} from '@/stores/bottomSheetStore';
+} from '../../stores/bottomSheetStore';
 
 export interface BottomSheetProps {
   /** 시트 표시 상태 — 외부에서 제어. */
