@@ -42,6 +42,9 @@ npm-debug.log
 yarn-error.log
 *.log
 
+# library build output (builder-bob)
+lib/
+
 # Environment
 .env
 .env.local
