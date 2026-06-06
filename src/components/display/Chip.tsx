@@ -48,6 +48,7 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
 import { useAppTheme } from '../../theme';
+import type { AppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 import type { InteractivePressableProps } from '../../types/interactive';
@@ -104,7 +105,7 @@ const Row = styled.View<{
   flex-direction: row;
   align-items: center;
   align-self: flex-start;
-  opacity: ${({ theme, $disabled, $pressed }) =>
+  opacity: ${({ theme, $disabled, $pressed }: { theme: AppTheme; $disabled: boolean; $pressed: boolean }) =>
     $disabled ? theme.interaction.disabledOpacity : $pressed ? theme.interaction.pressedOpacity : 1};
 `;
 
