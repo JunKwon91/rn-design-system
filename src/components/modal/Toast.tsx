@@ -19,7 +19,10 @@
 
 import { Platform } from 'react-native';
 import { Check, Info, X } from 'lucide-react-native';
-import styled, { useTheme, type DefaultTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import IconButton from '../action/IconButton';
 import Text from '../primitives/Text';
@@ -36,9 +39,9 @@ const Container = styled.View`
   padding: 12px 16px;
   border-width: 1px;
   gap: 12px;
-  background-color: ${({ theme }) => theme.colors.surface.containerHigh};
-  border-color: ${({ theme }) => theme.colors.border.subtle};
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.containerHigh};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.md}px;
   shadow-color: #000;
   shadow-offset: 0px 4px;
   shadow-opacity: 0.18;
@@ -63,7 +66,7 @@ function renderIcon(type: ToastType, color: string) {
   }
 }
 
-function iconColor(theme: DefaultTheme, type: ToastType): string {
+function iconColor(theme: AppTheme, type: ToastType): string {
   switch (type) {
     case 'success':
       return theme.colors.state.success;
@@ -75,7 +78,7 @@ function iconColor(theme: DefaultTheme, type: ToastType): string {
 }
 
 export default function Toast({ config, onDismiss }: ToastProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { type, title, description } = config;
 
   return (

@@ -45,7 +45,9 @@ import { Check, X } from 'lucide-react-native';
 import { cloneElement, isValidElement } from 'react';
 import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 import type { InteractivePressableProps } from '../../types/interactive';
@@ -165,7 +167,7 @@ function Chip({
   accessibilityLabel,
   ...pressableProps
 }: ChipProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const spec = SIZE_SPEC[size];
 
   // variant별 시각 토큰

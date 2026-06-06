@@ -29,6 +29,8 @@ import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 import Text from '../primitives/Text';
 
 import { useRadioGroup } from './RadioGroup';
@@ -63,7 +65,7 @@ const Row = styled.View<{ $disabled: boolean; $pressed: boolean }>`
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  opacity: ${({ theme, $disabled, $pressed }) =>
+  opacity: ${({ theme, $disabled, $pressed }: { theme: AppTheme; $disabled: boolean; $pressed: boolean }) =>
     $disabled ? theme.interaction.disabledOpacity : $pressed ? theme.interaction.pressedOpacity : 1};
 `;
 
@@ -72,7 +74,7 @@ const Box = styled.View<{ $size: number; $stroke: number; $selected: boolean }>`
   height: ${({ $size }) => $size}px;
   border-radius: ${({ $size }) => $size / 2}px;
   border-width: ${({ $stroke }) => $stroke}px;
-  border-color: ${({ theme, $selected }) =>
+  border-color: ${({ theme, $selected }: { theme: AppTheme; $selected: boolean }) =>
     $selected ? theme.colors.primary.action : theme.colors.border.control};
   align-items: center;
   justify-content: center;
@@ -82,7 +84,7 @@ const Dot = styled.View<{ $size: number }>`
   width: ${({ $size }) => $size}px;
   height: ${({ $size }) => $size}px;
   border-radius: ${({ $size }) => $size / 2}px;
-  background-color: ${({ theme }) => theme.colors.primary.action};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.action};
 `;
 
 const Label = styled(Text)<{ $disabled: boolean }>`

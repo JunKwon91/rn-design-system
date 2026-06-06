@@ -36,6 +36,8 @@ import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 import Button from '../action/Button';
 import Text from '../primitives/Text';
 
@@ -73,9 +75,9 @@ const Container = styled.View`
   justify-content: center;
   gap: 12px;
   border-width: 1px;
-  background-color: ${({ theme }) => theme.colors.surface.container};
-  border-color: ${({ theme }) => theme.colors.border.subtle};
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.lg}px;
 `;
 
 /**

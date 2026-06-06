@@ -37,7 +37,10 @@
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { AlertCircle } from 'lucide-react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Button from '../action/Button';
 import Text from '../primitives/Text';
@@ -65,9 +68,9 @@ const Container = styled.View`
   justify-content: center;
   gap: 12px;
   border-width: 1px;
-  background-color: ${({ theme }) => theme.colors.surface.container};
-  border-color: ${({ theme }) => theme.colors.border.subtle};
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.lg}px;
 `;
 
 /**
@@ -87,7 +90,7 @@ export default function ErrorView({
   action,
   style,
 }: ErrorViewProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const resolvedIcon = icon ?? (
     <AlertCircle color={theme.colors.state.error} size={32} />
   );

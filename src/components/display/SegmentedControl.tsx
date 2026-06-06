@@ -43,7 +43,10 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 
@@ -70,7 +73,7 @@ const Container = styled.View`
   border-radius: 18px;
   flex-direction: row;
   border-width: 1.5px;
-  border-color: ${({ theme }) => theme.colors.border.strong};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.strong};
   background-color: transparent;
   overflow: hidden;
 `;
@@ -79,7 +82,7 @@ const Indicator = styled(Animated.View)`
   position: absolute;
   height: 36px;
   top: -1.5px;
-  background-color: ${({ theme }) => theme.colors.primary.action};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.action};
 `;
 
 const Segment = styled.Pressable`
@@ -93,11 +96,12 @@ const SegmentInner = styled.View<{ $pressed: boolean }>`
   flex: 1;
   align-items: center;
   justify-content: center;
-  opacity: ${({ theme, $pressed }) => ($pressed ? theme.interaction.pressedOpacity : 1)};
+  opacity: ${({ theme, $pressed }: { theme: AppTheme; $pressed: boolean }) =>
+    $pressed ? theme.interaction.pressedOpacity : 1};
 `;
 
 const SegmentLabel = styled(Text)<{ $active: boolean }>`
-  color: ${({ theme, $active }) =>
+  color: ${({ theme, $active }: { theme: AppTheme; $active: boolean }) =>
     $active ? theme.colors.primary.onAction : theme.colors.text.secondary};
 `;
 
@@ -124,7 +128,7 @@ function SegmentedControl<T extends string>({
   onChange,
   style,
 }: SegmentedControlProps<T>) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const [containerWidth, setContainerWidth] = useState(0);
   const activeIndex = Math.max(
     0,

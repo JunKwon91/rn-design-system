@@ -44,8 +44,7 @@ import type {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { useTheme } from 'styled-components/native';
-
+import { useAppTheme } from '../../theme';
 import type { InteractivePressableProps } from '../../types/interactive';
 
 export type IconButtonSize =
@@ -126,7 +125,7 @@ export default function IconButton({
   style,
   ...pressableProps
 }: IconButtonProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   const colorMap: Record<IconButtonColor, string> = {
     primary: theme.colors.text.primary,

@@ -18,6 +18,8 @@
 
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 export type DividerOrientation =
   /** 가로 구분선 (height: 1, width: 100%) */
   | 'horizontal'
@@ -56,7 +58,8 @@ const StyledDivider = styled.View<{
   $color: DividerColor;
   $inset: number;
 }>`
-  background-color: ${({ theme, $color }) => theme.colors.border[$color]};
+  background-color: ${({ theme, $color }: { theme: AppTheme; $color: DividerColor }) =>
+    theme.colors.border[$color]};
   ${({ $orientation, $inset }) =>
     $orientation === 'horizontal'
       ? `

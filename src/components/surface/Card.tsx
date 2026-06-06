@@ -46,6 +46,7 @@ import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
 import Divider from '../primitives/Divider';
 import Text from '../primitives/Text';
 
@@ -90,13 +91,13 @@ const Container = styled.View<{
   $variant: CardVariant;
   $density: CardDensity;
 }>`
-  background-color: ${({ theme }) => theme.colors.surface.container};
-  border-radius: ${({ theme }) => theme.radius.lg}px;
-  padding: ${({ theme, $density }) =>
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.lg}px;
+  padding: ${({ theme, $density }: { theme: AppTheme; $density: CardDensity }) =>
     $density === 'compact' ? theme.spacing.md : theme.spacing.lg}px;
-  gap: ${({ theme, $density }) =>
+  gap: ${({ theme, $density }: { theme: AppTheme; $density: CardDensity }) =>
     $density === 'compact' ? theme.spacing.sm : theme.spacing.md}px;
-  ${({ theme, $variant }) =>
+  ${({ theme, $variant }: { theme: AppTheme; $variant: CardVariant }) =>
     $variant === 'default'
       ? `border-width: 1px; border-color: ${theme.colors.border.subtle};`
       : ''}

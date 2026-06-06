@@ -41,7 +41,9 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import { useAppTheme } from '../../theme';
 
 export type SkeletonProps =
   | { type: 'rect'; width: number; height: number }
@@ -78,7 +80,7 @@ const TextLine = styled(Animated.View)<{ $w: number | string; $h: number }>`
 `;
 
 function useShimmerStyle() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const progress = useSharedValue(0);
 
   useEffect(() => {

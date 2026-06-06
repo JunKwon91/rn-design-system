@@ -30,7 +30,6 @@ import { lightColors, darkColors, type Colors } from './colors';
 import { interaction } from './interaction';
 import { spacing, radius } from './spacing';
 import { typography } from './typography';
-import './styled';
 
 // ----------------------------------------------------------------------------
 // 모드 타입 — 'light' 또는 'dark' 문자열만 허용
@@ -104,3 +103,5 @@ export const darkTheme: AppTheme = {
 // `import { darkColors } from './theme'`처럼 개별 토큰만 가져올 수 있도록 통로를 열어둠.
 // ----------------------------------------------------------------------------
 export { lightColors, darkColors, spacing, radius, typography, interaction };
+export type { Colors, ColorsShape } from './colors';
+export { useAppTheme } from './useAppTheme';

@@ -36,6 +36,8 @@ import type {
 } from 'react-native';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 export type TextVariant =
   /** Manrope 32 / 700 · 메인 페이지 큰 제목 */
   | 'displayLg'
@@ -100,15 +102,16 @@ const StyledText = styled.Text<{
   $color: TextColor;
   $align: 'left' | 'center' | 'right';
 }>`
-  font-family: ${({ theme, $variant }) =>
+  font-family: ${({ theme, $variant }: { theme: AppTheme; $variant: TextVariant }) =>
     theme.typography[$variant].fontFamily};
-  font-size: ${({ theme, $variant }) => theme.typography[$variant].fontSize}px;
-  font-weight: ${({ theme, $variant }) =>
+  font-size: ${({ theme, $variant }: { theme: AppTheme; $variant: TextVariant }) =>
+    theme.typography[$variant].fontSize}px;
+  font-weight: ${({ theme, $variant }: { theme: AppTheme; $variant: TextVariant }) =>
     theme.typography[$variant].fontWeight};
-  line-height: ${({ theme, $variant }) =>
+  line-height: ${({ theme, $variant }: { theme: AppTheme; $variant: TextVariant }) =>
     theme.typography[$variant].lineHeight}px;
   text-align: ${({ $align }) => $align};
-  color: ${({ theme, $color }) => {
+  color: ${({ theme, $color }: { theme: AppTheme; $color: TextColor }) => {
     switch ($color) {
       case 'primary':
         return theme.colors.text.primary;
@@ -122,11 +125,11 @@ const StyledText = styled.Text<{
         return theme.colors.text.primaryInverse;
     }
   }};
-  ${({ theme, $variant }) => {
+  ${({ theme, $variant }: { theme: AppTheme; $variant: TextVariant }) => {
     const t = theme.typography[$variant];
     return 'letterSpacing' in t ? `letter-spacing: ${t.letterSpacing}px;` : '';
   }};
-  ${({ theme, $variant }) => {
+  ${({ theme, $variant }: { theme: AppTheme; $variant: TextVariant }) => {
     const t = theme.typography[$variant];
     return 'textTransform' in t ? `text-transform: ${t.textTransform};` : '';
   }};

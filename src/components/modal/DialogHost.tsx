@@ -28,6 +28,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
 import { useDialogStore, type DialogConfig } from '../../stores/dialogStore';
 import Dialog from './Dialog';
 
@@ -43,7 +44,7 @@ const Backdrop = styled(Animated.View)`
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: ${({ theme }) => theme.colors.overlay.scrim};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.overlay.scrim};
 `;
 
 const Center = styled.View`

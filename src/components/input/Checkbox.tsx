@@ -30,7 +30,10 @@
 import { Check } from 'lucide-react-native';
 import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 
@@ -64,7 +67,7 @@ const Row = styled.View<{ $disabled: boolean; $pressed: boolean }>`
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  opacity: ${({ theme, $disabled, $pressed }) =>
+  opacity: ${({ theme, $disabled, $pressed }: { theme: AppTheme; $disabled: boolean; $pressed: boolean }) =>
     $disabled ? theme.interaction.disabledOpacity : $pressed ? theme.interaction.pressedOpacity : 1};
 `;
 
@@ -73,8 +76,8 @@ const Box = styled.View<{ $size: number; $stroke: number; $checked: boolean }>`
   height: ${({ $size }) => $size}px;
   border-radius: 2px;
   border-width: ${({ $checked, $stroke }) => ($checked ? 0 : $stroke)}px;
-  border-color: ${({ theme }) => theme.colors.border.control};
-  background-color: ${({ theme, $checked }) =>
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.control};
+  background-color: ${({ theme, $checked }: { theme: AppTheme; $checked: boolean }) =>
     $checked ? theme.colors.primary.action : 'transparent'};
   align-items: center;
   justify-content: center;
@@ -104,7 +107,7 @@ function Checkbox({
   testID,
   accessibilityLabel,
 }: CheckboxProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const spec = SIZE_SPEC[size];
 
   const handlePress = () => {

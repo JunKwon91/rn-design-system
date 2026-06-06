@@ -46,8 +46,7 @@ import type {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { useTheme } from 'styled-components/native';
-
+import { useAppTheme } from '../../theme';
 import Text from '../primitives/Text';
 import type { TextVariant } from '../primitives/Text';
 import type { InteractivePressableProps } from '../../types/interactive';
@@ -129,7 +128,7 @@ export default function Button({
   accessibilityLabel,
   ...pressableProps
 }: ButtonProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const blocked = disabled || loading;
   const textVariant = SIZE_TEXT[size];
 
@@ -137,8 +136,8 @@ export default function Button({
     variant === 'primary'
       ? theme.colors.primary.onAction
       : variant === 'destructive'
-        ? theme.colors.primary.onAction
-        : theme.colors.text.secondary;
+      ? theme.colors.primary.onAction
+      : theme.colors.text.secondary;
 
   const computeStyle = ({
     pressed,

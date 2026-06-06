@@ -26,7 +26,10 @@
 
 import { ActivityIndicator } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 
@@ -48,9 +51,9 @@ const Container = styled.View`
   justify-content: center;
   gap: 12px;
   border-width: 1px;
-  background-color: ${({ theme }) => theme.colors.surface.container};
-  border-color: ${({ theme }) => theme.colors.border.subtle};
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.lg}px;
 `;
 
 /**
@@ -64,7 +67,7 @@ export default function LoadingView({
   size = 'large',
   style,
 }: LoadingViewProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <Container style={style}>

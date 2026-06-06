@@ -50,7 +50,10 @@ import type {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 
@@ -92,12 +95,12 @@ const Container = styled.View`
 
 const Field = styled.View<{ $state: InputState }>`
   height: 44px;
-  border-radius: ${({ theme }) => theme.radius.base}px;
-  background-color: ${({ theme }) => theme.colors.surface.containerLowest};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.base}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.containerLowest};
   flex-direction: row;
   align-items: center;
   border-width: ${({ $state }) => ($state === 'focus' ? 2 : 1)}px;
-  border-color: ${({ theme, $state }) => {
+  border-color: ${({ theme, $state }: { theme: AppTheme; $state: InputState }) => {
     if ($state === 'focus') return theme.colors.primary.action;
     if ($state === 'error') return theme.colors.state.error;
     return theme.colors.border.subtle;
@@ -137,7 +140,7 @@ const Input = forwardRef<TextInput, InputProps>(function Input(
   },
   ref,
 ) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   const state: InputState = disabled
