@@ -47,7 +47,7 @@ import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from 'styled-components/native';
+import { useAppTheme } from '../../theme';
 
 export type ScreenEdge =
   /** 상단 (status bar / 노치 / Dynamic Island) */
@@ -135,7 +135,7 @@ export default function Screen({
   style,
   children,
 }: ScreenProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const horizontalPadding = padded ? theme.spacing.containerMargin : 0;
 
   const containerStyle: ViewStyle = {

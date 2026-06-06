@@ -39,7 +39,10 @@
 import { Pressable, TextInput } from 'react-native';
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { Search, X } from 'lucide-react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 export interface SearchInputProps {
   /** 현재 검색어 — 제어 컴포넌트로 사용. */
@@ -58,10 +61,10 @@ export interface SearchInputProps {
 
 const Field = styled.View`
   height: 44px;
-  border-radius: ${({ theme }) => theme.radius.base}px;
-  background-color: ${({ theme }) => theme.colors.surface.containerLowest};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.base}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.containerLowest};
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.border.subtle};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
   flex-direction: row;
   align-items: center;
   padding-left: 12px;
@@ -90,7 +93,7 @@ export default function SearchInput({
   autoFocus,
   style,
 }: SearchInputProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const hasValue = value.length > 0;
 
   const inputStyle: TextStyle = {

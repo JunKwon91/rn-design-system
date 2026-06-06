@@ -20,6 +20,8 @@ import { useEffect, useRef, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 import Button from '../action/Button';
 import Input from '../input/Input';
 import Text from '../primitives/Text';
@@ -34,8 +36,8 @@ export interface DialogProps {
 const Card = styled.View`
   padding: 24px;
   gap: 16px;
-  border-radius: ${({ theme }) => theme.radius.lg}px;
-  background-color: ${({ theme }) => theme.colors.surface.container};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.lg}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
 `;
 
 const ButtonRow = styled.View`
@@ -48,7 +50,7 @@ const ButtonCell = styled.View`
 `;
 
 const DescriptionText = styled(Text)`
-  margin-top: ${({ theme }) => theme.spacing.xs}px;
+  margin-top: ${({ theme }: { theme: AppTheme }) => theme.spacing.xs}px;
 `;
 
 /**

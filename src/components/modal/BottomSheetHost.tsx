@@ -40,6 +40,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 import {
   useBottomSheetStore,
   type BottomSheetSnap,
@@ -61,7 +63,7 @@ const Backdrop = styled(Animated.View)`
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: ${({ theme }) => theme.colors.overlay.scrim};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.overlay.scrim};
 `;
 
 const Sheet = styled(Animated.View)`
@@ -69,7 +71,7 @@ const Sheet = styled(Animated.View)`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${({ theme }) => theme.colors.surface.container};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
   border-top-left-radius: 28px;
   border-top-right-radius: 28px;
   shadow-color: #000;
@@ -89,7 +91,7 @@ const HandleBar = styled.View`
   width: 32px;
   height: 4px;
   border-radius: 2px;
-  background-color: ${({ theme }) => theme.colors.border.default};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.default};
 `;
 
 const Content = styled(Animated.View)`

@@ -26,7 +26,9 @@
 // ============================================================================
 
 import type { StyleProp, ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import { useAppTheme } from '../../theme';
 
 export type BadgeType = 'dot' | 'count' | 'label';
 export type BadgeSize = 'sm' | 'md';
@@ -109,7 +111,7 @@ function Badge({
   style,
   testID,
 }: BadgeProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const bg =
     color === 'primary'
       ? theme.colors.primary.action

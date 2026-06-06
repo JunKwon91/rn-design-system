@@ -34,8 +34,10 @@
 import { cloneElement, isValidElement } from 'react';
 import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 import Text from '../primitives/Text';
 import type { InteractivePressableProps } from '../../types/interactive';
 
@@ -84,7 +86,7 @@ const SquareFab = styled(Pressable).attrs({ style: SHADOW })<{
   width: ${({ $dim }) => $dim}px;
   height: ${({ $dim }) => $dim}px;
   border-radius: ${({ $radius }) => $radius}px;
-  background-color: ${({ theme }) => theme.colors.primary.action};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.action};
   align-items: center;
   justify-content: center;
 `;
@@ -92,7 +94,7 @@ const SquareFab = styled(Pressable).attrs({ style: SHADOW })<{
 const ExtendedFab = styled(Pressable).attrs({ style: SHADOW })`
   height: ${EXTENDED_HEIGHT}px;
   border-radius: ${EXTENDED_RADIUS}px;
-  background-color: ${({ theme }) => theme.colors.primary.action};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.action};
   flex-direction: row;
   align-items: center;
   padding-left: 16px;
@@ -101,7 +103,7 @@ const ExtendedFab = styled(Pressable).attrs({ style: SHADOW })`
 
 const ExtendedLabel = styled(Text)`
   margin-left: 8px;
-  color: ${({ theme }) => theme.colors.primary.onAction};
+  color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.onAction};
   font-family: 'Inter';
   font-weight: 600;
 `;
@@ -134,7 +136,7 @@ function FAB({
   accessibilityLabel,
   ...pressableProps
 }: FABProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const iconColor = theme.colors.primary.onAction;
 
   if (variant === 'extended') {

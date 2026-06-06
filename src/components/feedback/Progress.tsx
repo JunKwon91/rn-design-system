@@ -46,7 +46,10 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
@@ -79,14 +82,14 @@ const LinearTrack = styled(Animated.View)<{ $h: number; $r: number }>`
   width: 100%;
   height: ${({ $h }) => $h}px;
   border-radius: ${({ $r }) => $r}px;
-  background-color: ${({ theme }) => theme.colors.border.default};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.default};
   overflow: hidden;
 `;
 
 const LinearFill = styled(Animated.View)<{ $h: number; $r: number }>`
   height: ${({ $h }) => $h}px;
   border-radius: ${({ $r }) => $r}px;
-  background-color: ${({ theme }) => theme.colors.primary.action};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.action};
 `;
 
 /**
@@ -206,7 +209,7 @@ const CircularWrap = styled(Animated.View)<{ $size: number }>`
  * <CircularProgress variant="indeterminate" size="sm" />
  */
 export function CircularProgress(props: CircularProgressProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { size = 'md', style, testID, accessibilityLabel } = props;
   const spec = CIRCULAR_SIZE_SPEC[size];
   const isIndet = props.variant === 'indeterminate';

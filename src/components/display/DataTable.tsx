@@ -54,7 +54,10 @@ import { Pressable, View } from 'react-native';
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 
@@ -118,9 +121,9 @@ const ROW_HEIGHT = {
 const Container = styled.View`
   border-width: 1px;
   overflow: hidden;
-  background-color: ${({ theme }) => theme.colors.surface.container};
-  border-color: ${({ theme }) => theme.colors.border.subtle};
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
+  border-radius: ${({ theme }: { theme: AppTheme }) => theme.radius.md}px;
 `;
 
 const HeaderRow = styled.View<{ $height: number }>`
@@ -129,8 +132,8 @@ const HeaderRow = styled.View<{ $height: number }>`
   align-items: center;
   border-bottom-width: 1px;
   height: ${({ $height }) => $height}px;
-  background-color: ${({ theme }) => theme.colors.surface.containerLow};
-  border-bottom-color: ${({ theme }) => theme.colors.border.subtle};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.containerLow};
+  border-bottom-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
 `;
 
 const BodyRow = styled.View<{ $height: number; $isLast: boolean }>`
@@ -139,7 +142,7 @@ const BodyRow = styled.View<{ $height: number; $isLast: boolean }>`
   align-items: center;
   height: ${({ $height }) => $height}px;
   border-bottom-width: ${({ $isLast }) => ($isLast ? 0 : 1)}px;
-  border-bottom-color: ${({ theme }) => theme.colors.border.subtle};
+  border-bottom-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
 `;
 
 const CellContent = styled.View`
@@ -165,7 +168,7 @@ function DataTable<T>({
   keyExtractor,
   style,
 }: DataTableProps<T>) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const heights = ROW_HEIGHT[density];
 
   const handleHeaderPress = (col: DataTableColumn<T>) => {

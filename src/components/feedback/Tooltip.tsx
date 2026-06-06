@@ -75,7 +75,10 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 export type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
@@ -121,11 +124,11 @@ const Bubble = styled.View`
   padding-top: 4px;
   padding-bottom: 4px;
   border-radius: 4px;
-  background-color: ${({ theme }) => theme.colors.surface.inverse};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.inverse};
 `;
 
 const BubbleText = styled.Text`
-  color: ${({ theme }) => theme.colors.text.primaryInverse};
+  color: ${({ theme }: { theme: AppTheme }) => theme.colors.text.primaryInverse};
   font-size: 12px;
   line-height: 16px;
 `;
@@ -154,7 +157,7 @@ function Tooltip({
   testID,
   accessibilityLabel,
 }: TooltipProps) {
-  useTheme();
+  useAppTheme();
   const [internalVisible, setInternalVisible] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });

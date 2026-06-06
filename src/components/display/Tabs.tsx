@@ -44,7 +44,10 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Badge from './Badge';
 import Text from '../primitives/Text';
@@ -95,14 +98,14 @@ const TabContentRow = styled.View`
 const Underline = styled.View<{ $active: boolean }>`
   height: 2px;
   align-self: stretch;
-  background-color: ${({ theme, $active }) =>
+  background-color: ${({ theme, $active }: { theme: AppTheme; $active: boolean }) =>
     $active ? theme.colors.primary.action : 'transparent'};
 `;
 
 const BaseLine = styled.View`
   height: 1px;
   align-self: stretch;
-  background-color: ${({ theme }) => theme.colors.border.subtle};
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.subtle};
 `;
 
 const Wrap = styled.View`
@@ -134,7 +137,7 @@ function Tabs<T extends string>({
   onChange,
   style,
 }: TabsProps<T>) {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <ScrollView

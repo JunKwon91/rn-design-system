@@ -46,6 +46,7 @@ import { View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
 import Text from '../primitives/Text';
 
 export type SectionSpacing =
@@ -75,11 +76,11 @@ const Header = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+  margin-bottom: ${({ theme }: { theme: AppTheme }) => theme.spacing.md}px;
 `;
 
 const ChildrenStack = styled.View<{ $spacing: SectionSpacing }>`
-  gap: ${({ theme, $spacing }) => {
+  gap: ${({ theme, $spacing }: { theme: AppTheme; $spacing: SectionSpacing }) => {
     if ($spacing === 'compact') return theme.spacing.sm;
     if ($spacing === 'roomy') return theme.spacing.lg;
     return theme.spacing.md;

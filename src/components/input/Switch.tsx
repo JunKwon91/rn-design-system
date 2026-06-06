@@ -47,7 +47,10 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
+
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 import Text from '../primitives/Text';
 import type { InteractivePressableProps } from '../../types/interactive';
@@ -81,7 +84,7 @@ const Row = styled.View<{ $disabled: boolean; $pressed: boolean }>`
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  opacity: ${({ theme, $disabled, $pressed }) =>
+  opacity: ${({ theme, $disabled, $pressed }: { theme: AppTheme; $disabled: boolean; $pressed: boolean }) =>
     $disabled ? theme.interaction.disabledOpacity : $pressed ? theme.interaction.pressedOpacity : 1};
 `;
 
@@ -116,7 +119,7 @@ function Switch({
   accessibilityLabel,
   ...pressableProps
 }: SwitchProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const spec = SIZE_SPEC[size];
   const padOff = (spec.trackH - spec.thumbOff) / 2;
   const padOn = (spec.trackH - spec.thumbOn) / 2;

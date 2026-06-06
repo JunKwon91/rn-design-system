@@ -35,8 +35,10 @@
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { ChevronRight, ExternalLink } from 'lucide-react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+import { useAppTheme } from '../../theme';
 import { Switch } from '../input';
 import Text from '../primitives/Text';
 
@@ -47,7 +49,8 @@ const RowBase = styled.View`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background-color: ${({ theme }) => theme.colors.surface.container};
+  background-color: ${({ theme }: { theme: AppTheme }) =>
+    theme.colors.surface.container};
 `;
 
 const PressableRowBase = styled.Pressable`
@@ -124,7 +127,7 @@ export type SettingsRowProps = SettingsRowCommon &
  * <SettingsRow kind="toggle" label="다크 모드" value={dark} onChange={setDark} />
  */
 export default function SettingsRow(props: SettingsRowProps) {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   const renderRight = () => {
     switch (props.kind) {
@@ -136,7 +139,11 @@ export default function SettingsRow(props: SettingsRowProps) {
         );
       case 'toggle':
         return (
-          <Switch value={props.value} onValueChange={props.onChange} size="md" />
+          <Switch
+            value={props.value}
+            onValueChange={props.onChange}
+            size="md"
+          />
         );
       case 'picker':
         return (
@@ -198,8 +205,8 @@ export default function SettingsRow(props: SettingsRowProps) {
     props.kind === 'toggle'
       ? 'switch'
       : props.kind === 'link'
-        ? 'link'
-        : 'button';
+      ? 'link'
+      : 'button';
 
   return (
     <PressableRowBase

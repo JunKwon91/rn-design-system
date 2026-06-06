@@ -30,6 +30,8 @@
 
 import styled from 'styled-components/native';
 
+import type { AppTheme } from '../../theme';
+
 export type SpacerSize =
   /** 4px · 아이콘 옆 텍스트 사이 등 매우 작은 간격 */
   | 'xs'
@@ -69,7 +71,7 @@ const StyledSpacer = styled.View<{
   $axis: SpacerAxis;
 }>`
   flex-shrink: 0;
-  ${({ theme, $size, $axis }) =>
+  ${({ theme, $size, $axis }: { theme: AppTheme; $size: SpacerSize; $axis: SpacerAxis }) =>
     $axis === 'horizontal'
       ? `width: ${theme.spacing[$size]}px;`
       : `height: ${theme.spacing[$size]}px; width: 100%;`}
