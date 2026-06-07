@@ -12,7 +12,7 @@ import styled, { useTheme } from 'styled-components/native';
 
 import { Spacer, Text } from '@/components/primitives';
 import { Card, Screen, Section } from '@/components/surface';
-import type { RootStackParamList } from '@/navigation/types';
+import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 

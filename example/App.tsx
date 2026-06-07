@@ -39,7 +39,7 @@ import {
   PopupHost,
   ToastHost,
 } from '@/components/modal';
-import RootNavigator from '@/navigation/RootNavigator';
+import RootNavigator from './src/navigation/RootNavigator';
 import { darkTheme, lightTheme } from '@/theme';
 
 export default function App() {
