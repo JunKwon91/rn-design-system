@@ -49,6 +49,10 @@ type InteractivePressableProps = Pick<PressableProps,
 | `children` | `ReactNode` | ✓ | — |
 | `style` | `StyleProp<TextStyle>` | — | — |
 
+| Light | Dark |
+|---|---|
+| ![Text light](screenshots/text-light.png) | ![Text dark](screenshots/text-dark.png) |
+
 `TextVariant` 11종은 [docs/theme.md#typography](theme.md#typography) 참고. `TextColor`는 `'primary' | 'secondary' | 'muted' | 'accent' | 'inverse'` 다섯 값이며 다음과 같이 매핑됩니다:
 
 | color 값 | 매핑되는 토큰 |
@@ -74,6 +78,8 @@ type InteractivePressableProps = Pick<PressableProps,
 | `size` | `SpacerSize` (`'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl' \| '3xl' \| '4xl'`) | ✓ | — |
 | `axis` | `'vertical' \| 'horizontal'` | — | `'vertical'` |
 
+*이미지 준비중*
+
 ```tsx
 <Spacer size="md" />
 <Spacer size="xl" axis="horizontal" />
@@ -88,6 +94,8 @@ type InteractivePressableProps = Pick<PressableProps,
 | `orientation` | `'horizontal' \| 'vertical'` | — | `'horizontal'` |
 | `color` | `'subtle' \| 'default' \| 'strong'` | — | `'subtle'` |
 | `inset` | `number` | — | `0` |
+
+*이미지 준비중*
 
 ```tsx
 <Divider />
@@ -113,6 +121,8 @@ type InteractivePressableProps = Pick<PressableProps,
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `children` | `ReactNode` | ✓ | — |
 
+*이미지 준비중*
+
 ```tsx
 <Screen>
   <Text variant="headlineSm">제목</Text>
@@ -137,6 +147,10 @@ type InteractivePressableProps = Pick<PressableProps,
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `children` | `ReactNode` | ✓ | — |
 
+| Light | Dark |
+|---|---|
+| ![Card light](screenshots/card-light.png) | ![Card dark](screenshots/card-dark.png) |
+
 ```tsx
 <Card title="이번 달" meta="2026-06" showDivider>
   <Text>최근 활동이 12건 있습니다.</Text>
@@ -158,6 +172,8 @@ type InteractivePressableProps = Pick<PressableProps,
 | `spacing` | `'compact' \| 'default' \| 'roomy'` | — | `'default'` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `children` | `ReactNode` | ✓ | — |
+
+*이미지 준비중*
 
 ```tsx
 <Section title="알림">
@@ -187,6 +203,10 @@ type InteractivePressableProps = Pick<PressableProps,
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `accessibilityLabel` | `string` | — | — |
 
+| Light | Dark |
+|---|---|
+| ![Button light](screenshots/button-light.png) | ![Button dark](screenshots/button-dark.png) |
+
 `loading: true`는 자체적으로 `disabled` 효과를 포함합니다. `variant='destructive'`는 `state.error` 배경 + 흰 텍스트로 표시되어 삭제·되돌릴 수 없는 액션에 사용합니다.
 
 ```tsx
@@ -208,6 +228,8 @@ type InteractivePressableProps = Pick<PressableProps,
 | `accessibilityLabel` | `string` | ✓ | — |
 | `onPress` | `() => void` | ✓ | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
+
+*이미지 준비중*
 
 `accessibilityLabel`은 필수입니다(아이콘만 보이는 컴포넌트라 스크린리더용 라벨이 보장되어야 합니다).
 
@@ -231,6 +253,10 @@ import { Settings, Search } from 'lucide-react-native';
 | `onPress` | `() => void` | ✓ | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![FAB light](screenshots/fab-light.png) | ![FAB dark](screenshots/fab-dark.png) |
 
 `variant='extended'`는 라벨이 함께 노출되는 가로형 FAB로, `label`을 함께 전달합니다.
 
@@ -262,6 +288,10 @@ import { Plus } from 'lucide-react-native';
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | (RN `TextInputProps`) | `Omit<TextInputProps, 'style'>` | — | — |
 
+| Light | Dark |
+|---|---|
+| ![Input light](screenshots/input-light.png) | ![Input dark](screenshots/input-dark.png) |
+
 `error`가 있으면 보더와 helper 영역이 에러 상태로 전환됩니다. `showHelper: false`는 라벨/에러가 없을 때 helper 영역의 빈 공간을 제거합니다.
 
 ```tsx
@@ -292,6 +322,8 @@ const [email, setEmail] = useState('');
 | `autoFocus` | `boolean` | — | `false` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
+*이미지 준비중*
+
 ```tsx
 const [q, setQ] = useState('');
 
@@ -317,6 +349,10 @@ const [q, setQ] = useState('');
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `testID` | `string` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![Checkbox light](screenshots/checkbox-light.png) | ![Checkbox dark](screenshots/checkbox-dark.png) |
 
 ```tsx
 const [agreed, setAgreed] = useState(false);
@@ -353,6 +389,10 @@ const [agreed, setAgreed] = useState(false);
 | `testID` | `string` | — | — |
 | `accessibilityLabel` | `string` | — | — |
 
+| Light | Dark |
+|---|---|
+| ![Radio light](screenshots/radio-light.png) | ![Radio dark](screenshots/radio-dark.png) |
+
 ```tsx
 type Plan = 'free' | 'pro' | 'team';
 const [plan, setPlan] = useState<Plan>('pro');
@@ -377,6 +417,10 @@ const [plan, setPlan] = useState<Plan>('pro');
 | `disabled` | `boolean` | — | `false` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![Switch light](screenshots/switch-light.png) | ![Switch dark](screenshots/switch-dark.png) |
 
 ```tsx
 const [dark, setDark] = useState(false);
@@ -404,6 +448,10 @@ const [dark, setDark] = useState(false);
 | `onSort` | `(key: string, direction: 'asc' \| 'desc') => void` | — | — |
 | `keyExtractor` | `(row: T, index: number) => string` | — | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![DataTable light](screenshots/datatable-light.png) | ![DataTable dark](screenshots/datatable-dark.png) |
 
 `DataTableColumn<T>`은 `key`/`header`/`width`/`align`/`render` 등을 포함하며, `disabled` 옵션으로 특정 열의 정렬을 막을 수 있습니다.
 
@@ -434,6 +482,10 @@ const columns: DataTableColumn<Row>[] = [
 | `onChange` | `(value: T) => void` | ✓ | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
+| Light | Dark |
+|---|---|
+| ![SegmentedControl light](screenshots/segmented-control-light.png) | ![SegmentedControl dark](screenshots/segmented-control-dark.png) |
+
 각 `segment`는 `value`/`label`을 가지며 `disabled?: boolean`로 비활성화할 수 있습니다.
 
 ```tsx
@@ -460,6 +512,10 @@ const [sort, setSort] = useState<Sort>('recent');
 | `value` | `T` | ✓ | — |
 | `onChange` | `(value: T) => void` | ✓ | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![Tabs light](screenshots/tabs-light.png) | ![Tabs dark](screenshots/tabs-dark.png) |
 
 각 `TabItem`은 `value`/`label`을 가지며 옵션으로 `icon?: ReactNode`(라벨 앞), `badge?: number | string`(라벨 뒤; number는 카운트 99+ 자동 처리), `disabled?: boolean`을 받습니다.
 
@@ -493,6 +549,10 @@ const [active, setActive] = useState('all');
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `testID` | `string` | — | — |
 
+| Light | Dark |
+|---|---|
+| ![Badge light](screenshots/badge-light.png) | ![Badge dark](screenshots/badge-dark.png) |
+
 - `type='dot'`: `value` 불필요. 작은 원 표시
 - `type='count'`: `value: number`. 100 이상은 `"99+"` 자동
 - `type='label'`: `value: string`. 짧은 라벨 표시
@@ -520,6 +580,10 @@ const [active, setActive] = useState('all');
 | `disabled` | `boolean` | — | `false` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![Chip light](screenshots/chip-light.png) | ![Chip dark](screenshots/chip-dark.png) |
 
 - `filter`: `selected` 상태에 따라 ✓ 아이콘 + 채워진 배경
 - `assist`/`input`: `icon`으로 leading 아이콘 표시
@@ -549,6 +613,10 @@ iOS HIG 설정 행 패턴의 컴포넌트입니다. `kind`로 5종의 행 형태
 | `label` | `string` | ✓ | — |
 | `leadingIcon` | `ReactNode` | — | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![SettingsRow light](screenshots/settings-row-light.png) | ![SettingsRow dark](screenshots/settings-row-dark.png) |
 
 kind별 추가 props:
 
@@ -591,6 +659,8 @@ import { Bell, Globe } from 'lucide-react-native';
 | `tone` | `'standard' \| 'subtle'` | — | `'standard'` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
+*이미지 준비중*
+
 `EmptyStateAction`은 `{ label: string; onPress: () => void }` 형태로, 표시 시 내부에 Button을 렌더합니다.
 
 ```tsx
@@ -616,6 +686,8 @@ import { Inbox } from 'lucide-react-native';
 | `action` | `ErrorViewAction` | — | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
+*이미지 준비중*
+
 ```tsx
 <ErrorView
   title="네트워크 오류"
@@ -634,6 +706,8 @@ import { Inbox } from 'lucide-react-native';
 | `size` | `'small' \| 'large'` | — | `'large'` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
+*이미지 준비중*
+
 ```tsx
 <LoadingView message="불러오는 중..." />
 ```
@@ -647,6 +721,10 @@ import { Inbox } from 'lucide-react-native';
 | `'rect'` | `width: number \| string`, `height: number \| string` |
 | `'circle'` | `size: number` |
 | `'text'` | `lines?: number (기본 3)`, `lineWidths?: (number \| string)[]`, `lineHeight?: number` |
+
+| Light | Dark |
+|---|---|
+| ![Skeleton light](screenshots/skeleton-light.png) | ![Skeleton dark](screenshots/skeleton-dark.png) |
 
 ```tsx
 <Skeleton type="rect" width={200} height={16} />
@@ -667,6 +745,10 @@ import { Inbox } from 'lucide-react-native';
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `testID` | `string` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![Progress light](screenshots/progress-light.png) | ![Progress dark](screenshots/progress-dark.png) |
 
 `variant='determinate'`(생략 가능)에서는 `value`가 필수입니다. `indeterminate`는 무한 애니메이션으로 진행 단계를 모를 때 사용합니다.
 
@@ -693,6 +775,10 @@ import { Inbox } from 'lucide-react-native';
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `testID` | `string` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+
+| Light | Dark |
+|---|---|
+| ![Tooltip light](screenshots/tooltip-light.png) | ![Tooltip dark](screenshots/tooltip-dark.png) |
 
 `visible`을 지정하면 외부 제어 모드로 동작합니다(onboarding 등). 미지정 시 자동 모드 — 롱프레스로 열리고 `autoDismissDelay` 후 닫힙니다.
 
@@ -725,12 +811,20 @@ modal 카테고리에는 시각 컴포넌트 4종(`Toast`, `Dialog`, `BottomShee
 | `config` | `ToastConfig` | ✓ | — |
 | `onDismiss` | `() => void` | ✓ | — |
 
+| Light | Dark |
+|---|---|
+| ![Toast light](screenshots/toast-light.png) | ![Toast dark](screenshots/toast-dark.png) |
+
 ### Dialog
 
 | prop | 타입 | 필수 | 기본값 |
 |---|---|---|---|
 | `config` | `DialogConfig` | ✓ | — |
 | `onResolve` | `(value: unknown) => void` | ✓ | — |
+
+| Light | Dark |
+|---|---|
+| ![Dialog light](screenshots/dialog-light.png) | ![Dialog dark](screenshots/dialog-dark.png) |
 
 ### BottomSheet
 
@@ -745,6 +839,30 @@ modal 카테고리에는 시각 컴포넌트 4종(`Toast`, `Dialog`, `BottomShee
 | `initialSnap` | `number` | — | `0` |
 | `onSnapChange` | `(index: number) => void` | — | — |
 | `children` | `ReactNode` | ✓ | — |
+
+**단일 snap**
+
+| Light | Dark |
+|---|---|
+| ![BottomSheet single snap light](screenshots/bottom-sheet-single-snap-light.png) | ![BottomSheet single snap dark](screenshots/bottom-sheet-single-snap-dark.png) |
+
+**다중 snap**
+
+| Light | Dark |
+|---|---|
+| ![BottomSheet multi snap light](screenshots/bottom-sheet-multi-snap-light.png) | ![BottomSheet multi snap dark](screenshots/bottom-sheet-multi-snap-dark.png) |
+
+**Scrollable**
+
+| Light | Dark |
+|---|---|
+| ![BottomSheet scrollable light](screenshots/bottom-sheet-scrollable-light.png) | ![BottomSheet scrollable dark](screenshots/bottom-sheet-scrollable-dark.png) |
+
+**키보드 양립**
+
+| Light | Dark |
+|---|---|
+| ![BottomSheet keyboard light](screenshots/bottom-sheet-keyboard-light.png) | ![BottomSheet keyboard dark](screenshots/bottom-sheet-keyboard-dark.png) |
 
 `snapPoints`를 지정하면 다중 snap 모드로 동작하고, 미지정 시 `height` 기준 단일 snap입니다. `BottomSheetSnap`은 `'auto' | \`${number}%\` | number` 형태로 자유 혼합 가능합니다.
 
@@ -770,6 +888,24 @@ const [visible, setVisible] = useState(false);
 | `visible` | `boolean` | ✓ | — |
 | `onDismiss` | `() => void` | ✓ | — |
 | `children` | `ReactNode` | ✓ | — |
+
+**RadioGroup 선택**
+
+| Light | Dark |
+|---|---|
+| ![Popup radio light](screenshots/popup-radio-light.png) | ![Popup radio dark](screenshots/popup-radio-dark.png) |
+
+**Checkbox 다중 선택**
+
+| Light | Dark |
+|---|---|
+| ![Popup checkbox light](screenshots/popup-checkbox-light.png) | ![Popup checkbox dark](screenshots/popup-checkbox-dark.png) |
+
+**다중 Input form**
+
+| Light | Dark |
+|---|---|
+| ![Popup form light](screenshots/popup-form-light.png) | ![Popup form dark](screenshots/popup-form-dark.png) |
 
 ```tsx
 const [visible, setVisible] = useState(false);
