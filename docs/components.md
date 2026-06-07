@@ -1,6 +1,6 @@
 # Components
 
-35종 컴포넌트의 props 레퍼런스와 사용 예시입니다. 각 컴포넌트는 `AppTheme` 토큰을 기본 동작에 자동 적용하고, 필요하면 `style` prop으로 시각 속성을 추가로 재정의할 수 있습니다. 토큰 구조 자체는 [docs/theme.md](theme.md)를 참고하세요.
+36종 컴포넌트의 props 레퍼런스와 사용 예시입니다. 각 컴포넌트는 `AppTheme` 토큰을 기본 동작에 자동 적용하고, 필요하면 `style` prop으로 시각 속성을 추가로 재정의할 수 있습니다. 토큰 구조 자체는 [docs/theme.md](theme.md)를 참고하세요.
 
 - [공통 — InteractivePressableProps](#공통--interactivepressableprops)
 - [primitives](#primitives) — Text · Spacer · Divider
@@ -149,13 +149,13 @@ type InteractivePressableProps = Pick<PressableProps,
 
 ### Section
 
-페이지 안의 논리적 영역을 묶는 컴포넌트입니다. `title`과 `action`(우측 보조 UI)을 받고, 자식 사이 간격을 자동으로 둡니다.
+페이지 안의 논리적 영역을 묶는 컴포넌트입니다. `title`과 `action`(우측 보조 UI)을 받고, `spacing`으로 자식 사이 간격을 3단계로 제어합니다(`compact`=8px, `default`=12px, `roomy`=16px).
 
 | prop | 타입 | 필수 | 기본값 |
 |---|---|---|---|
 | `title` | `string` | — | — |
 | `action` | `ReactNode` | — | — |
-| `spacing` | `'default' \| 'compact'` | — | `'default'` |
+| `spacing` | `'compact' \| 'default' \| 'roomy'` | — | `'default'` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `children` | `ReactNode` | ✓ | — |
 
