@@ -8,15 +8,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from 'styled-components/native';
 
-import GalleryHomeScreen from '@/screens/GalleryHomeScreen';
-import PrimitivesScreen from '@/screens/gallery/PrimitivesScreen';
-import SurfaceScreen from '@/screens/gallery/SurfaceScreen';
-import ActionScreen from '@/screens/gallery/ActionScreen';
-import InputScreen from '@/screens/gallery/InputScreen';
-import DisplayScreen from '@/screens/gallery/DisplayScreen';
-import ListScreen from '@/screens/gallery/ListScreen';
-import FeedbackScreen from '@/screens/gallery/FeedbackScreen';
-import ModalScreen from '@/screens/gallery/ModalScreen';
+import GalleryHomeScreen from '../screens/GalleryHomeScreen';
+import PrimitivesScreen from '../screens/gallery/PrimitivesScreen';
+import SurfaceScreen from '../screens/gallery/SurfaceScreen';
+import ActionScreen from '../screens/gallery/ActionScreen';
+import InputScreen from '../screens/gallery/InputScreen';
+import DisplayScreen from '../screens/gallery/DisplayScreen';
+import ListScreen from '../screens/gallery/ListScreen';
+import FeedbackScreen from '../screens/gallery/FeedbackScreen';
+import ModalScreen from '../screens/gallery/ModalScreen';
 
 import type { RootStackParamList } from './types';
 
