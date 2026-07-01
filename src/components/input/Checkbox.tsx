@@ -16,24 +16,24 @@
 //
 // [디자인 토큰]
 // Box: cornerRadius 2
-//   sm 16×16 / stroke 1.5 — Check icon size 10 strokeWidth 1.5
+//   sm 16×16 / stroke 1.5 — Check icon size 10 strokeWidth 2
 //   md 20×20 / stroke 2   — Check icon size 12 strokeWidth 2
-//   lg 24×24 / stroke 2   — Check icon size 16 strokeWidth 2.5
+//   lg 24×24 / stroke 2   — Check icon size 16 strokeWidth 2
 // Unchecked: stroke border.control, fill transparent
-// Checked:   fill primary.action, lucide Check 아이콘 color primary.onAction
+// Checked:   fill primary.action, DS Check(커스텀) 아이콘 color primary.onAction
 // Disabled:  Row opacity 0.5
 // Label:     우측 8px gap, Text variant labelMd
 //   enabled  — text.primary
 //   disabled — text.secondary opacity 0.7
 // ============================================================================
 
-import { Check } from 'lucide-react-native';
 import { Pressable } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
 import type { AppTheme } from '../../theme';
 import { useAppTheme } from '../../theme';
+import { Check } from '../../icons';
 
 import Text from '../primitives/Text';
 
@@ -58,9 +58,9 @@ interface SizeSpec {
 }
 
 const SIZE_SPEC: Record<CheckboxSize, SizeSpec> = {
-  sm: { box: 16, stroke: 1.5, check: 10, checkStroke: 1.5 },
+  sm: { box: 16, stroke: 1.5, check: 10, checkStroke: 2 },
   md: { box: 20, stroke: 2, check: 12, checkStroke: 2 },
-  lg: { box: 24, stroke: 2, check: 16, checkStroke: 2.5 },
+  lg: { box: 24, stroke: 2, check: 16, checkStroke: 2 },
 };
 
 const Row = styled.View<{ $disabled: boolean; $pressed: boolean }>`
