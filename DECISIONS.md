@@ -1518,3 +1518,93 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 - 콘텐츠 모델은 Title/Meta/Body 텍스트 고정 유지 — 인스턴스에 공·차트 등 임의 콘텐츠 중첩은 여전히 불가. 그런 콘텐츠 카드는 소비 앱이 이 스펙에 맞춰 프레임으로 구성(스펙-매칭)한다.
 - **사용처 매핑(리스트=Filled, 패널=Outlined)은 DS가 아니라 소비 앱이 정의한다** — DS가 특정 앱의 의미론을 알면 재사용성이 깨지므로. (LottoStats ADR-10)
 - Figma Card 컴포넌트 description에 variant 스펙·용도 기재.
+
+---
+
+## ADR-42: OptionCard 신설 + 공용 Check 아이콘 (Radio / Checkbox와 역할 구분)
+
+### 상황
+
+소비 앱(LottoStats)에 "옵션 하나를 고르는 선택형 카드"(예: 번호 추천 알고리즘 선택)가 있는데, 선택 표시가 컴포넌트가 아니라 임시 요소로 제각각이었다 — 선택=Check 인스턴스 / 미선택=직접 그린 원. 이를 DS 컴포넌트로 정식화하려 했으나 두 벽에 부딪혔다:
+
+- 선택 표시(채워진 원 + 체크)를 **DS Radio의 Selected 상태로 흡수하면**, Radio(원+체크)가 Checkbox(사각+체크)와 모양(원/사각)만 다른 거의 같은 꼴이 되어 **단일선택/다중선택을 시각으로 구분하는 관습이 무너진다.**
+- OptionCard의 체크와 Checkbox의 체크가 크기·각도가 서로 달라 **체크 모양이 불일치**했다.
+
+### 선택
+
+1. **선택형 카드를 별도 컴포넌트 `OptionCard`로 신설** (폼 컨트롤과 층위 분리).
+   - `State` variant = Selected(테두리 `primary/action` + 채워진 원 + 체크) / Unselected(회색 링 `border/default`)
+   - 속성: `Title`, `Description`(TEXT) + 아이콘 슬롯(nested instance)
+   - `surface/container` + radius 16. 전용 페이지 `⌨️ Input — OptionCard`(Radio/Checkbox와 동일한 섹션 구조).
+2. **Radio(링+점) / Checkbox(사각+체크)는 폼 컨트롤로 그대로 유지** — 손대지 않는다.
+3. **공용 `Check` 아이콘 컴포넌트 신설** — OptionCard와 Checkbox가 같은 Check 인스턴스를 참조해 체크 모양을 단일화.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| DS Radio의 Selected를 원+체크로 변경 | Checkbox(사각+체크)와 시각 구분 상실 → 단일/다중 선택 관습 붕괴 |
+| 선택 표시를 커스텀(비-컴포넌트)으로 유지 | 재사용·일관성 없음. 선택=Check / 미선택=직접 그린 원으로 제각각 |
+| OptionCard에 아이콘 내장 | 알고리즘 아이콘은 앱 도메인 → 아이콘 슬롯(instance-swap)으로 두고 소비 앱이 제공 |
+
+### 근거
+
+- "선택형 카드"는 폼 컨트롤(Radio/Checkbox)과 다른 층위(카드 전체가 선택 대상) → 별도 컴포넌트가 맞다.
+- Radio/Checkbox를 건드리지 않으므로 폼 컨트롤 구분(점 vs 사각+체크)이 보존된다.
+- 아이콘은 도메인 콘텐츠 → 슬롯으로 분리(Card ADR-41과 동일 원칙: DS=껍데기, 앱=콘텐츠).
+- 공용 Check로 체크 모양을 단일 소스화 → 이후 변경이 OptionCard·Checkbox에 동시 반영.
+
+### 결과
+
+- `OptionCard`(State/Title/Description/아이콘 슬롯) + `Check` 아이콘 컴포넌트 추가.
+- 소비 앱은 OptionCard 인스턴스에 자기 아이콘(예: AlgorithmIcon)을 슬롯 swap + 로컬 테마 색으로 사용(LottoStats 번호 추천 알고리즘 카드에 적용).
+- 구현 노트: 텍스트를 인스턴스 직접 오버라이드로 넣으면 렌더가 불안정 → **컴포넌트 TEXT 속성(Title/Description)**으로 처리해야 안정적.
+- 아이콘 슬롯은 현재 nested instance 직접 swap 방식. INSTANCE_SWAP 속성은 미퍼블리시 컴포넌트 키 문제로 보류 — publish 후 정식 속성으로 승격 가능.
+
+---
+
+## ADR-43: 커스텀 SVG 아이콘 시스템 도입 (`createIcon` + `src/icons`) + Figma 정합 코드 반영
+
+### 상황
+
+- DS 컴포넌트는 아이콘을 `lucide-react-native`로 쓰거나 slot(`ReactNode`)으로 받아왔다. 그러나 (a) DS 고유 글리프(부드러운 Check 등)가 lucide에 없고, (b) 앞으로 lucide로 커버 안 되는 커스텀 아이콘이 계속 생기며, (c) 외부 아이콘 패키지 의존을 점진 축소하고 싶다.
+- Figma에서 Check를 커스텀(부드러운) 모양으로 통일(ADR-42)했는데 코드 Checkbox는 lucide `Check`(모양 다름)라 **디자인-코드 divergence**가 발생했다.
+
+### 선택
+
+- 이미 peer dep인 **`react-native-svg`**(lucide도 이걸 사용) 위에 **커스텀 아이콘 시스템**을 둔다.
+  - `src/icons/createIcon.tsx` — 팩토리. **lucide와 동일 API**(`size`/`color`/`strokeWidth`), viewBox 24, stroke 기반 round cap/join.
+  - `src/icons/Check.tsx` — 첫 커스텀 아이콘(부드러운 체크, Figma와 동일 path `M5.1 12.5 L9.9 17.1 L18.9 7.2`).
+  - `src/icons/index.ts` + 루트 `src/index.ts`에서 export.
+- Checkbox·OptionCard가 DS `Check` 사용. lucide는 미이관 아이콘 위해 당분간 유지 — API 동일이라 **import만 교체하는 drop-in 이관**.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| lucide만 계속 사용 | 커스텀 글리프 표현 불가 + Figma와 divergence |
+| Figma Check를 lucide 모양으로 되돌림 | 디자인 의도(부드러운 체크) 포기 |
+| 아이콘 전용 별도 패키지 | 규모 대비 과함 — `src/icons`로 충분 |
+
+### 근거
+
+- **새 의존성 0** — react-native-svg 재사용. lucide와 동일 엔진·API라 시각/성능 동일 + 점진 drop-in.
+- viewBox/stroke 규약을 lucide 관례와 맞춰 혼용 시에도 일관.
+
+### 결과
+
+**신규**
+- `src/icons/`(createIcon + Check + barrel), 루트 export.
+
+**동반 반영 (Figma 정합)**
+- **Card**: variant `default/elevated → outlined/filled` (ADR-41 코드 반영). breaking — 아직 소비처 0이라 즉시 rename. example 갤러리 사용처 동반 수정.
+- **theme**: `border.divider` 토큰 추가 (Light `slate-300` #CBD5E1 / Dark `slateDark-720` #474B55).
+- **SettingsRow**: `divider?: boolean`(기본 true) — 하단 좌우 16 inset 라인(`border.divider`). 그룹 마지막 행은 `false`.
+- **OptionCard**: `input/OptionCard.tsx` 신규 (ADR-42 코드 반영) — `selected/title/description/icon(slot)/onPress`, 선택 마크(원+Check) / 링, `accessibilityRole="radio"`.
+- **Checkbox**: lucide → DS `Check`, checkStroke 전 사이즈 2px 통일.
+- **SegmentedControl**: 윤곽선 Figma DS 정합 — 1.5px→1px, `border.strong`→`border.default` (선택 pill 침범 오프셋 -1.5→-1 동반).
+- **SettingsRow** (`kind: 'custom'`): 라벨 + full-width `content` 슬롯(세로 블록) 추가 — SegmentedControl 등 임의 컴포넌트를 행에 배치(Lotto Settings 테마 행 구조 반영).
+
+**검증**: 전체 `tsc --noEmit -p tsconfig.json` 0 error.
+
+**후속**: ChevronRight/ExternalLink 등 순차 커스텀 추가 → lucide 완전 이관 시 dependency 제거 검토. 소비 앱은 lucide 대신 DS 아이콘 사용(이름 충돌 방지).

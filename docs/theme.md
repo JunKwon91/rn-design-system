@@ -85,6 +85,7 @@ import { lightTheme, darkTheme } from '@junkwon91/rn-design-system';
 | `subtle` | 매우 흐릿한 구분선 (Divider 등) |
 | `strong` | 강조 보더 (선택 강조 등) |
 | `control` | interactive control 보더. Checkbox/Radio 등의 WCAG 대비 충족용 |
+| `divider` | 리스트 행 인셋 구분선 (SettingsRow 등) |
 
 #### `colors.primary` — 브랜드 액션
 

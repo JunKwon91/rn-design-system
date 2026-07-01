@@ -172,6 +172,7 @@ export interface ColorsShape {
     subtle: string; // 매우 흐릿한 구분선
     strong: string; // 강조된 보더
     control: string; // Checkbox/Radio 등 interactive 컨트롤 보더
+    divider: string; // 리스트 행 구분선 (SettingsRow 인셋 divider 등)
   };
   // primary = 브랜드 액션 (버튼, 액티브 탭 등).
   primary: {
@@ -226,6 +227,7 @@ export const lightColors: ColorsShape = {
     subtle: primitives.slate[300],
     strong: primitives.slate[500],
     control: primitives.slate[450],
+    divider: primitives.slate[300], // Light 구분선 (#CBD5E1, Dark에서 값 분기)
   },
   primary: {
     action: primitives.brand.primaryLight, // 진한 파랑 버튼
@@ -277,6 +279,7 @@ export const darkColors: ColorsShape = {
     subtle: primitives.slateDark[870],
     strong: primitives.slateDark[500],
     control: primitives.slateDark[450],
+    divider: primitives.slateDark[720], // Dark 구분선 (#474B55, subtle보다 진해 가시성 확보)
   },
   primary: {
     action: primitives.brand.primaryDark, // 다크 모드용 옅은 파랑

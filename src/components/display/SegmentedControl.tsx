@@ -19,16 +19,16 @@
 //   />
 //
 // [디자인 토큰 — M3 Segmented Button]
-// 컨테이너: height 36, borderRadius 18 (pillbox), 1.5px border.strong,
+// 컨테이너: height 36, borderRadius 18 (pillbox), 1px border.default,
 //   bg transparent, overflow hidden (active indicator + segments 모두 외곽
 //   cornerRadius에 자동 clip)
 // Indicator (Reanimated absolute):
-//   position absolute, top -1.5 (border 영역 침범 + outer clip 처리로 외곽
+//   position absolute, top -1 (border 영역 침범 + outer clip 처리로 외곽
 //     stroke 안쪽까지 fill — visible padding 0)
 //   height 36 (외곽 height와 동일, border 영역 침범)
 //   left + width useSharedValue (200ms timing, Easing.inOut(Easing.ease))
 //   bg primary.action
-// 각 세그먼트: flex 1, height 36, margin-vertical -1.5 (border 침범 패턴)
+// 각 세그먼트: flex 1, height 36, margin-vertical -1 (border 침범 패턴)
 //   Active   — 텍스트 primary.onAction
 //   Inactive — 텍스트 text.secondary
 // 텍스트 variant: labelLg (Inter 14/600)
@@ -72,8 +72,8 @@ const Container = styled.View`
   height: 36px;
   border-radius: 18px;
   flex-direction: row;
-  border-width: 1.5px;
-  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.strong};
+  border-width: 1px;
+  border-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.default};
   background-color: transparent;
   overflow: hidden;
 `;
@@ -81,15 +81,15 @@ const Container = styled.View`
 const Indicator = styled(Animated.View)`
   position: absolute;
   height: 36px;
-  top: -1.5px;
+  top: -1px;
   background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.action};
 `;
 
 const Segment = styled.Pressable`
   flex: 1;
   height: 36px;
-  margin-top: -1.5px;
-  margin-bottom: -1.5px;
+  margin-top: -1px;
+  margin-bottom: -1px;
 `;
 
 const SegmentInner = styled.View<{ $pressed: boolean }>`

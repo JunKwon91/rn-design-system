@@ -1,9 +1,10 @@
 // ============================================================================
 // InputScreen — Input 카테고리 갤러리
 // ============================================================================
-// Input · SearchInput · Checkbox · Radio · Switch — Tabs 전환 패턴 (5 탭)
+// Input · SearchInput · Checkbox · Radio · Switch · OptionCard — Tabs 전환 (6 탭)
 // ============================================================================
 
+import { Flame, Shuffle, Snowflake } from 'lucide-react-native';
 import { useState } from 'react';
 import { ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
@@ -12,6 +13,7 @@ import { Tabs } from '@/components/display';
 import {
   Checkbox,
   Input,
+  OptionCard,
   Radio,
   RadioGroup,
   SearchInput,
@@ -26,6 +28,7 @@ const SECTIONS = [
   { value: 'checkbox', label: 'Checkbox' },
   { value: 'radio', label: 'Radio' },
   { value: 'switch', label: 'Switch' },
+  { value: 'optioncard', label: 'OptionCard' },
 ] as const;
 
 type SectionValue = typeof SECTIONS[number]['value'];
@@ -73,6 +76,9 @@ export default function InputScreen() {
   const [lgSwitch, setLgSwitch] = useState(false);
   const [noLabelOff, setNoLabelOff] = useState(false);
   const [noLabelOn, setNoLabelOn] = useState(true);
+
+  // OptionCard 시연 상태
+  const [algo, setAlgo] = useState<'hot' | 'cold' | 'random'>('hot');
 
   return (
     <Screen edges={['bottom']} padded={false}>
@@ -292,6 +298,49 @@ export default function InputScreen() {
                 <Switch value={false} disabled />
                 <Switch value disabled />
               </RowNoLabel>
+            </Section>
+          </>
+        )}
+
+        {activeSection === 'optioncard' && (
+          <>
+            <Section title="OptionCard · single select (단일 선택)">
+              <Text variant="labelSm" color="muted">
+                선택된 값: {algo}
+              </Text>
+              <OptionCard
+                selected={algo === 'hot'}
+                title="Hot 추천"
+                description="최근 출현 빈도가 높은 번호 중심"
+                icon={<Flame size={28} color={theme.colors.state.error} />}
+                onPress={() => setAlgo('hot')}
+              />
+              <Spacer size="sm" />
+              <OptionCard
+                selected={algo === 'cold'}
+                title="Cold 추천"
+                description="장기간 미출현한 번호 위주"
+                icon={<Snowflake size={28} color={theme.colors.state.info} />}
+                onPress={() => setAlgo('cold')}
+              />
+              <Spacer size="sm" />
+              <OptionCard
+                selected={algo === 'random'}
+                title="랜덤 생성"
+                description="순수 확률 기반 자동 생성"
+                icon={<Shuffle size={28} color={theme.colors.text.secondary} />}
+                onPress={() => setAlgo('random')}
+              />
+            </Section>
+            <Spacer size="2xl" />
+            <Section title="OptionCard · disabled">
+              <OptionCard
+                selected
+                title="비활성 (선택됨)"
+                description="disabled — 탭 무시 + opacity 저하"
+                icon={<Flame size={28} color={theme.colors.state.error} />}
+                disabled
+              />
             </Section>
           </>
         )}

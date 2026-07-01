@@ -1,16 +1,17 @@
 # Components
 
-36종 컴포넌트의 props 레퍼런스와 사용 예시입니다. 각 컴포넌트는 `AppTheme` 토큰을 기본 동작에 자동 적용하고, 필요하면 `style` prop으로 시각 속성을 추가로 재정의할 수 있습니다. 토큰 구조 자체는 [docs/theme.md](theme.md)를 참고하세요.
+37종 컴포넌트의 props 레퍼런스와 사용 예시입니다. 각 컴포넌트는 `AppTheme` 토큰을 기본 동작에 자동 적용하고, 필요하면 `style` prop으로 시각 속성을 추가로 재정의할 수 있습니다. 토큰 구조 자체는 [docs/theme.md](theme.md)를 참고하세요.
 
 - [공통 — InteractivePressableProps](#공통--interactivepressableprops)
 - [primitives](#primitives) — Text · Spacer · Divider
 - [surface](#surface) — Screen · Card · Section
 - [action](#action) — Button · IconButton · FAB
-- [input](#input) — Input · SearchInput · Checkbox · Radio · RadioGroup · Switch
+- [input](#input) — Input · SearchInput · Checkbox · Radio · RadioGroup · Switch · OptionCard
 - [display](#display) — DataTable · SegmentedControl · Tabs · Badge · Chip
 - [list](#list) — SettingsRow
 - [feedback](#feedback) — EmptyState · ErrorView · LoadingView · Skeleton · LinearProgress · CircularProgress · Tooltip
 - [modal](#modal) — Toast · Dialog · BottomSheet · Popup (시각 컴포넌트; Host 마운트와 호출은 [docs/imperative.md](imperative.md))
+- [icons](#icons) — createIcon · Check (커스텀 SVG 아이콘)
 
 ---
 
@@ -135,11 +136,11 @@ type InteractivePressableProps = Pick<PressableProps,
 
 ### Card
 
-관련된 내용을 묶는 표면 컨테이너입니다. `surface.container` 배경과 `radius.lg`를 기본으로 사용하고, `title`/`meta`로 헤더를 자동 구성합니다.
+관련된 내용을 묶는 표면 컨테이너입니다. `surface.container` 배경과 `radius.lg`를 기본으로 사용하고, `title`/`meta`로 헤더를 자동 구성합니다. variant는 `outlined`(1px `border.subtle`, 독립 정보 패널) / `filled`(무테, 반복 리스트 항목)로 구분합니다.
 
 | prop | 타입 | 필수 | 기본값 |
 |---|---|---|---|
-| `variant` | `'default' \| 'elevated'` | — | `'default'` |
+| `variant` | `'outlined' \| 'filled'` | — | `'outlined'` |
 | `density` | `'default' \| 'compact'` | — | `'default'` |
 | `title` | `string` | — | — |
 | `meta` | `string` | — | — |
@@ -429,6 +430,37 @@ const [dark, setDark] = useState(false);
 <Switch value disabled />
 ```
 
+### OptionCard
+
+아이콘 + 제목/설명 + 선택 표시로 구성된 "하나를 고르는" 선택형 카드입니다. 카드 전체가 탭 영역이며, 그룹 내 단일 선택은 소비 측이 관리합니다(`accessibilityRole="radio"`). 폼 컨트롤 Radio/Checkbox와는 다른 층위 — 카드 자체가 선택 대상입니다. 아이콘은 `icon` slot으로 주입합니다.
+
+| prop | 타입 | 필수 | 기본값 |
+|---|---|---|---|
+| `selected` | `boolean` | ✓ | — |
+| `title` | `string` | ✓ | — |
+| `description` | `string` | — | — |
+| `icon` | `ReactNode` | — | — |
+| `onPress` | `() => void` | — | — |
+| `disabled` | `boolean` | — | `false` |
+| `style` | `StyleProp<ViewStyle>` | — | — |
+| `accessibilityLabel` | `string` | — | — |
+
+`selected`: 파란 테두리 + 채운 원 + Check / unselected: 무테 + 링.
+
+```tsx
+import { Flame } from 'lucide-react-native';
+
+const [mode, setMode] = useState<'hot' | 'cold'>('hot');
+
+<OptionCard
+  selected={mode === 'hot'}
+  title="Hot 추천"
+  description="최근 출현 빈도가 높은 번호 중심"
+  icon={<Flame size={28} />}
+  onPress={() => setMode('hot')}
+/>
+```
+
 ---
 
 ## display
@@ -605,13 +637,14 @@ import { Plus, Star } from 'lucide-react-native';
 
 ### SettingsRow
 
-iOS HIG 설정 행 패턴의 컴포넌트입니다. `kind`로 5종의 행 형태(`'default' | 'toggle' | 'picker' | 'link' | 'action'`)를 선택하고, 각 kind마다 받는 props가 달라집니다.
+iOS HIG 설정 행 패턴의 컴포넌트입니다. `kind`로 6종의 행 형태(`'default' | 'toggle' | 'picker' | 'link' | 'action' | 'custom'`)를 선택하고, 각 kind마다 받는 props가 달라집니다. 하단 인셋 구분선은 `divider`(기본 `true`)로 제어하며, 그룹의 **마지막 행은 `divider={false}`**로 끕니다.
 
 | prop | 타입 | 필수 | 기본값 |
 |---|---|---|---|
-| `kind` | `'default' \| 'toggle' \| 'picker' \| 'link' \| 'action'` | ✓ | — |
+| `kind` | `'default' \| 'toggle' \| 'picker' \| 'link' \| 'action' \| 'custom'` | ✓ | — |
 | `label` | `string` | ✓ | — |
 | `leadingIcon` | `ReactNode` | — | — |
+| `divider` | `boolean` | — | `true` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
 | Light | Dark |
@@ -625,9 +658,10 @@ kind별 추가 props:
 - `picker`: `value: string`, `onPress: () => void` — 우측 값 + chevron
 - `link`: `onPress: () => void` — 우측 chevron (외부 이동 등)
 - `action`: `onPress: () => void` — 라벨만 누르는 행
+- `custom`: `content: ReactNode` — 라벨 아래 full-width 컨텐츠(세로 블록). SegmentedControl 등 임의 컴포넌트 배치용
 
 ```tsx
-import { Bell, Globe } from 'lucide-react-native';
+import { Globe } from 'lucide-react-native';
 
 <SettingsRow kind="default" label="버전" value="2.0.0" />
 <SettingsRow kind="toggle" label="다크 모드" value={dark} onChange={setDark} />
@@ -639,7 +673,25 @@ import { Bell, Globe } from 'lucide-react-native';
   onPress={openLangPicker}
 />
 <SettingsRow kind="link" label="문의하기" onPress={openContact} />
-<SettingsRow kind="action" label="로그아웃" onPress={logout} />
+// 그룹의 마지막 행 — divider={false}
+<SettingsRow kind="action" label="로그아웃" onPress={logout} divider={false} />
+
+// custom — 라벨 + 임의 컴포넌트(예: SegmentedControl)
+<SettingsRow
+  kind="custom"
+  label="테마"
+  content={
+    <SegmentedControl
+      segments={[
+        { value: 'dark', label: '다크' },
+        { value: 'light', label: '라이트' },
+        { value: 'system', label: '시스템' },
+      ]}
+      value={theme}
+      onChange={setTheme}
+    />
+  }
+/>
 ```
 
 ---
@@ -914,3 +966,32 @@ const [visible, setVisible] = useState(false);
   <ThemeSelector onPick={(t) => { applyTheme(t); setVisible(false); }} />
 </Popup>
 ```
+
+---
+
+## icons
+
+lucide-react-native로 커버되지 않는 아이콘을 직접 정의하기 위한 경량 SVG 팩토리입니다. `createIcon`은 lucide와 동일한 props(`size` / `color` / `strokeWidth`)를 노출하므로 소비 측 사용법이 lucide 아이콘과 완전히 동일합니다. 컴포넌트 간 공유가 필요한 아이콘(예: Checkbox·OptionCard가 함께 쓰는 `Check`)은 여기서 단일 정의해 중복을 없앱니다.
+
+### createIcon
+
+`createIcon(paths, viewBox?)` — path `d` 문자열(또는 배열)로 아이콘 컴포넌트를 만든다.
+
+| 인자 | 타입 | 기본값 |
+|---|---|---|
+| `paths` | `string \| string[]` | — |
+| `viewBox` | `string` | `'0 0 24 24'` |
+
+반환 컴포넌트 props(`IconProps`): `size`(기본 24) · `color`(기본 `'currentColor'`) · `strokeWidth`(기본 2) + `react-native-svg`의 `SvgProps`.
+
+```tsx
+import { createIcon } from '@junkwon91/rn-design-system';
+
+export const Check = createIcon('M5.1 12.5 L9.9 17.1 L18.9 7.2');
+
+<Check size={16} color={theme.colors.primary.onAction} />
+```
+
+### Check
+
+체크 표시 아이콘. Checkbox·OptionCard의 선택 표시에 공용으로 쓰인다.

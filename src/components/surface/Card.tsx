@@ -31,11 +31,11 @@
 // radius: theme.radius.lg (16)
 // padding: default=16, compact=12
 // gap:     default=12, compact=8
-// 보더 (default variant): 1px theme.colors.border.subtle
+// 보더 (outlined variant): 1px theme.colors.border.subtle
 //
 // [variant]
-//   - default:  보더 있는 기본 카드
-//   - elevated: 보더 없는 카드 (그림자는 추후 추가)
+//   - outlined: 보더 있는 카드 — 독립 정보 패널
+//   - filled:   보더 없는 플랫 카드 — 반복 리스트 항목
 //
 // [density]
 //   - default:  일반 카드 (Hero, 통계 카드 등)
@@ -51,10 +51,10 @@ import Divider from '../primitives/Divider';
 import Text from '../primitives/Text';
 
 export type CardVariant =
-  /** 보더 있는 기본 카드 (1px border.subtle) */
-  | 'default'
-  /** 보더 없는 카드 (그림자는 추후 추가) */
-  | 'elevated';
+  /** 보더 있는 카드 (1px border.subtle) — 독립 정보 패널 */
+  | 'outlined'
+  /** 보더 없는 플랫 카드 (surface.container 채움만) — 반복 리스트 항목 */
+  | 'filled';
 
 export type CardDensity =
   /** padding 16 / gap 12 · 일반 카드 (Hero, 통계 등) */
@@ -65,7 +65,7 @@ export type CardDensity =
 export interface CardProps {
   /**
    * 카드 스타일 variant.
-   * @default 'default'
+   * @default 'outlined'
    */
   variant?: CardVariant;
   /**
@@ -98,7 +98,7 @@ const Container = styled.View<{
   gap: ${({ theme, $density }: { theme: AppTheme; $density: CardDensity }) =>
     $density === 'compact' ? theme.spacing.sm : theme.spacing.md}px;
   ${({ theme, $variant }: { theme: AppTheme; $variant: CardVariant }) =>
-    $variant === 'default'
+    $variant === 'outlined'
       ? `border-width: 1px; border-color: ${theme.colors.border.subtle};`
       : ''}
 `;
@@ -126,7 +126,7 @@ const Header = styled.View`
  * </Card>
  */
 export default function Card({
-  variant = 'default',
+  variant = 'outlined',
   density = 'default',
   title,
   meta,

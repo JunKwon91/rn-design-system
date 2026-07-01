@@ -30,6 +30,7 @@
 //   picker:  Value + ChevronRight
 //   link:    ExternalLink 아이콘
 //   action:  ChevronRight 아이콘
+//   custom:  라벨 아래 임의 컨텐츠(full-width, 세로 블록) — SegmentedControl 등
 // ============================================================================
 
 import type { ReactNode } from 'react';
@@ -75,11 +76,30 @@ const RowLeft = styled.View`
   flex-shrink: 1;
 `;
 
+// 하단 인셋 구분선 — 좌우 16px inset. absolute라 Row 높이(56)에 영향 없음.
+const DividerLine = styled.View`
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 1px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.border.divider};
+`;
+
+// kind='custom' — 라벨 위 + 임의 컨텐츠(full-width) 아래. SegmentedControl 등 배치.
+const CustomBlock = styled.View`
+  padding: 16px;
+  gap: 12px;
+  background-color: ${({ theme }: { theme: AppTheme }) => theme.colors.surface.container};
+`;
+
 type SettingsRowCommon = {
   /** 좌측에 표시되는 본문 라벨. */
   label: string;
   /** 라벨 앞에 표시되는 leading 아이콘 (iOS HIG row 패턴, lucide-react-native 등 ReactNode). */
   leadingIcon?: ReactNode;
+  /** 행 하단 인셋 구분선 표시 여부. 그룹의 마지막 행은 `false`로 끈다. @default true */
+  divider?: boolean;
   /** Row 컨테이너에 적용할 외부 스타일 override. */
   style?: StyleProp<ViewStyle>;
 };
@@ -115,6 +135,12 @@ export type SettingsRowProps = SettingsRowCommon &
         /** 좌측 라벨 + 우측 ChevronRight. 화면 내 진입용. */
         kind: 'action';
         onPress: () => void;
+      }
+    | {
+        /** 라벨 위 + 임의 컴포넌트 아래(full-width). SegmentedControl 등 배치용. */
+        kind: 'custom';
+        /** 라벨 아래에 렌더할 컨텐츠 (SegmentedControl 등 ReactNode). */
+        content: ReactNode;
       }
   );
 
@@ -174,6 +200,8 @@ export default function SettingsRow(props: SettingsRowProps) {
             strokeWidth={2}
           />
         );
+      default:
+        return null;
     }
   };
 
@@ -184,11 +212,22 @@ export default function SettingsRow(props: SettingsRowProps) {
     </RowLeft>
   );
 
+  if (props.kind === 'custom') {
+    return (
+      <CustomBlock style={props.style}>
+        {labelEl}
+        {props.content}
+        {props.divider !== false && <DividerLine />}
+      </CustomBlock>
+    );
+  }
+
   if (props.kind === 'default') {
     return (
       <RowBase style={props.style}>
         {labelEl}
         {renderRight()}
+        {props.divider !== false && <DividerLine />}
       </RowBase>
     );
   }
@@ -226,6 +265,7 @@ export default function SettingsRow(props: SettingsRowProps) {
     >
       {labelEl}
       {renderRight()}
+      {props.divider !== false && <DividerLine />}
     </PressableRowBase>
   );
 }
