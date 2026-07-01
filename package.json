@@ -1,6 +1,6 @@
 {
   "name": "@junkwon91/rn-design-system",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
