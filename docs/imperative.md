@@ -70,8 +70,8 @@ const { displayed, queue, show, dismiss, clearAll } = useToastStore();
 
 - `displayed`: 현재 표시 중인 1개(또는 null)
 - `queue`: 대기 중인 토스트 배열(최대 3개)
-- `show(config)`: 직접 ToastConfig를 push할 때
-- `dismiss(id)`: 특정 토스트를 닫기
+- `show(config)`: id 없이 직접 push (id는 라이브러리가 생성해 반환값으로 돌려줌)
+- `dismiss()`: 현재 표시 중인 토스트를 닫고 큐의 다음 항목을 올림
 - `clearAll()`: 전체 비우기
 
 ### Config
@@ -80,7 +80,7 @@ const { displayed, queue, show, dismiss, clearAll } = useToastStore();
 type ToastType = 'success' | 'error' | 'info';
 
 interface ToastConfig {
-  id: string;
+  id: string;         // show()에는 넘기지 않음(자동 생성)
   type: ToastType;
   title: string;
   description?: string;
@@ -92,7 +92,7 @@ interface ToastConfig {
 
 - 한 번에 1개만 표시. 추가 호출은 큐(최대 3개)에 쌓이고 표시 중인 항목이 닫히면 다음이 올라옵니다.
 - 큐가 가득 찬 상태에서 또 호출되면 가장 오래된 큐 항목이 제거됩니다.
-- `duration` 기본 3000ms. `0`을 주면 자동 해제 없이 사용자가 닫거나 `dismiss(id)`로 닫을 때까지 유지됩니다.
+- `duration` 기본 3000ms. `0`을 주면 자동 해제 없이 사용자가 닫거나 `dismiss()`로 닫을 때까지 유지됩니다.
 
 ### 예
 
@@ -106,14 +106,13 @@ toast.info('새 데이터 도착');
 // 직접 Config로 (수동 해제)
 import { useToastStore } from '@junkwon91/rn-design-system';
 
-const id = useToastStore.getState().show({
-  id: 'upload-1',
+useToastStore.getState().show({
   type: 'info',
   title: '업로드 중...',
   duration: 0,
 });
-// ... 업로드 완료 후
-useToastStore.getState().dismiss(id);
+// ... 업로드 완료 후 (현재 표시 중인 토스트를 닫음)
+useToastStore.getState().dismiss();
 ```
 
 ---
@@ -138,7 +137,7 @@ import { useDialogStore } from '@junkwon91/rn-design-system';
 const { displayed, queue, dismiss, clearAll } = useDialogStore();
 ```
 
-각 `config`는 `id`/`variant`/`resolve`를 제외한 사용자 입력 부분만 받습니다(나머지는 라이브러리가 자동 채움).
+각 `config`는 `id`/`variant`를 제외한 사용자 입력 부분만 받습니다(나머지는 라이브러리가 자동 채움).
 
 ### Config
 
@@ -172,7 +171,7 @@ interface PromptDialogConfig {
 ### 동작
 
 - 한 번에 1개만 표시(toast와 동일한 큐 패턴, 최대 3개 대기).
-- `confirm`은 사용자가 확인을 누르면 `true`, 취소(또는 backdrop 탭/back 키)는 `false`로 resolve.
+- `confirm`은 사용자가 확인을 누르면 `true`, 취소(또는 backdrop 탭)는 `false`로 resolve.
 - `prompt`는 확인 시 입력 문자열, 취소 시 `null`로 resolve.
 
 ### 예
@@ -242,7 +241,7 @@ interface BottomSheetConfig {
 ```
 
 - `height`: 단일 snap 높이. `'auto'`(50%), 백분율 문자열(`'50%'`), 픽셀 숫자(`400`) 자유 선택
-- `snapPoints`: 다중 snap. 같은 형식의 배열. 지정 시 `height`는 무시되고 개발 모드에서 경고가 표시됩니다
+- `snapPoints`: 다중 snap. 같은 형식의 배열. 지정 시 `height`는 무시됩니다(`height`와 `snapPoints`를 함께 주면 개발 모드에서 경고)
 - `initialSnap`: `snapPoints` 인덱스 기준 초기 위치
 
 ### 동작
