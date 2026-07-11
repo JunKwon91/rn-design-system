@@ -2,7 +2,7 @@
 // Text — 시맨틱 텍스트 컴포넌트
 // ============================================================================
 //
-// theme.typography 10개 variant + theme.colors 5개 color를 props로 선택.
+// theme.typography 11개 variant + theme.colors 5개 color를 props로 선택.
 // 다크/라이트 모드 색상은 ThemeProvider가 자동 교체.
 //
 // styled-components/native 위에서 transient props($variant/$color/$align)를
@@ -14,6 +14,7 @@
 //   headlineSm   Manrope 17 / 600  — Stack Navigator 헤더 타이틀
 //   bodyBase     Inter   16 / 400  — 기본 본문
 //   bodySm       Inter   14 / 400  — 보조 본문, 테이블 셀
+//   bodyXs       Inter   13 / 400  — Toast description, 보조 메타데이터
 //   labelSm      Inter   11 / 600  — Bottom Tab 라벨
 //   labelMd      Inter   13 / 600  — Input·Settings Row 라벨
 //   labelLg      Inter   14 / 600  — Segmented Control·Bottom Nav active
@@ -138,7 +139,7 @@ const StyledText = styled.Text<{
 /**
  * 시맨틱 텍스트 컴포넌트.
  *
- * theme.typography의 10가지 variant + theme.colors의 5가지 color를 props로
+ * theme.typography의 11가지 variant + theme.colors의 5가지 color를 props로
  * 받아 RN Text를 렌더한다. 다크/라이트 모드 색상은 ThemeProvider가 자동 전환.
  *
  * @example
