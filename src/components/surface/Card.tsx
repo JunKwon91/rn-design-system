@@ -13,7 +13,7 @@
 //
 //   // 헤더가 있는 카드
 //   <Card title="최근 결과" meta="2024.02.03">
-//     <LottoBallSet ... />
+//     <Chart ... />
 //   </Card>
 //
 //   // 컴팩트 카드 (작은 padding/gap)
@@ -117,7 +117,7 @@ const Header = styled.View`
  *
  * @example
  * <Card title="최근 결과" meta="2024.02.03" showDivider>
- *   <LottoBallSet ... />
+ *   <Chart ... />
  * </Card>
  *
  * @example

@@ -19,7 +19,7 @@ React Native 0.81+ 디자인 시스템. `styled-components/native` 위에 라이
 GitHub 브랜치/태그 의존성으로 설치합니다(npm 레지스트리 미배포):
 
 ```bash
-npm install '@junkwon91/rn-design-system@github:JunKwon91/rn-design-system#feature/library'
+npm install '@junkwon91/rn-design-system@github:JunKwon91/rn-design-system#v2.1.0'
 ```
 
 설치 시 `prepare` 스크립트가 `react-native-builder-bob` 빌드를 자동 실행해 `lib/` 산출물을 생성합니다.
