@@ -1,5 +1,5 @@
 // ============================================================================
-// LottoStats interaction 토큰 — interactive 컴포넌트 state opacity (mode 무관)
+// interaction 토큰 — interactive 컴포넌트 state opacity (mode 무관)
 // ============================================================================
 //
 // 사용 예) opacity: ${({ theme }) => theme.interaction.pressedOpacity}
