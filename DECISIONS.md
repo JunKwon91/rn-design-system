@@ -1703,3 +1703,35 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 
 **후속**
 - worker 타이머 잔여(ADR-44)를 정리한 뒤 test 스텝을 CI에 추가한다.
+
+---
+
+## ADR-46: 테스트를 CI에 편입 + worker teardown 경고 제거
+
+### 상황
+
+- ADR-44/45에서 남긴 후속: 테스트(ADR-44)는 그린이지만 전체 스위트를 한 번에 돌리면 "worker failed to exit gracefully"(active timers) 경고가 떠서 CI 로그가 지저분해질 수 있어 test 스텝을 CI(ADR-45)에서 뺐다.
+- 원인을 파고들었다. `--detectOpenHandles`로도 구체적 누수가 안 잡히고, `--runInBand`(워커 없음)에서는 경고가 아예 안 났다. 즉 실제 리소스 누수가 아니라 멀티워커 종료 시점의 타이머 잔여였다. 범인은 템플릿 스모크 테스트 `__tests__/App.test.tsx` — 예제 앱을 렌더만 하고 **언마운트하지 않아** 마운트된 컴포넌트(Reanimated 애니메이션 등)의 타이머가 남아 있었다.
+
+### 선택
+
+- App 스모크 테스트가 렌더 후 `renderer.unmount()`를 호출하도록 고쳐 근본 원인을 제거한다(`--forceExit`로 덮지 않는다).
+- CI에 `Test` 스텝(`npm test -- --ci`)을 typecheck와 build 사이에 추가한다.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| `--forceExit`로 경고 무시 | 경고를 덮을 뿐 원인(정리 안 된 타이머)을 남긴다. 언마운트 한 줄로 실제로 없앨 수 있다 |
+| CI를 `--runInBand`로 고정 | 워커를 죽여 경고를 피하는 우회. 원인을 두고 실행 방식만 바꾸는 것이라 부적절 |
+| test를 계속 CI에서 제외 | exit code는 원래 0이라 기능상 문제는 없었지만, 회귀 감지를 CI가 못 하는 상태가 유지된다 |
+
+### 근거
+
+- 언마운트는 정상적인 테스트 정리다 — 컴포넌트의 effect cleanup(예: Skeleton의 `cancelAnimation`)이 실행되며 타이머가 회수된다. 경고가 사라지는 게 그 증거다.
+- exit code는 이전에도 0이었지만, 로그가 깨끗해야 진짜 문제가 생겼을 때 눈에 띈다.
+
+### 결과
+
+- `__tests__/App.test.tsx`에 언마운트 추가 → 멀티워커 전체 실행에서 worker 경고 소멸(12 suite / 61 test 그대로 통과).
+- `.github/workflows/ci.yml`에 `Test` 스텝 추가 → 이제 CI가 lint / 타입체크 / **테스트** / 빌드를 검증한다.
