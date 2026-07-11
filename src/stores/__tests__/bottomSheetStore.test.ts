@@ -5,16 +5,17 @@
 // 한 번에 1개 표시. imperative open/close/snapTo + onDismiss/onSnapChange 콜백.
 
 import { useBottomSheetStore, bottomSheet } from '../bottomSheetStore';
+import type { BottomSheetSnap } from '../bottomSheetStore';
 
 const state = () => useBottomSheetStore.getState();
 
 const INITIAL = {
   isVisible: false,
-  snapPoints: ['auto'] as const,
+  snapPoints: ['auto'] as BottomSheetSnap[],
   currentSnapIndex: 0,
   children: null,
-  onDismiss: undefined,
-  onSnapChange: undefined,
+  onDismiss: undefined as (() => void) | undefined,
+  onSnapChange: undefined as ((index: number) => void) | undefined,
 };
 
 beforeEach(() => useBottomSheetStore.setState({ ...INITIAL }));

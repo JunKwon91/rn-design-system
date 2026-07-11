@@ -1659,3 +1659,47 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 **한계 / 후속**
 - 전체 스위트를 한 번에 돌리면 "worker failed to exit gracefully" 경고가 뜬다(App 스모크가 띄우는 애니메이션 타이머 잔여로 추정). 파일을 나눠 돌리면 안 뜨고 전 테스트는 통과한다. `--forceExit`로 덮지 않고 후속 정리 과제로 남긴다.
 - 아직 안 덮은 컴포넌트(display/modal/list 등)는 필요할 때 같은 패턴으로 늘린다.
+
+---
+
+## ADR-45: CI 파이프라인 도입 (GitHub Actions — lint / 타입체크 / 빌드)
+
+### 상황
+
+- `.github`가 없어 CI가 전혀 없었다. lint·타입·빌드 회귀를 매번 로컬에서 손으로 확인하는 데 의존했다.
+- 이 저장소는 npm 레지스트리가 아니라 GitHub 브랜치/태그 의존성으로 설치된다(ADR 없음, README 참조). 설치 시 `prepare`(bob build)가 실행되므로, main이나 태그의 빌드가 깨져 있으면 소비자의 `npm install`이 그대로 실패한다. 즉 "항상 빌드되는 상태"를 지키는 게 특히 중요하다.
+
+### 선택
+
+- 워크플로 하나(`.github/workflows/ci.yml`)를 `push: main` + `pull_request: main`에서 돌린다.
+- 잡 1개: checkout → setup-node(22, npm 캐시) → `npm ci --ignore-scripts` → `npm run lint` → `npm run typecheck` → `npm run prepare`.
+- 타입체크 스크립트 신설: `"typecheck": "tsc --noEmit -p tsconfig.json"` (루트 tsconfig).
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| 타입체크를 `tsconfig.build.json`으로 | 빌드 tsconfig는 `noCheck: true`(ADR-40)라 타입 오류를 잡지 못한다. 게이트로 세우면 아무것도 못 거른다. 실제 검증 목적이면 루트 tsconfig여야 한다 |
+| `npm ci`(스크립트 포함) | 설치 시 `prepare`(bob build)가 자동으로 한 번 돌고 Build 스텝에서 또 돈다 = 중복 빌드. `--ignore-scripts`로 설치를 가볍게 하고 빌드는 명시 스텝에서 한 번만 돌린다 |
+| CI에 test 스텝 포함 | 이번 CI 범위는 lint/타입/빌드로 잡았다. 테스트(ADR-44)는 그린이지만 전체 동시 실행 시 "worker failed to exit gracefully" 경고가 남아 로그가 지저분해진다. 그 잔여 타이머를 먼저 정리한 뒤 별도로 붙인다 |
+| publish 워크플로 | `package.json "private": true` + npm 미배포 방침. 만들지 않는다 |
+| Node 버전 매트릭스 | 단일 라이브러리라 22 하나로 충분. 여러 버전 병렬 검증은 지금 이득 대비 과함 |
+
+### 근거
+
+- **Node 22**: engines가 `>= 22.11.0`. `node-version: '22'`을 주면 setup-node가 그 이상 최신 패치를 설치해 engines를 위반하지 않는다.
+- **캐시**: setup-node의 npm 캐시(`cache: 'npm'`)로 매 실행 클린 설치 시간을 줄인다.
+- **타입체크에 루트 tsconfig를 쓰는 이유**는 위 표대로 ADR-40 때문이다. 빌드 tsconfig는 emit 전용이다.
+- **빌드를 CI에 넣는 이유**: 이 저장소는 "설치 = 빌드"라, 빌드가 깨지면 곧 소비자 설치가 깨진다. main/PR에서 bob build 성공을 매번 확인한다.
+
+### 결과
+
+**신규**
+- `.github/workflows/ci.yml`, `package.json`에 `typecheck` 스크립트.
+- 각 스텝을 로컬에서 그대로 돌려 확인: `npm ci --ignore-scripts` / `npm run lint` / `npm run typecheck`(tsc --noEmit) / `npm run prepare`(bob) 전부 exit 0.
+
+**작업 중 발견 (고쳐서 반영)**
+- bob build가 `src/test-utils/`(테스트 render 헬퍼)를 `lib/`에 함께 컴파일해 배포 산출물에 섞이고 있었다. 이 헬퍼는 devDependency인 `@testing-library/react-native`를 import하므로 배포본에 들어가면 안 된다. bob의 `exclude`에 `test-utils`를 추가하고 `files` 화이트리스트에 `!**/test-utils`를 넣어 배포에서 제외했다(bob 컴파일 대상 63 → 61 files로 복귀).
+
+**후속**
+- worker 타이머 잔여(ADR-44)를 정리한 뒤 test 스텝을 CI에 추가한다.

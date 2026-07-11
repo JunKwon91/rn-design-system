@@ -1,0 +1,47 @@
+name: CI
+
+# 라이브러리 품질 게이트 — PR과 main 푸시에서 lint / 타입체크 / 빌드를 검증한다.
+# (배포는 하지 않는다: package.json "private": true, npm 레지스트리 미배포 방침.)
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          # package.json engines(">= 22.11.0")를 만족하는 22.x LTS.
+          # 22를 지정하면 setup-node가 22.11 이상 최신 패치를 설치한다.
+          node-version: '22'
+          # npm 캐시(~/.npm) 복원 — package-lock.json 해시 기준. 매 실행 클린
+          # 설치 시간을 크게 줄인다.
+          cache: 'npm'
+
+      - name: Install dependencies
+        # npm ci: package-lock.json 그대로 재현 설치(재현성). 이 저장소는 설치
+        # 시 prepare(bob build)가 자동 실행되지만, CI에서는 아래 Build 스텝에서
+        # 명시적으로 다시 돌리므로 --ignore-scripts로 설치 단계를 가볍게 유지한다.
+        run: npm ci --ignore-scripts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        # 루트 tsconfig.json으로 풀 타입체크(--noEmit). 빌드 전용
+        # tsconfig.build.json은 "noCheck": true(ADR-40)라 타입 오류를 잡지
+        # 못하므로 여기서는 반드시 루트 tsconfig를 사용한다.
+        run: npm run typecheck
+
+      - name: Build (react-native-builder-bob)
+        # lib/(commonjs·module·typescript) 산출물 생성이 실제로 성공하는지 검증.
+        # prepare 스크립트와 동일 명령.
+        run: npm run prepare

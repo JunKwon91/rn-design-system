@@ -11,7 +11,8 @@
     "src",
     "lib",
     "!**/__tests__",
-    "!**/*.test.*"
+    "!**/*.test.*",
+    "!**/test-utils"
   ],
   "sideEffects": false,
   "repository": {
@@ -24,6 +25,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "prepare": "bob build"
   },
   "dependencies": {
@@ -80,6 +82,7 @@
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
+    "exclude": "**/{__tests__,__fixtures__,__mocks__,test-utils}/**",
     "targets": [
       [
         "commonjs",
