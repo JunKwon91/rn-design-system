@@ -320,7 +320,7 @@ const [email, setEmail] = useState('');
 | `placeholder` | `string` | — | — |
 | `onChangeText` | `(text: string) => void` | ✓ | — |
 | `onClear` | `() => void` | — | — |
-| `autoFocus` | `boolean` | — | `false` |
+| `autoFocus` | `boolean` | — | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
 *이미지 준비중*
@@ -444,6 +444,7 @@ const [dark, setDark] = useState(false);
 | `disabled` | `boolean` | — | `false` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `accessibilityLabel` | `string` | — | — |
+| `testID` | `string` | — | — |
 
 `selected`: 파란 테두리 + 채운 원 + Check / unselected: 무테 + 링.
 
@@ -485,7 +486,7 @@ const [mode, setMode] = useState<'hot' | 'cold'>('hot');
 |---|---|
 | ![DataTable light](screenshots/datatable-light.png) | ![DataTable dark](screenshots/datatable-dark.png) |
 
-`DataTableColumn<T>`은 `key`/`header`/`width`/`align`/`render` 등을 포함하며, `disabled` 옵션으로 특정 열의 정렬을 막을 수 있습니다.
+`DataTableColumn<T>`은 `key`/`header`/`render`/`align`/`flex`/`sortable` 등을 포함하며, `sortable` 옵션으로 특정 열의 정렬을 켤 수 있습니다.
 
 ```tsx
 const columns: DataTableColumn<Row>[] = [
@@ -653,11 +654,11 @@ iOS HIG 설정 행 패턴의 컴포넌트입니다. `kind`로 6종의 행 형태
 
 kind별 추가 props:
 
-- `default`: `value?: string` — 우측 보조 텍스트
+- `default`: `value: string` — 우측 보조 텍스트
 - `toggle`: `value: boolean`, `onChange: (v: boolean) => void` — 우측 Switch
 - `picker`: `value: string`, `onPress: () => void` — 우측 값 + chevron
-- `link`: `onPress: () => void` — 우측 chevron (외부 이동 등)
-- `action`: `onPress: () => void` — 라벨만 누르는 행
+- `link`: `onPress: () => void` — 우측 ExternalLink 아이콘 (외부 이동 등)
+- `action`: `onPress: () => void` — 우측 ChevronRight 아이콘 (화면 내 진입)
 - `custom`: `content: ReactNode` — 라벨 아래 full-width 컨텐츠(세로 블록). SegmentedControl 등 임의 컴포넌트 배치용
 
 ```tsx
@@ -770,7 +771,7 @@ import { Inbox } from 'lucide-react-native';
 
 | type | 추가 props |
 |---|---|
-| `'rect'` | `width: number \| string`, `height: number \| string` |
+| `'rect'` | `width: number`, `height: number` |
 | `'circle'` | `size: number` |
 | `'text'` | `lines?: number (기본 3)`, `lineWidths?: (number \| string)[]`, `lineHeight?: number` |
 
