@@ -1,6 +1,8 @@
 # @junkwon91/rn-design-system
 
-React Native 0.81+ 디자인 시스템. `styled-components/native` 위에 라이트/다크 토큰을 얹고, 8 카테고리 36 컴포넌트(시각 컴포넌트 32 + Host 4) + 전역 imperative 호스트(Toast / Dialog / BottomSheet / Popup)를 제공합니다.
+[![CI](https://github.com/JunKwon91/rn-design-system/actions/workflows/ci.yml/badge.svg)](https://github.com/JunKwon91/rn-design-system/actions/workflows/ci.yml)
+
+React Native 0.81+ 디자인 시스템. `styled-components/native` 위에 라이트/다크 토큰을 얹고, 8 카테고리 37 컴포넌트(시각 컴포넌트 33 + Host 4) + 전역 imperative 호스트(Toast / Dialog / BottomSheet / Popup)를 제공합니다.
 
 - 컴포넌트: primitives · surface · action · input · display · list · feedback · modal
 - 테마: `AppTheme` (mode / colors / spacing / radius / typography / interaction) + `lightTheme` / `darkTheme`
@@ -9,7 +11,7 @@ React Native 0.81+ 디자인 시스템. `styled-components/native` 위에 라이
 자세한 문서:
 
 - [docs/theme.md](docs/theme.md) — AppTheme 구조 · 토큰 레퍼런스 · 앱에서 테마 타입 확장하기
-- [docs/components.md](docs/components.md) — 36종 컴포넌트별 props 레퍼런스
+- [docs/components.md](docs/components.md) — 37종 컴포넌트별 props 레퍼런스
 - [docs/imperative.md](docs/imperative.md) — toast/dialog/bottomSheet/popup 셋업 + 호출 API
 
 ---
@@ -155,20 +157,33 @@ export default function HomeScreen() {
 
 ---
 
-## 컴포넌트 카테고리 (36종)
+## 컴포넌트 카테고리 (37종)
 
 | 카테고리 | 수 | 컴포넌트 |
 |---|---|---|
 | primitives | 3 | Text, Spacer, Divider |
 | surface | 3 | Screen, Card, Section |
 | action | 3 | Button, IconButton, FAB |
-| input | 6 | Input, SearchInput, Checkbox, Radio, RadioGroup, Switch |
+| input | 7 | Input, SearchInput, Checkbox, Radio, RadioGroup, OptionCard, Switch |
 | display | 5 | DataTable, SegmentedControl, Tabs, Badge, Chip |
 | list | 1 | SettingsRow |
 | feedback | 7 | EmptyState, ErrorView, LoadingView, Skeleton, LinearProgress, CircularProgress, Tooltip |
 | modal | 8 | Toast, ToastHost, Dialog, DialogHost, BottomSheet, BottomSheetHost, Popup, PopupHost |
 
-시각 컴포넌트 32 + Host 4 = 총 36. 각 컴포넌트의 props 레퍼런스는 [docs/components.md](docs/components.md) 참고.
+시각 컴포넌트 33 + Host 4 = 총 37. 각 컴포넌트의 props 레퍼런스는 [docs/components.md](docs/components.md) 참고.
+
+---
+
+## 개발
+
+```bash
+npm test          # jest — 스토어 유닛 + 컴포넌트 접근성 쿼리 테스트
+npm run lint      # eslint
+npm run typecheck # tsc --noEmit (루트 tsconfig)
+npm run prepare   # react-native-builder-bob 빌드 → lib/ 산출물
+```
+
+PR·main 푸시 시 GitHub Actions(CI)가 lint → 타입체크 → 테스트 → 빌드를 자동 검증합니다.
 
 ---
 

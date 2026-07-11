@@ -1615,7 +1615,7 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 
 ### 상황
 
-- 36 컴포넌트 · 43개 ADR을 쌓는 동안 자동화 테스트는 RN 템플릿 기본 스모크(`__tests__/App.test.tsx`, 예제 앱이 렌더되는지) 1개뿐이었다. 컴포넌트/스토어 단위 테스트는 0개.
+- 37 컴포넌트 · 43개 ADR을 쌓는 동안 자동화 테스트는 RN 템플릿 기본 스모크(`__tests__/App.test.tsx`, 예제 앱이 렌더되는지) 1개뿐이었다. 컴포넌트/스토어 단위 테스트는 0개.
 - 그래서 (a) 리팩터링 시 회귀를 자동으로 잡지 못하고, (b) ADR에 적어 둔 동작 명세(큐잉 상한, Dialog Promise 결과 등)가 실제 코드와 일치하는지 실행 가능한 형태로 확인할 수단이 없었다.
 - 스택 제약: 모든 컴포넌트가 styled-components `ThemeProvider(AppTheme)`를 전제한다. 상당수 컴포넌트가 Reanimated v4(+ react-native-worklets)·gesture-handler·safe-area·svg에 의존해, jest에서 각 라이브러리의 mock/setup이 필요하다.
 
