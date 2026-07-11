@@ -11,7 +11,8 @@
     "src",
     "lib",
     "!**/__tests__",
-    "!**/*.test.*"
+    "!**/*.test.*",
+    "!**/test-utils"
   ],
   "sideEffects": false,
   "repository": {
@@ -24,6 +25,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "prepare": "bob build"
   },
   "dependencies": {
@@ -52,6 +54,9 @@
     "@react-native/jest-preset": "0.85.3",
     "@react-native/metro-config": "0.85.3",
     "@react-native/typescript-config": "0.85.3",
+    "@react-navigation/native": "^7.3.8",
+    "@react-navigation/native-stack": "^7.17.10",
+    "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.2.0",
     "@types/react-test-renderer": "^19.1.0",
@@ -63,9 +68,11 @@
     "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-builder-bob": "^0.41.0",
+    "react-native-edge-to-edge": "^1.8.1",
     "react-native-gesture-handler": "^2.31.2",
     "react-native-reanimated": "^4.3.1",
     "react-native-safe-area-context": "^5.7.0",
+    "react-native-screens": "^4.26.0",
     "react-native-svg": "^15.15.4",
     "react-native-worklets": "^0.8.3",
     "react-test-renderer": "19.2.3",
@@ -75,10 +82,26 @@
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
+    "exclude": "**/{__tests__,__fixtures__,__mocks__,test-utils}/**",
     "targets": [
-      ["commonjs", { "esm": true }],
-      ["module", { "esm": true }],
-      ["typescript", { "project": "tsconfig.build.json" }]
+      [
+        "commonjs",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
     ]
   },
   "engines": {
