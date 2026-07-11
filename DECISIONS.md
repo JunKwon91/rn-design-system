@@ -1608,3 +1608,54 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 **검증**: 전체 `tsc --noEmit -p tsconfig.json` 0 error.
 
 **후속**: ChevronRight/ExternalLink 등 순차 커스텀 추가 → lucide 완전 이관 시 dependency 제거 검토. 소비 앱은 lucide 대신 DS 아이콘 사용(이름 충돌 방지).
+
+---
+
+## ADR-44: 테스트 전략 도입 (스토어 유닛 우선 + 접근성 쿼리 컴포넌트 테스트)
+
+### 상황
+
+- 36 컴포넌트 · 43개 ADR을 쌓는 동안 자동화 테스트는 RN 템플릿 기본 스모크(`__tests__/App.test.tsx`, 예제 앱이 렌더되는지) 1개뿐이었다. 컴포넌트/스토어 단위 테스트는 0개.
+- 그래서 (a) 리팩터링 시 회귀를 자동으로 잡지 못하고, (b) ADR에 적어 둔 동작 명세(큐잉 상한, Dialog Promise 결과 등)가 실제 코드와 일치하는지 실행 가능한 형태로 확인할 수단이 없었다.
+- 스택 제약: 모든 컴포넌트가 styled-components `ThemeProvider(AppTheme)`를 전제한다. 상당수 컴포넌트가 Reanimated v4(+ react-native-worklets)·gesture-handler·safe-area·svg에 의존해, jest에서 각 라이브러리의 mock/setup이 필요하다.
+
+### 선택
+
+- **@testing-library/react-native 13** 도입. 구 `@testing-library/jest-native`는 deprecated되어 RNTL 12.4+ 내장 matcher로 대체한다.
+- **인프라**: `@react-native/jest-preset`을 spread한 뒤 필요한 부분만 덮어쓴다.
+  - 커스텀 `jest-resolver.js`: RN preset resolver에 worklets의 `.native` 확장 제거 로직을 합성한다. 이게 없으면 reanimated 4가 끌어오는 react-native-worklets가 `.native` 구현을 집어 "Native part of Worklets doesn't seem to be initialized"로 죽는다. jest setup 방식이 라이브러리·버전마다 달라서, 각 패키지가 배포하는 mock/jestSetup/resolver 파일을 기준으로 맞췄다.
+  - `jest-setup.js`: reanimated mock, gesture-handler jestSetup, safe-area mock (모두 각 패키지 배포본).
+  - `src/test-utils/renderWithTheme`: ThemeProvider로 감싸고 `mode: 'light' | 'dark'`를 받는 render 헬퍼.
+- **작성 순서**: ① 스토어 유닛(순수 로직) → ② 그 위 컴포넌트 UI → ③ light/dark swap.
+- **쿼리 규약**: `testID`가 아니라 `accessibilityRole` / `accessibilityLabel` / `accessibilityState`로 조회한다.
+- 커버리지 %는 목표(gate)로 두지 않는다. 회귀 위험이 큰 지점부터 선별해 덮는다.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| 전수 커버리지 + % gate | 위험이 낮은 곳까지 테스트를 채우게 되어 유지보수 비용만 늘고, 숫자를 맞추려는 저가치 테스트가 생긴다. 깨지면 티 안 나게 아픈 곳(큐잉·컴포넌트 계약)을 먼저 덮는 편이 이득이 크다 |
+| 컴포넌트부터 시작 | 스토어는 네이티브·테마 의존이 없어 인프라 없이 바로 통과시킬 수 있다. 순수 로직을 먼저 통과시켜 두면 이후 컴포넌트 테스트가 실패할 때 원인 범위가 좁아진다 |
+| `testID` 기반 쿼리 | testID는 접근성 회귀를 잡지 못한다. role/label 쿼리는 렌더 구현과 분리되면서 접근성 속성까지 함께 검증한다 |
+| 스냅샷 테스트 | 렌더 구조 diff는 의도한 변경에도 깨져 노이즈가 크다. 동작·계약 단언이 신호 대비 낫다 |
+| Reanimated 중간 프레임 단언 | mock 환경에서 프레임 진행이 불안정하다. 초기/최종 접근성 상태만 본다 |
+
+### 근거
+
+- **스토어를 먼저 한 이유**: `toast/dialog/bottomSheet/popup` store는 네이티브·테마 의존이 없는 순수 Zustand 로직이라 인프라 없이 바로 테스트할 수 있고, ADR-11(큐 상한 3·FIFO overflow)과 ADR-12(confirm→boolean / prompt→string|null / info→void)의 명세를 실행 가능한 형태로 고정한다. 두 ADR을 다시 읽고 코드와 대조했으며 이번엔 불일치가 없었다.
+- **접근성 쿼리로 짠 이유**: 컴포넌트 다수가 이미 `accessibilityRole`/`accessibilityState`를 갖고 있다. role/state로 조회하면 테스트가 곧 그 접근성 계약을 검증하게 되고, 내부 렌더 구조가 바뀌어도 잘 안 깨지며(리팩터링 내성) 접근성 속성이 빠지면 테스트가 잡아 준다.
+- **light/dark를 실측한 이유**: ADR-04(mode swap 100%)가 실제로 지켜지는지, 같은 컴포넌트를 두 테마로 렌더해 적용된 색이 다르고 각 모드 토큰과 일치하는지, 그리고 두 색 토큰의 키 트리가 동일한지로 확인한다.
+
+### 결과
+
+**신규**
+- 인프라: `jest.config.js`(정비) · `jest-setup.js` · `jest-resolver.js` · `src/test-utils/renderWithTheme.tsx` · `.eslintrc.js`(테스트 파일 jest env override).
+- 스토어 테스트 4종(30 케이스), 컴포넌트/테마 테스트 7종(30 케이스). 기존 App 스모크 1 포함 총 12 suite / 61 test 통과.
+
+**작업 중 발견 (코드는 고치지 않고 기록)**
+- `example/App.tsx`가 package.json에 없는 의존성(`@react-navigation/*`, `react-native-screens`, `react-native-edge-to-edge`)을 import하고 있었다 — jest뿐 아니라 `npm run ios`도 실패하는 상태라, 예제 앱 실행에 필요한 것이므로 devDependencies에 추가해 되살렸다.
+- `RadioGroup` 컨테이너는 `accessibilityRole="radiogroup"`을 갖지만 `accessible={true}`는 일부러 두지 않는다(그래야 자식 Radio가 개별 포커스를 유지한다). 그래서 `getByRole('radiogroup')`이 잡히지 않는 게 정상이고, 컨테이너를 고치는 대신 자식 Radio가 각각 접근 가능한지를 검증하도록 테스트를 맞췄다.
+
+**한계 / 후속**
+- 전체 스위트를 한 번에 돌리면 "worker failed to exit gracefully" 경고가 뜬다(App 스모크가 띄우는 애니메이션 타이머 잔여로 추정). 파일을 나눠 돌리면 안 뜨고 전 테스트는 통과한다. `--forceExit`로 덮지 않고 후속 정리 과제로 남긴다.
+- 아직 안 덮은 컴포넌트(display/modal/list 등)는 필요할 때 같은 패턴으로 늘린다.
