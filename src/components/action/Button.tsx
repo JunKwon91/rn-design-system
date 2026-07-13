@@ -30,7 +30,7 @@
 //   - primary:     bg theme.colors.primary.action, text theme.colors.primary.onAction
 //   - secondary:   bg transparent, border 1px theme.colors.border.strong,
 //                  text theme.colors.text.secondary
-//   - destructive: bg theme.colors.state.error, text theme.colors.primary.onAction
+//   - destructive: bg theme.colors.state.errorAction, text theme.colors.primary.onAction
 //                  (Dialog confirm 삭제 등 — Badge destructive 패턴과 동일)
 //
 // [상태]
@@ -155,7 +155,7 @@ export default function Button({
     if (variant === 'primary') {
       base.backgroundColor = theme.colors.primary.action;
     } else if (variant === 'destructive') {
-      base.backgroundColor = theme.colors.state.error;
+      base.backgroundColor = theme.colors.state.errorAction;
     } else {
       base.borderWidth = 1;
       base.borderColor = theme.colors.border.strong;

@@ -208,7 +208,7 @@ type InteractivePressableProps = Pick<PressableProps,
 |---|---|
 | ![Button light](screenshots/button-light.png) | ![Button dark](screenshots/button-dark.png) |
 
-`loading: true`는 자체적으로 `disabled` 효과를 포함합니다. `variant='destructive'`는 `state.error` 배경 + 흰 텍스트로 표시되어 삭제·되돌릴 수 없는 액션에 사용합니다.
+`loading: true`는 자체적으로 `disabled` 효과를 포함합니다. `variant='destructive'`는 `state.errorAction` 배경 + 흰 텍스트로 표시되어 삭제·되돌릴 수 없는 액션에 사용합니다.
 
 ```tsx
 <Button label="저장" onPress={handleSave} />
