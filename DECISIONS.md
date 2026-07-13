@@ -1735,3 +1735,42 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 
 - `__tests__/App.test.tsx`에 언마운트 추가 → 멀티워커 전체 실행에서 worker 경고 소멸(12 suite / 61 test 그대로 통과).
 - `.github/workflows/ci.yml`에 `Test` 스텝 추가 → 이제 CI가 lint / 타입체크 / **테스트** / 빌드를 검증한다.
+
+---
+
+## ADR-47: destructive 버튼 배경을 `state.errorAction`으로 분리 (라이트 톤다운)
+
+### 상황
+
+- Dialog 삭제 confirm 등 destructive 버튼의 **라이트 모드 배경**(`state.error` = `#B91C1C` red-700 + 흰 텍스트)이 시각적으로 과하게 강렬하다는 피드백.
+- 원인: `state.error`가 **두 역할을 겸함** — ① 전경 액센트(Input 에러 텍스트·보더, ErrorView 아이콘, Toast, Badge)와 ② destructive 버튼 채움. ①은 라이트 surface 위 4.5:1을 위해 진하고 채도 높은 red-700이 필요하고(ADR-40 히스토리: `#DC2626` red-600은 helper text 4.41:1로 미달이라 red-700로 올림), 그 값을 ②의 큰 솔리드 배경 + 흰 텍스트로 재사용하니 무게가 과하다.
+
+### 선택
+
+- 전경 액센트용 `state.error`(#B91C1C)는 **그대로 두고**, destructive 버튼 배경 전용 토큰 **`state.errorAction`**을 신설.
+  - 라이트: **`#A83B3B`** — red-700의 밝기는 유지하고 **채도만 74%→48%로 down**(muted red). 흰 텍스트 대비 **6.26:1**(현재 6.47:1과 사실상 동일, AA·AAA 근접).
+  - 다크: `errorDark`(#FFB4AB) 그대로 — 다크 destructive는 ADR-34에서 WCAG 충족 확인(변경 0).
+- `Button` `variant='destructive'`만 이 토큰을 배경으로 사용. 텍스트는 기존 `primary.onAction`(라이트 흰색) 유지.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| 공유 `state.error`를 직접 톤다운 | 6곳(Input/ErrorView/Toast/Badge/Button/Dialog)에 파급. 밝히면 전경 4.5:1이 깨져 접근성 회귀(ADR-40의 4.41:1 히스토리) |
+| 토널 스타일(옅은 배경 + 진빨강 텍스트, M3 error-container) | "조금" 톤다운 요청 대비 시각 변화가 과함. 흰 텍스트 관습도 사라짐 |
+| Dialog 삭제 버튼만 분기 | destructive 처리가 두 갈래로 갈려 일관성 하락. Button variant 단위로 통일이 맞음 |
+| 색 하드코딩 | DS 규약 위반(과거 Button destructive `#FFFFFF` 하드코딩이 회귀로 지적됨). 반드시 토큰 |
+
+### 근거
+
+- **명도 아닌 채도만 낮춤**: 밝기를 유지해 흰 텍스트 대비(6.26:1)를 지키면서 "강렬함"의 원인인 채도만 26%p 낮춰 차분하게. 바래 보이지 않고 여전히 명확한 빨강.
+- **역할 분리**: 전경 액센트(#B91C1C, 4.5:1 보장)와 버튼 채움(#A83B3B)을 별 토큰으로 나눠, 한쪽을 바꿔도 다른 쪽 제약이 깨지지 않음.
+- ADR-04(ColorsShape 라이트/다크 100% parity)에 따라 두 모드 모두 `errorAction`을 정의 → `tsc`가 누락을 컴파일타임에 강제.
+
+### 결과
+
+- `colors.ts`: primitive `errorActionLight` 추가, `ColorsShape.state.errorAction` + light(#A83B3B)/dark(#FFB4AB) 정의.
+- `Button` destructive 배경이 `state.errorAction` 참조. 라이트만 시각 변화(#B91C1C→#A83B3B), 다크 무변경.
+- 문서: theme.md 토큰 표(`error`=액센트 / `errorAction`=버튼 배경 분리), components.md Button 설명 갱신.
+
+**범위 밖(후속 고려)**: Badge `color='destructive'`는 여전히 `state.error`(#B91C1C)를 배경으로 사용 — 이번 요청은 버튼 한정. 버튼과 배지의 destructive 빨강이 미세하게 달라지므로, 필요 시 Badge도 `errorAction`으로 통일 검토.

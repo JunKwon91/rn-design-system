@@ -94,6 +94,7 @@ const primitives = {
     warningDark: '#F59E0B', // 경고 — 다크 모드용
     errorLight: '#B91C1C', // 에러 — 라이트 모드용 (red-700, 모든 Light surface 위 4.5:1 통과)
     errorDark: '#FFB4AB', // 에러 — 다크 모드용 (밝은 살구빨강)
+    errorActionLight: '#A83B3B', // destructive 버튼 배경 — 라이트 (red-700 채도 down, white 위 6.26:1)
     infoLight: '#2563EB', // 정보 — 라이트 모드용 (blue-600, containerHigh 위 4.19:1)
     infoDark: '#ADC6FF', // 정보 — 다크 모드용 (옅은 파랑)
   },
@@ -184,6 +185,7 @@ export interface ColorsShape {
     success: string;
     warning: string;
     error: string;
+    errorAction: string; // destructive 버튼 배경 (error 액센트와 분리)
     info: string;
   };
   // overlay = 모달 backdrop·scrim 등 화면 위 오버레이 색상.
@@ -237,6 +239,7 @@ export const lightColors: ColorsShape = {
     success: primitives.state.successLight,
     warning: primitives.state.warningLight,
     error: primitives.state.errorLight, // 라이트 모드는 진한 빨강 사용
+    errorAction: primitives.state.errorActionLight, // destructive 버튼 배경 (톤다운)
     info: primitives.state.infoLight, // 라이트 모드는 진한 파랑 사용
   },
   overlay: {
@@ -289,6 +292,7 @@ export const darkColors: ColorsShape = {
     success: primitives.state.successDark,
     warning: primitives.state.warningDark,
     error: primitives.state.errorDark, // 다크 모드는 밝은 살구빨강 (가독성)
+    errorAction: primitives.state.errorDark, // destructive 버튼 배경 = error와 동일 (다크는 변경 없음)
     info: primitives.state.infoDark, // 다크 모드는 옅은 파랑 사용
   },
   overlay: {
