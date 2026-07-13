@@ -100,7 +100,8 @@ import { lightTheme, darkTheme } from '@junkwon91/rn-design-system';
 |---|---|
 | `success` | 성공 |
 | `warning` | 경고 |
-| `error` | 오류 / destructive |
+| `error` | 오류 액센트 (텍스트·아이콘·보더) |
+| `errorAction` | destructive 버튼 배경 |
 | `info` | 정보 |
 
 #### `colors.overlay` — 오버레이
