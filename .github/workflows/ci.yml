@@ -1,6 +1,6 @@
 name: CI
 
-# 라이브러리 품질 게이트 — PR과 main 푸시에서 lint / 타입체크 / 빌드를 검증한다.
+# 라이브러리 품질 게이트 — PR과 main 푸시에서 lint / 타입체크 / 테스트 / 빌드를 검증한다.
 # (배포는 하지 않는다: package.json "private": true, npm 레지스트리 미배포 방침.)
 on:
   push:
@@ -8,9 +8,32 @@ on:
   pull_request:
     branches: [main]
 
+# 같은 브랜치에 연속으로 푸시하면 이전 실행은 취소한다. 어차피 마지막 커밋의
+# 결과만 의미가 있어, 중간 실행을 계속 돌리는 건 러너 시간 낭비다.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 최소 권한. 이 워크플로는 코드를 읽기만 하고 커밋·이슈·릴리스를 만들지 않는다.
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # 정상 실행이 1~2분이라, 그 이상 매달리면 무언가 잘못된 것으로 보고 끊는다.
+    timeout-minutes: 15
+
+    strategy:
+      # 한 버전이 실패해도 나머지 버전 결과를 끝까지 본다(원인 범위 파악용).
+      fail-fast: false
+      matrix:
+        # package.json engines(">= 22.11.0")을 만족하는 두 LTS.
+        # 22는 하한선, 24는 상위 버전 회귀 감지용 — 소비 프로젝트가 어느 쪽이든
+        # 동작함을 근거로 말할 수 있게 한다.
+        node: ['22', '24']
+
+    name: verify (Node ${{ matrix.node }})
 
     steps:
       - name: Checkout
@@ -19,9 +42,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          # package.json engines(">= 22.11.0")를 만족하는 22.x LTS.
-          # 22를 지정하면 setup-node가 22.11 이상 최신 패치를 설치한다.
-          node-version: '22'
+          node-version: ${{ matrix.node }}
           # npm 캐시(~/.npm) 복원 — package-lock.json 해시 기준. 매 실행 클린
           # 설치 시간을 크게 줄인다.
           cache: 'npm'
@@ -43,7 +64,8 @@ jobs:
 
       - name: Test
         # 스토어 유닛 + 컴포넌트 접근성 쿼리 테스트(ADR-44). --ci로 CI 모드.
-        run: npm test -- --ci
+        # 커버리지를 요약 출력해 테스트가 어디까지 닿는지 로그로 남긴다.
+        run: npm test -- --ci --coverage --coverageReporters=text-summary
 
       - name: Build (react-native-builder-bob)
         # lib/(commonjs·module·typescript) 산출물 생성이 실제로 성공하는지 검증.
