@@ -190,5 +190,3 @@ PR·main 푸시 시 GitHub Actions(CI)가 lint → 타입체크 → 테스트 �
 ## License
 
 MIT License — Copyright (c) 2026 JunKwon91
-
-<!-- CI/branch-protection 실습용 임시 변경 -->
