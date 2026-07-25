@@ -50,10 +50,6 @@ type InteractivePressableProps = Pick<PressableProps,
 | `children` | `ReactNode` | ✓ | — |
 | `style` | `StyleProp<TextStyle>` | — | — |
 
-| Light | Dark |
-|---|---|
-| ![Text light](screenshots/text-light.png) | ![Text dark](screenshots/text-dark.png) |
-
 `TextVariant` 11종은 [docs/theme.md#typography](theme.md#typography) 참고. `TextColor`는 `'primary' | 'secondary' | 'muted' | 'accent' | 'inverse'` 다섯 값이며 다음과 같이 매핑됩니다:
 
 | color 값 | 매핑되는 토큰 |
@@ -254,10 +250,6 @@ import { Settings, Search } from 'lucide-react-native';
 | `onPress` | `() => void` | ✓ | — |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 | `accessibilityLabel` | `string` | — | — |
-
-| Light | Dark |
-|---|---|
-| ![FAB light](screenshots/fab-light.png) | ![FAB dark](screenshots/fab-dark.png) |
 
 `variant='extended'`는 라벨이 함께 노출되는 가로형 FAB로, `label`을 함께 전달합니다.
 
@@ -648,10 +640,6 @@ iOS HIG 설정 행 패턴의 컴포넌트입니다. `kind`로 6종의 행 형태
 | `divider` | `boolean` | — | `true` |
 | `style` | `StyleProp<ViewStyle>` | — | — |
 
-| Light | Dark |
-|---|---|
-| ![SettingsRow light](screenshots/settings-row-light.png) | ![SettingsRow dark](screenshots/settings-row-dark.png) |
-
 kind별 추가 props:
 
 - `default`: `value: string` — 우측 보조 텍스트
@@ -775,10 +763,6 @@ import { Inbox } from 'lucide-react-native';
 | `'circle'` | `size: number` |
 | `'text'` | `lines?: number (기본 3)`, `lineWidths?: (number \| string)[]`, `lineHeight?: number` |
 
-| Light | Dark |
-|---|---|
-| ![Skeleton light](screenshots/skeleton-light.png) | ![Skeleton dark](screenshots/skeleton-dark.png) |
-
 ```tsx
 <Skeleton type="rect" width={200} height={16} />
 <Skeleton type="circle" size={40} />
@@ -901,21 +885,9 @@ modal 카테고리에는 시각 컴포넌트 4종(`Toast`, `Dialog`, `BottomShee
 
 **다중 snap**
 
-| Light | Dark |
-|---|---|
-| ![BottomSheet multi snap light](screenshots/bottom-sheet-multi-snap-light.png) | ![BottomSheet multi snap dark](screenshots/bottom-sheet-multi-snap-dark.png) |
-
 **Scrollable**
 
-| Light | Dark |
-|---|---|
-| ![BottomSheet scrollable light](screenshots/bottom-sheet-scrollable-light.png) | ![BottomSheet scrollable dark](screenshots/bottom-sheet-scrollable-dark.png) |
-
 **키보드 양립**
-
-| Light | Dark |
-|---|---|
-| ![BottomSheet keyboard light](screenshots/bottom-sheet-keyboard-light.png) | ![BottomSheet keyboard dark](screenshots/bottom-sheet-keyboard-dark.png) |
 
 `snapPoints`를 지정하면 다중 snap 모드로 동작하고, 미지정 시 `height` 기준 단일 snap입니다. `BottomSheetSnap`은 `'auto' | \`${number}%\` | number` 형태로 자유 혼합 가능합니다.
 
@@ -944,15 +916,7 @@ const [visible, setVisible] = useState(false);
 
 **RadioGroup 선택**
 
-| Light | Dark |
-|---|---|
-| ![Popup radio light](screenshots/popup-radio-light.png) | ![Popup radio dark](screenshots/popup-radio-dark.png) |
-
 **Checkbox 다중 선택**
-
-| Light | Dark |
-|---|---|
-| ![Popup checkbox light](screenshots/popup-checkbox-light.png) | ![Popup checkbox dark](screenshots/popup-checkbox-dark.png) |
 
 **다중 Input form**
 
