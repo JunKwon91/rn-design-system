@@ -8,25 +8,81 @@
 // 자유롭게 쓰면 "16px과 17px이 섞이거나, 굵기가 들쭉날쭉" 해진다.
 //
 // [폰트 페어링: Manrope + Inter]
-//   - Manrope: 기하학적, 모던한 느낌 → 큰 제목과 로또 공 숫자에 사용
+//   - Manrope: 기하학적, 모던한 느낌 → 큰 제목과 숫자 강조에 사용
 //   - Inter:  가독성 최고 → 본문, 라벨, 작은 텍스트에 사용
 //
-// [중요: 폰트 파일 링크 필요]
-// 아래 fontFamily에 'Manrope', 'Inter'를 적었지만, 폰트 .ttf 파일을
-// iOS와 Android에 별도로 링크하지 않으면 렌더되지 않는다.
-//   - iOS: Info.plist의 UIAppFonts 항목 + Resources에 .ttf 추가
-//   - Android: android/app/src/main/assets/fonts/ 에 .ttf 복사
+// [폰트 파일은 앱이 링크한다 — 라이브러리는 번들하지 않는다]
+// 이 라이브러리는 .ttf/.otf를 포함하지 않는다(package.json files = src, lib).
+// 아래 fontFamily 값은 "이 이름으로 등록된 폰트를 쓴다"는 선언일 뿐이고,
+// 실제 렌더는 앱이 폰트를 링크했을 때만 이루어진다. 링크하지 않으면
+// 시스템 기본 폰트로 fallback된다(에러는 나지 않는다).
+//   - iOS: Info.plist의 UIAppFonts + Resources에 폰트 파일 추가
+//   - Android: android/app/src/main/assets/fonts/ 에 복사
 //   - react-native.config.js에 assets 경로 명시
-// 폰트 링크는 후속 작업으로 처리 예정. 현재는 시스템 기본 폰트로 fallback.
 //
-// [개념: 'as const' on string literals]
-// fontWeight: '700' as const 처럼 명시적으로 좁히는 이유는 React Native의
-// fontWeight 타입이 좁은 union ('100' | '200' | ... | 'normal' | 'bold')이기
-// 때문. 그냥 '700'이라고 쓰면 string으로 추론되어 타입 불일치 에러 발생.
+// [앱이 폰트를 교체할 수 있다]
+// AppTheme의 typography 타입은 아래 TypographyShape 인터페이스다.
+// fontFamily가 string이므로, 앱은 테마를 스프레드해 폰트만 갈아끼울 수 있다.
+//
+//   const appTheme: AppTheme = {
+//     ...lightTheme,
+//     typography: {
+//       ...lightTheme.typography,
+//       displayLg: { ...lightTheme.typography.displayLg, fontFamily: 'Pretendard' },
+//     },
+//   };
+//
+// colors가 ColorsShape로 계약을 고정하는 것과 같은 패턴이다(ADR-04).
+//
+// [개념: 'as const' + 'satisfies']
+// fontWeight: '700' as const 처럼 좁히는 이유는 React Native의 fontWeight
+// 타입이 좁은 union('100' | ... | 'normal' | 'bold')이기 때문이다. 그냥
+// '700'이라고 쓰면 string으로 추론되어 TextStyle에 넣을 때 타입 에러가 난다.
+// 여기에 `satisfies TypographyShape`를 붙여, 키 누락·오타·값 타입 오류를
+// 정의 시점에 잡는다. as const가 만드는 정확한 리터럴 타입은 그대로 유지되고,
+// AppTheme을 거치면 TypographyShape로 넓어져 앱이 값을 덮어쓸 수 있다.
 // ============================================================================
 
+import type { TextStyle } from 'react-native';
+
 // ----------------------------------------------------------------------------
-// typography — 11가지 글꼴 스타일 묶음
+// TypographyStyle — 스타일 한 묶음의 계약
+// ----------------------------------------------------------------------------
+// React Native TextStyle에 그대로 펼쳐 넣을 수 있는 형태.
+// fontWeight/textTransform은 RN의 좁은 union을 그대로 재사용한다.
+export interface TypographyStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: NonNullable<TextStyle['fontWeight']>;
+  lineHeight: number;
+  /** labelCaps처럼 자간이 필요한 스타일에서만 쓴다. */
+  letterSpacing?: number;
+  /** labelCaps처럼 대문자 변환이 필요한 스타일에서만 쓴다. */
+  textTransform?: NonNullable<TextStyle['textTransform']>;
+}
+
+// ----------------------------------------------------------------------------
+// TypographyShape — typography 객체 전체의 계약
+// ----------------------------------------------------------------------------
+// 새 스타일을 추가할 때 이 인터페이스에도 키를 넣어야 한다.
+// 넣지 않으면 아래 satisfies에서 컴파일 에러가 난다(의도된 안전장치).
+export interface TypographyShape {
+  displayLg: TypographyStyle;
+  headlineMd: TypographyStyle;
+  headlineSm: TypographyStyle;
+  bodyBase: TypographyStyle;
+  bodySm: TypographyStyle;
+  bodyXs: TypographyStyle;
+  labelXs: TypographyStyle;
+  labelSm: TypographyStyle;
+  labelMd: TypographyStyle;
+  labelLg: TypographyStyle;
+  numericMd: TypographyStyle;
+  labelCaps: TypographyStyle;
+}
+
+// ----------------------------------------------------------------------------
+// typography — 12가지 글꼴 스타일 묶음
 // ----------------------------------------------------------------------------
 // 각 스타일은 React Native의 TextStyle과 호환되도록 구성:
 //   { fontFamily, fontSize, fontWeight, lineHeight, ... }
@@ -43,7 +99,6 @@ export const typography = {
   },
 
   // headlineMd — 중간 크기 헤드라인 (카드 제목, 섹션 헤더)
-  // 예: "최근 회차", "Hot 번호" 등
   headlineMd: {
     fontFamily: 'Manrope',
     fontSize: 20,
@@ -85,7 +140,16 @@ export const typography = {
     lineHeight: 18,
   },
 
-  // labelSm — 작은 라벨 (Bottom Tab 라벨, 작은 버튼 텍스트)
+  // labelXs — 가장 작은 라벨 (Badge sm 등 좁은 컨테이너 안의 짧은 텍스트)
+  // 스케일 최소값 — 본문에는 쓰지 않는다.
+  labelXs: {
+    fontFamily: 'Inter',
+    fontSize: 10,
+    fontWeight: '600' as const,
+    lineHeight: 13,
+  },
+
+  // labelSm — 작은 라벨 (Bottom Tab 라벨, Badge md, Chip sm)
   // labelCaps와 달리 대문자 변환 없음 — 한글 라벨에 적합
   labelSm: {
     fontFamily: 'Inter',
@@ -94,7 +158,7 @@ export const typography = {
     lineHeight: 14,
   },
 
-  // labelMd — 중간 라벨 (Input 라벨, Settings Row 라벨)
+  // labelMd — 중간 라벨 (Input 라벨, Settings Row 라벨, Chip md)
   labelMd: {
     fontFamily: 'Inter',
     fontSize: 13,
@@ -102,7 +166,7 @@ export const typography = {
     lineHeight: 16,
   },
 
-  // labelLg — 큰 라벨 (Segmented Control, Bottom Navigation active)
+  // labelLg — 큰 라벨 (Segmented Control, Bottom Navigation active, FAB extended)
   labelLg: {
     fontFamily: 'Inter',
     fontSize: 14,
@@ -127,13 +191,14 @@ export const typography = {
     lineHeight: 16,
     letterSpacing: 0.6, // 자간 — 대문자 텍스트는 살짝 벌리면 가독성↑
     textTransform: 'uppercase' as const, // 자동으로 대문자로 변환
-    // textTransform도 좁은 union 타입이라 'as const' 필요
   },
-} as const;
+} as const satisfies TypographyShape;
 
 // ----------------------------------------------------------------------------
-// Typography 타입 export — 다른 파일에서 typography 객체 모양을 참조할 때
+// Typography 타입 export
 // ----------------------------------------------------------------------------
-// 예) function styledText(t: Typography['displayLg']) { ... }
-//     → displayLg 스타일과 같은 모양의 객체만 받음
-export type Typography = typeof typography;
+// 계약(TypographyShape)과 구현(typography)이 분리되어 있다.
+//   - AppTheme.typography는 TypographyShape → 앱이 값을 덮어쓸 수 있다
+//   - typography 상수 자체는 as const 리터럴 → 정확한 값이 타입에 남는다
+// Colors/ColorsShape와 같은 구조다.
+export type Typography = TypographyShape;

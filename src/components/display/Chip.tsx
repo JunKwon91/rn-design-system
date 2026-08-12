@@ -34,8 +34,9 @@
 //   default — outlined border/control, text text/muted (보조 톤), 아이콘 없음
 //
 // [공통 사양]
-// sm — height 28, padding-h 10, font 12, icon 14 (close X 12)
-// md — height 32, padding-h 12, font 13, icon 16 (close X 14)
+// sm — height 28, padding-h 10, 라벨 labelSm(11/600/14), icon 14 (close X 12)
+// md — height 32, padding-h 12, 라벨 labelMd(13/600/16), icon 16 (close X 14)
+// 라벨 글꼴은 typography 토큰만 쓴다 — 크기·굵기를 이 파일에서 정하지 않는다.
 // cornerRadius = height/2 (pill)
 // itemSpacing 8 (아이콘 ↔ 라벨, 라벨 ↔ close)
 // accessibilityRole — filter 'switch' / 그 외 'button'
@@ -75,14 +76,15 @@ export interface ChipProps extends InteractivePressableProps {
 interface SizeSpec {
   height: number;
   padH: number;
-  fontSize: number;
+  /** 라벨에 쓸 typography 토큰 키 — 크기·굵기·폰트를 여기서 정하지 않는다. */
+  textToken: 'labelSm' | 'labelMd';
   iconSize: number;
   closeIconSize: number;
 }
 
 const SIZE_SPEC: Record<ChipSize, SizeSpec> = {
-  sm: { height: 28, padH: 10, fontSize: 12, iconSize: 14, closeIconSize: 12 },
-  md: { height: 32, padH: 12, fontSize: 13, iconSize: 16, closeIconSize: 14 },
+  sm: { height: 28, padH: 10, textToken: 'labelSm', iconSize: 14, closeIconSize: 12 },
+  md: { height: 32, padH: 12, textToken: 'labelMd', iconSize: 16, closeIconSize: 14 },
 };
 
 const Row = styled.View<{
@@ -109,10 +111,8 @@ const Row = styled.View<{
     $disabled ? theme.interaction.disabledOpacity : $pressed ? theme.interaction.pressedOpacity : 1};
 `;
 
-const LabelText = styled(Text)<{ $color: string; $fontSize: number }>`
+const LabelText = styled(Text)<{ $color: string }>`
   color: ${({ $color }) => $color};
-  font-size: ${({ $fontSize }) => $fontSize}px;
-  font-weight: 600;
   margin-left: 8px;
   margin-right: 8px;
 `;
@@ -249,11 +249,7 @@ function Chip({
           $pressed={pressed}
         >
           {renderLeading}
-          <LabelComponent
-            variant="labelSm"
-            $color={textColor}
-            $fontSize={spec.fontSize}
-          >
+          <LabelComponent variant={spec.textToken} $color={textColor}>
             {label}
           </LabelComponent>
           {renderClose}

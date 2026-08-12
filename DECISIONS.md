@@ -1774,3 +1774,110 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 - 문서: theme.md 토큰 표(`error`=액센트 / `errorAction`=버튼 배경 분리), components.md Button 설명 갱신.
 
 **범위 밖(후속 고려)**: Badge `color='destructive'`는 여전히 `state.error`(#B91C1C)를 배경으로 사용 — 이번 요청은 버튼 한정. 버튼과 배지의 destructive 빨강이 미세하게 달라지므로, 필요 시 Badge도 `errorAction`으로 통일 검토.
+
+---
+
+## ADR-48: `typography` 타입을 리터럴에서 `TypographyShape` 인터페이스로 확장 (앱별 폰트 교체 허용)
+
+### 상황
+
+- `AppTheme.typography`가 `typeof typography`였고, `typography` 상수는 `as const`라 각 값이 **리터럴 타입**으로 고정됐다. 즉 `displayLg.fontFamily`의 타입이 `string`이 아니라 `'"Manrope"'`다.
+- 그래서 앱이 폰트만 갈아끼운 테마를 만들 수 없었다. 아래가 타입 에러다.
+
+  ```ts
+  const appTheme: AppTheme = {
+    ...lightTheme,
+    typography: {
+      ...lightTheme.typography,
+      displayLg: { ...lightTheme.typography.displayLg, fontFamily: 'Pretendard' },
+    },
+  };
+  // Type '"Pretendard"' is not assignable to type '"Manrope"'.
+  ```
+
+- 라이브러리는 폰트 파일을 번들하지 않고(`files`: `src`, `lib`) 앱이 링크하는 구조다. 그런데 정작 **어떤 폰트를 쓸지는 라이브러리가 리터럴로 고정**하고 있어, 로드 책임과 선택 권한이 어긋나 있었다.
+- 실제로 소비 앱(LottoStats)은 `AppTheme['typography'] & 확장` 교차 타입으로 **키 추가**만 하고 있었다. 기존 키의 값 변경은 애초에 불가능했다.
+
+### 선택
+
+- `colors`가 `ColorsShape`로 계약을 고정하는 패턴(ADR-04)을 그대로 따른다.
+  - `TypographyStyle` — 스타일 한 묶음의 계약. `fontFamily: string`, `fontSize`/`lineHeight`: `number`, `fontWeight`: `NonNullable<TextStyle['fontWeight']>`, `letterSpacing`·`textTransform`은 optional.
+  - `TypographyShape` — 12개 키를 가진 객체 계약.
+  - `AppTheme.typography`의 타입을 `typeof typography` → `TypographyShape`로 교체.
+- `typography` 상수의 `as const`는 **유지**하고 `satisfies TypographyShape`를 덧붙인다.
+- `Typography`, `TypographyShape`, `TypographyStyle`을 공개 타입으로 재export.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| `as const` 제거 | `fontWeight: '700'`이 `string`으로 추론되어 RN `TextStyle`의 좁은 union에 넣을 때 타입 에러. 상수를 `style={theme.typography.displayLg}`로 직접 펼치는 기존 사용처가 깨진다 |
+| 앱에서 `as AppTheme` 캐스팅으로 우회 | 타입 안전성을 앱 쪽에서 포기하게 만든다. 계약을 넓히는 게 라이브러리의 책임 |
+| `fontFamily`만 별도 토큰(`fontFamilies.sans` 등)으로 분리 | 스타일 묶음이 두 곳으로 쪼개져 `style={token}` 한 줄 사용이 깨진다. 변경 범위 대비 이득 없음 |
+| `Partial<Typography>` 병합 헬퍼 제공 | API 표면만 늘고, 스프레드로 이미 되는 일 |
+
+### 근거
+
+- **`as const` + `satisfies` 조합**이 두 요구를 동시에 만족한다. 정의 시점에는 리터럴 타입이 유지되어 `TextStyle` 호환성과 정확한 값 문서화가 남고, `AppTheme`을 거치면 `TypographyShape`로 넓어져 앱이 값을 덮어쓸 수 있다. `satisfies`는 키 누락·오타·값 타입 오류를 컴파일타임에 잡는다(ADR-04의 `ColorsShape` 강제와 같은 역할).
+- **역할이 제자리를 찾는다.** 폰트 파일을 링크하는 주체(앱)가 폰트 이름도 정한다. 라이브러리는 "이 스케일을 이 이름으로 쓴다"는 기본값만 제공한다.
+- 기존 소비 앱의 교차 타입 확장(`AppTheme['typography'] & typeof extension`)은 그대로 성립한다 — 검증 완료.
+
+### 결과
+
+- `theme/typography.ts`: `TypographyStyle`·`TypographyShape` 인터페이스 추가, `as const satisfies TypographyShape`, `Typography = TypographyShape`.
+- `theme/index.ts`: `AppTheme.typography: TypographyShape`, 타입 3종 재export.
+- 앱이 폰트를 교체할 수 있다 — 단일 스타일 교체, 전체 일괄 교체 모두 타입 통과.
+- 폰트 링크 주석을 사실에 맞게 정정했다(기존 "후속 작업으로 처리 예정"은 빈 약속이었다 — 라이브러리는 앞으로도 폰트를 번들하지 않는다).
+
+---
+
+## ADR-49: Badge·Chip·FAB의 글꼴 하드코딩 제거 (`labelXs` 신설, Chip sm 12→11)
+
+### 상황
+
+- ADR-48로 앱이 테마에서 폰트를 교체할 수 있게 됐지만, **세 컴포넌트가 `theme.typography`를 거치지 않아** 교체가 반영되지 않았다.
+  - `Badge`: `font-family: 'Inter'` + `FONT_SIZE` 상수(sm 10 / md 11) + `font-weight: 600` + `line-height: $size + 2`
+  - `Chip`: `SIZE_SPEC.fontSize`(sm 12 / md 13) + `font-weight: 600`이 `variant="labelSm"`을 덮어씀
+  - `FAB`: `font-family: 'Inter'` + `font-weight: 600`이 `variant="labelLg"`를 덮어씀
+- 즉 앱이 `fontFamily: 'Pretendard'`로 바꿔도 이 셋은 Inter로 남는다.
+- 걸림돌: Badge sm이 쓰는 **10px가 스케일에 없었다**(최소가 `labelSm` 11).
+
+### 선택
+
+- **`labelXs`(Inter 10 / 600 / 13)를 typography에 추가** — 스케일 11종 → 12종.
+- 세 컴포넌트를 토큰 경유로 전환한다.
+
+| 컴포넌트 | 이전(실효값) | 이후 | 변화 |
+|---|---|---|---|
+| Badge sm | Inter 10 / 600 / 12 | `labelXs` (10 / 600 / 13) | lineHeight +1 |
+| Badge md | Inter 11 / 600 / 13 | `labelSm` (11 / 600 / 14) | lineHeight +1 |
+| Chip sm | Inter 12 / 600 / 14 | `labelSm` (11 / 600 / 14) | **fontSize −1** |
+| Chip md | Inter 13 / 600 / 14 | `labelMd` (13 / 600 / 16) | lineHeight +2 |
+| FAB extended | Inter 14 / 600 / 20 | `labelLg` (14 / 600 / 20) | **없음** |
+
+- `Badge.FONT_SIZE`, `Chip.SizeSpec.fontSize` 상수를 제거하고 토큰 키(`TEXT_TOKEN`, `textToken`)로 대체했다.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| Chip sm을 위해 12px 토큰 신설 | 스케일에 10·11·12·13이 촘촘히 늘어서 의미 구분이 사라진다. 스케일은 선택을 좁히려고 있는 것 |
+| Chip sm을 `labelMd`(13)로 올림 | sm이 md와 같은 글자 크기가 되어 두 사이즈의 차이가 컨테이너 높이뿐이 된다 |
+| Badge lineHeight를 `$size + 2` 공식으로 유지 | 공식이 곧 매직넘버다. 토큰이 lineHeight를 갖고 있으므로 계산할 이유가 없다 |
+| 하드코딩만 지우고 스케일 밖 크기는 남김 | "토큰을 거친다"는 목적이 반만 달성된다 |
+
+### 근거
+
+- **`labelXs`는 실재하는 필요다.** Badge sm은 16×16 컨테이너에 숫자를 넣어야 해서 11px로는 여백이 부족하다. 이미 쓰이던 크기를 스케일에 편입한 것이지 새 크기를 발명한 게 아니다.
+- **Chip sm 1px 축소는 스케일 흡수 비용이다.** 12px는 `labelCaps` 하나만 쓰는 크기이고 그건 대문자 전용이라 성격이 다르다. 12를 남기려면 일반 라벨용 12px 토큰을 새로 만들어야 하는데, 11(labelSm)과 13(labelMd) 사이에 하나를 더 끼우는 것은 스케일을 흐린다. Chip sm은 보조 UI라 1px 축소의 영향이 작다.
+- **FAB은 값 변화가 없다.** 이미 `variant="labelLg"`를 쓰고 있었고 덮어쓴 `font-family: 'Inter'` / `font-weight: 600`이 `labelLg`와 같은 값이었다. 죽은 코드를 지운 것이다.
+
+### 결과
+
+- `typography.ts`: `labelXs` 추가(12종).
+- `Badge.tsx`: `FONT_SIZE` → `TEXT_TOKEN`, `BadgeText`가 `$token: TypographyStyle`을 받아 4개 속성을 모두 토큰에서 읽는다.
+- `Chip.tsx`: `SizeSpec.fontSize` → `textToken`, `LabelText`에서 `font-size`·`font-weight` 제거, 사용처가 `variant={spec.textToken}` 전달.
+- `FAB.tsx`: `ExtendedLabel`에서 `font-family`·`font-weight` 제거.
+- 이제 앱이 테마에서 폰트를 바꾸면 세 컴포넌트가 함께 따라간다.
+
+**범위 밖(후속 고려)**: `Tooltip`의 `BubbleText`가 `font-size: 12px` / `line-height: 16px`를 하드코딩한다. 대응 토큰이 없다 — `labelCaps`가 12/16이지만 weight 600 + uppercase라 성격이 다르고, Tooltip은 weight 지정 없이 RN 기본(400)을 쓴다. 12/400/16 토큰을 신설할지, Tooltip을 기존 토큰에 맞출지 별도 판단이 필요하다.

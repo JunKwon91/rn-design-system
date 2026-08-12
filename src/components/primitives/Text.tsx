@@ -52,7 +52,9 @@ export type TextVariant =
   | 'bodySm'
   /** Inter 13 / 400 · Toast description, 보조 메타데이터 */
   | 'bodyXs'
-  /** Inter 11 / 600 · Bottom Tab 라벨 */
+  /** Inter 10 / 600 · 스케일 최소 — Badge sm 등 좁은 컨테이너 전용 */
+  | 'labelXs'
+  /** Inter 11 / 600 · Bottom Tab 라벨, Chip sm */
   | 'labelSm'
   /** Inter 13 / 600 · Input·Settings Row 라벨 */
   | 'labelMd'

@@ -26,7 +26,7 @@ export interface AppTheme {
   colors: Colors;                 // mode-aware 색 토큰
   spacing: typeof spacing;        // 간격 (px)
   radius: typeof radius;          // 반경 (px)
-  typography: typeof typography;  // 폰트 variant 11종
+  typography: TypographyShape;    // 폰트 variant 12종 (앱이 fontFamily 교체 가능)
   interaction: typeof interaction;// state opacity (mode 무관)
 }
 ```
@@ -153,7 +153,7 @@ export const radius = {
 
 ### typography
 
-11개 variant. Manrope(제목·숫자 강조)와 Inter(본문·라벨)를 페어링합니다. Manrope는 큰 사이즈에서 시각적 무게가 강해 제목·수치에 적합하고, Inter는 본문 가독성과 다국어(한글) 지원이 우수합니다. 두 폰트 모두 OFL 라이선스라 배포에 제약이 없습니다.
+12개 variant. Manrope(제목·숫자 강조)와 Inter(본문·라벨)를 페어링합니다. Manrope는 큰 사이즈에서 시각적 무게가 강해 제목·수치에 적합하고, Inter는 본문 가독성과 다국어(한글) 지원이 우수합니다. 두 폰트 모두 OFL 라이선스라 배포에 제약이 없습니다.
 
 | variant | font | size | weight | lineHeight | 특수 |
 |---|---|---|---|---|---|
@@ -166,10 +166,40 @@ export const radius = {
 | `labelLg` | Inter | 14 | 600 | 20 | — |
 | `labelMd` | Inter | 13 | 600 | 16 | — |
 | `labelSm` | Inter | 11 | 600 | 14 | — |
+| `labelXs` | Inter | 10 | 600 | 13 | 스케일 최소 — Badge sm 등 좁은 컨테이너 전용 |
 | `labelCaps` | Inter | 12 | 600 | 16 | `letterSpacing: 0.6`, `textTransform: 'uppercase'` |
 | `numericMd` | Manrope | 14 | 700 | 20 | — |
 
 `Text` 컴포넌트의 `variant` prop으로 직접 선택합니다. 자세한 사용은 [components.md](components.md)의 Text 항목 참고.
+
+#### 폰트 교체
+
+라이브러리는 폰트 파일을 번들하지 않습니다(`files`: `src`, `lib`). 위 `font` 열은 "이 이름으로 등록된 폰트를 쓴다"는 선언이고, 실제 렌더는 앱이 폰트를 링크했을 때 이루어집니다. 링크하지 않으면 시스템 기본 폰트로 fallback되며 에러는 나지 않습니다.
+
+`AppTheme.typography`의 타입은 `TypographyShape` 인터페이스라 앱이 값을 덮어쓸 수 있습니다(ADR-48).
+
+```ts
+import { lightTheme, type AppTheme } from '@junkwon91/rn-design-system';
+
+// 스타일 하나만 교체
+const theme: AppTheme = {
+  ...lightTheme,
+  typography: {
+    ...lightTheme.typography,
+    displayLg: { ...lightTheme.typography.displayLg, fontFamily: 'Pretendard' },
+  },
+};
+
+// 전체 일괄 교체
+const allPretendard: AppTheme = {
+  ...lightTheme,
+  typography: Object.fromEntries(
+    Object.entries(lightTheme.typography).map(([k, v]) => [k, { ...v, fontFamily: 'Pretendard' }]),
+  ) as AppTheme['typography'],
+};
+```
+
+`TypographyShape` / `TypographyStyle` 타입도 함께 export되므로, 앱이 스타일을 직접 조립할 때 쓸 수 있습니다.
 
 ### interaction
 

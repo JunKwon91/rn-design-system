@@ -22,13 +22,16 @@
 //   destructive — state.error + text.onPrimaryAction
 //   success     — state.success + text.onPrimaryAction
 //   warning     — state.warning + text.onPrimaryAction
-// 폰트: Inter Semi Bold, sm 10 / md 11
+// 폰트: typography 토큰 경유 — sm은 labelXs(10/600/13), md는 labelSm(11/600/14).
+//   크기·굵기·패밀리를 이 파일에서 정하지 않으므로, 앱이 테마에서 폰트를
+//   교체하면 Badge 글자도 따라간다.
 // ============================================================================
 
 import type { StyleProp, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 
 import { useAppTheme } from '../../theme';
+import type { TypographyStyle } from '../../theme';
 
 export type BadgeType = 'dot' | 'count' | 'label';
 export type BadgeSize = 'sm' | 'md';
@@ -48,7 +51,12 @@ const DOT_SIZE: Record<BadgeSize, number> = { sm: 6, md: 8 };
 const COUNT_SIZE: Record<BadgeSize, number> = { sm: 16, md: 20 };
 const LABEL_HEIGHT: Record<BadgeSize, number> = { sm: 16, md: 20 };
 const LABEL_PAD: Record<BadgeSize, number> = { sm: 6, md: 8 };
-const FONT_SIZE: Record<BadgeSize, number> = { sm: 10, md: 11 };
+
+// 글자는 typography 토큰에서만 읽는다 — 크기·굵기·폰트를 여기서 정하지 않는다.
+const TEXT_TOKEN: Record<BadgeSize, 'labelXs' | 'labelSm'> = {
+  sm: 'labelXs', // Inter 10 / 600 / 13
+  md: 'labelSm', // Inter 11 / 600 / 14
+};
 
 const Dot = styled.View<{ $size: number; $color: string }>`
   width: ${({ $size }) => $size}px;
@@ -78,12 +86,12 @@ const Label = styled.View<{ $h: number; $pad: number; $color: string }>`
   justify-content: center;
 `;
 
-const BadgeText = styled.Text<{ $size: number; $color: string }>`
-  font-family: 'Inter';
-  font-size: ${({ $size }) => $size}px;
-  font-weight: 600;
+const BadgeText = styled.Text<{ $token: TypographyStyle; $color: string }>`
+  font-family: ${({ $token }) => $token.fontFamily};
+  font-size: ${({ $token }) => $token.fontSize}px;
+  font-weight: ${({ $token }) => $token.fontWeight};
+  line-height: ${({ $token }) => $token.lineHeight}px;
   color: ${({ $color }) => $color};
-  line-height: ${({ $size }) => $size + 2}px;
   include-font-padding: false;
 `;
 
@@ -128,7 +136,7 @@ function Badge({
   if (type === 'count') {
     return (
       <Count $size={COUNT_SIZE[size]} $color={bg} style={style} testID={testID}>
-        <BadgeText $size={FONT_SIZE[size]} $color={fg}>
+        <BadgeText $token={theme.typography[TEXT_TOKEN[size]]} $color={fg}>
           {formatCount(value)}
         </BadgeText>
       </Count>
@@ -142,7 +150,7 @@ function Badge({
       style={style}
       testID={testID}
     >
-      <BadgeText $size={FONT_SIZE[size]} $color={fg}>
+      <BadgeText $token={theme.typography[TEXT_TOKEN[size]]} $color={fg}>
         {value !== undefined ? String(value) : ''}
       </BadgeText>
     </Label>

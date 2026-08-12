@@ -101,11 +101,11 @@ const ExtendedFab = styled(Pressable).attrs({ style: SHADOW })`
   padding-right: 20px;
 `;
 
+// 글꼴은 사용처에서 variant="labelLg"로 지정한다(typography 토큰 경유).
+// 여기서 font-family/font-weight를 덮어쓰면 앱이 테마로 폰트를 바꿔도 따라가지 않는다.
 const ExtendedLabel = styled(Text)`
   margin-left: 8px;
   color: ${({ theme }: { theme: AppTheme }) => theme.colors.primary.onAction};
-  font-family: 'Inter';
-  font-weight: 600;
 `;
 
 function iconWithProps(icon: React.ReactNode, size: number, color: string): React.ReactNode {

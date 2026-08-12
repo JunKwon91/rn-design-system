@@ -29,7 +29,7 @@
 import { lightColors, darkColors, type Colors } from './colors';
 import { interaction } from './interaction';
 import { spacing, radius } from './spacing';
-import { typography } from './typography';
+import { typography, type TypographyShape } from './typography';
 
 // ----------------------------------------------------------------------------
 // 모드 타입 — 'light' 또는 'dark' 문자열만 허용
@@ -51,12 +51,17 @@ export type ThemeMode = 'light' | 'dark';
 // (자세한 내막은 colors.ts의 ColorsShape 설명 참고)
 // 해결: AppTheme 인터페이스를 만들고 둘 다 이 타입을 만족하도록 강제.
 // ----------------------------------------------------------------------------
+// [typography는 왜 typeof가 아니라 인터페이스인가]
+// typeof typography로 두면 as const 리터럴이 그대로 타입이 되어
+// fontFamily가 '"Manrope"'로 고정된다. 그러면 앱이 폰트만 바꾼 테마를
+// 만들 수 없다("Pretendard"를 '"Manrope"'에 할당 불가). colors가
+// ColorsShape로 계약을 고정하듯, typography도 TypographyShape로 둔다.
 export interface AppTheme {
   mode: ThemeMode;             // 현재 테마 모드 ('light' | 'dark')
   colors: Colors;              // 색상 토큰 묶음
   spacing: typeof spacing;     // 간격 토큰 (typeof로 spacing 객체와 같은 구조 강제)
   radius: typeof radius;       // 반경 토큰
-  typography: typeof typography; // 글꼴 토큰
+  typography: TypographyShape; // 글꼴 토큰 (앱이 fontFamily 등을 덮어쓸 수 있다)
   interaction: typeof interaction; // interactive state opacity (mode 무관)
 }
 
@@ -104,4 +109,7 @@ export const darkTheme: AppTheme = {
 // ----------------------------------------------------------------------------
 export { lightColors, darkColors, spacing, radius, typography, interaction };
 export type { Colors, ColorsShape } from './colors';
+// 앱이 테마를 확장하거나 폰트를 교체할 때 필요한 타입.
+// 예) const t: TypographyStyle = { ...lightTheme.typography.bodyBase, fontFamily: 'Pretendard' }
+export type { Typography, TypographyShape, TypographyStyle } from './typography';
 export { useAppTheme } from './useAppTheme';
