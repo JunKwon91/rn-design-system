@@ -177,7 +177,7 @@ declare module 'styled-components/native' {
 - [docs/theme.md](docs/theme.md) — AppTheme 구조 · 토큰 레퍼런스 · 앱에서 테마 확장
 - [docs/components.md](docs/components.md) — 컴포넌트별 props + 라이트/다크 스크린샷
 - [docs/imperative.md](docs/imperative.md) — toast/dialog/bottomSheet/popup 셋업 + 호출 API
-- [DECISIONS.md](DECISIONS.md) — 설계 의사결정 기록(ADR 47건)
+- [DECISIONS.md](DECISIONS.md) — 설계 의사결정 기록
 
 ## 개발
 
