@@ -28,7 +28,7 @@
 // Value: typography.bodyBase
 //        Empty(placeholder)는 text.muted, Filled는 text.primary
 // X icon: lucide X 18px, stroke text.muted
-//         시각 크기 18×18, hitSlop 10으로 약 38×38 실제 hit area 확보
+//         시각 크기 18×18, hitSlop 13으로 44×44 실제 hit area 확보(ADR-50)
 //
 // [Input과의 차이]
 // - Focus / Error / Disabled 상태 없음 — 검색용이라 단일 톤
@@ -125,7 +125,7 @@ export default function SearchInput({
             onChangeText('');
             onClear?.();
           }}
-          hitSlop={10}
+          hitSlop={13}
           accessibilityRole="button"
           accessibilityLabel="검색어 지우기"
         >

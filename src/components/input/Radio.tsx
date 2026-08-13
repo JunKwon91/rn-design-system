@@ -61,9 +61,13 @@ const SIZE_SPEC: Record<RadioSize, SizeSpec> = {
   lg: { box: 24, stroke: 2,   dot: 10 },
 };
 
+// min-height 44 — 시각 요소(박스·트랙)는 그대로 두고 행 높이만 44로 잡아
+// 최소 터치 영역을 채운다(ADR-50). hitSlop 대신 높이를 쓴 이유는 세로로 나열될 때
+// 인접 항목끼리 터치 영역이 겹치지 않게 하기 위해서다.
 const Row = styled.View<{ $disabled: boolean; $pressed: boolean }>`
   flex-direction: row;
   align-items: center;
+  min-height: 44px;
   gap: 8px;
   opacity: ${({ theme, $disabled, $pressed }: { theme: AppTheme; $disabled: boolean; $pressed: boolean }) =>
     $disabled ? theme.interaction.disabledOpacity : $pressed ? theme.interaction.pressedOpacity : 1};

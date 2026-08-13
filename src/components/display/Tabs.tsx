@@ -24,7 +24,7 @@
 // 컨테이너: ScrollView horizontal, showsHorizontalScrollIndicator=false
 //   하단 1px base line (border.subtle) — 스크롤 시 탭들과 함께 이동해 활성
 //   underline overlay 위치 정합.
-// 각 탭: padding 16 H / 12 T / 0 B, gap 4 (label↔underline), align center
+// 각 탭: padding 16 H / 18 T / 0 B, gap 4 (label↔underline), align center — 높이 44
 // Label: typography.labelLg (Inter Semi Bold 14 / lineHeight 20)
 //   - Active   — text.primary
 //   - Inactive — text.muted
@@ -82,10 +82,12 @@ const Row = styled.View`
   flex-direction: row;
 `;
 
+// padding-top 18 — 상단 18 + 라벨 20(labelLg) + gap 4 + 밑줄 2 = 44.
+// 탭은 항상 탭 대상이므로 최소 터치 44를 시각 높이로 채운다(ADR-50).
 const TabColumn = styled.View`
   flex-direction: column;
   align-items: center;
-  padding: 12px 16px 0px 16px;
+  padding: 18px 16px 0px 16px;
   gap: 4px;
 `;
 

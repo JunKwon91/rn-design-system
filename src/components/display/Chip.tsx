@@ -87,6 +87,24 @@ const SIZE_SPEC: Record<ChipSize, SizeSpec> = {
   md: { height: 32, padH: 12, textToken: 'labelMd', iconSize: 16, closeIconSize: 14 },
 };
 
+// hitSlop — 칩은 조밀하게 나열되는 표면이라 시각 높이를 키우지 않고 세로로만 넓혀
+// 터치 44를 채운다(ADR-50). 가로는 넓히지 않는다 — 나란한 칩끼리 겹치기 때문.
+const SIZE_HIT_SLOP: Record<ChipSize, { top: number; bottom: number }> = {
+  sm: { top: 8, bottom: 8 },
+  md: { top: 6, bottom: 6 },
+};
+
+// 닫기 X(input variant) — 시각 크기가 12~14라 세로는 44를 채우지만 가로는 32~34에
+// 그친다. 더 넓히면 칩 자신의 press 영역을 삼켜 "칩 선택"이 불가능해지므로 여기서
+// 멈춘다. 남은 제약은 ADR-50에 기록했다.
+const CLOSE_HIT_SLOP: Record<
+  ChipSize,
+  { top: number; bottom: number; left: number; right: number }
+> = {
+  sm: { top: 16, bottom: 16, left: 8, right: 12 },
+  md: { top: 15, bottom: 15, left: 8, right: 12 },
+};
+
 const Row = styled.View<{
   $h: number;
   $padH: number;
@@ -208,7 +226,7 @@ function Chip({
       <CloseButton
         onPress={disabled ? undefined : onClose}
         disabled={disabled}
-        hitSlop={8}
+        hitSlop={CLOSE_HIT_SLOP[size]}
         accessibilityRole="button"
         accessibilityLabel="닫기"
       >
@@ -237,6 +255,7 @@ function Chip({
       }}
       accessibilityLabel={accessibilityLabel ?? label}
       style={style}
+      hitSlop={SIZE_HIT_SLOP[size]}
       {...pressableProps}
     >
       {({ pressed }) => (

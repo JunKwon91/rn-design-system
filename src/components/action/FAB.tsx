@@ -67,6 +67,15 @@ const SIZE_SPEC: Record<Exclude<FABVariant, 'extended'>, SizeSpec> = {
   large:   { dim: 96, radius: 48, iconSize: 36 },
 };
 
+// hitSlop — small(40)만 최소 터치 44에 미달한다. FAB는 화면 위에 떠 있어 인접
+// 요소와 겹칠 일이 없으므로 사방으로 2씩 넓혀 44를 채운다(ADR-50).
+// default(56)·large(96)·extended(56)는 시각 크기만으로 충족한다.
+const VARIANT_HIT_SLOP: Record<Exclude<FABVariant, 'extended'>, number | undefined> = {
+  small: 2,
+  default: undefined,
+  large: undefined,
+};
+
 const EXTENDED_HEIGHT = 56;
 const EXTENDED_RADIUS = 28;
 const EXTENDED_ICON_SIZE = 24;
@@ -172,6 +181,7 @@ function FAB({
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       accessibilityLabel={accessibilityLabel}
+      hitSlop={VARIANT_HIT_SLOP[variant]}
       style={({ pressed }) => [
         SHADOW,
         { opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },

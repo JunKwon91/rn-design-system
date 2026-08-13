@@ -118,6 +118,13 @@ const ROW_HEIGHT = {
   compact: { header: 32, body: 36 },
 } as const;
 
+// hitSlop — 정렬 가능한 헤더 셀만 터치 대상이다. 표의 밀도를 유지해야 하므로
+// 헤더 높이는 그대로 두고 세로로만 넓혀 44를 채운다(ADR-50).
+const HEADER_HIT_SLOP = {
+  default: { top: 2, bottom: 2 },
+  compact: { top: 6, bottom: 6 },
+} as const;
+
 const Container = styled.View`
   border-width: 1px;
   overflow: hidden;
@@ -226,6 +233,7 @@ function DataTable<T>({
               key={col.key}
               style={cellStyle}
               onPress={() => handleHeaderPress(col)}
+              hitSlop={HEADER_HIT_SLOP[density]}
               accessibilityRole="button"
               accessibilityLabel={`${col.header} 정렬`}
             >

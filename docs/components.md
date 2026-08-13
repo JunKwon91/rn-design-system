@@ -35,6 +35,25 @@ type InteractivePressableProps = Pick<PressableProps,
 
 ---
 
+## 공통 — 최소 터치 영역 44×44
+
+**탭 대상이 되는 모든 컴포넌트는 실제 터치 영역 44×44 이상을 보장합니다**(ADR-50). 호출처가 크기를 지정하지 않아도 지켜지고, 크기를 지정해도 44 아래로 내려가지 않습니다.
+
+44는 시각 크기가 아니라 눌리는 영역의 기준이므로, 조밀한 UI에서는 시각 크기를 유지한 채 `hitSlop`으로 채웁니다.
+
+| 방식 | 컴포넌트 |
+|---|---|
+| 시각 높이가 44 이상 | `Button` md·lg · `SegmentedControl` · `Tabs` · `Checkbox`·`Radio`·`Switch`(행 min-height) · `SettingsRow` · `OptionCard` · `Input` · `FAB` default·large·extended |
+| `hitSlop`으로 확보 | `Button` sm · `IconButton` 전 size · `Chip` sm·md · `FAB` small · `SearchInput` 지우기 · `DataTable` 정렬 헤더 |
+
+`hitSlop`은 **세로로만** 넓힙니다. 가로로 넓히면 나란히 놓인 버튼·칩끼리 터치 영역이 겹쳐 오탭이 생기기 때문입니다.
+
+`Dialog`·`EmptyState`·`ErrorView`의 액션 버튼은 내부에서 `size="md"`(44)로 고정되며 호출처에 크기를 노출하지 않습니다 — 접근성 보장을 API로 뚫지 않기 위해서입니다.
+
+**알려진 제약**: `Chip`(input variant)의 닫기 X는 세로 44는 채우지만 가로는 32~34입니다. 더 넓히면 칩 자신의 press 영역을 삼켜 칩 선택이 불가능해집니다.
+
+---
+
 ## primitives
 
 ### Text
@@ -185,7 +204,7 @@ type InteractivePressableProps = Pick<PressableProps,
 
 ### Button
 
-화면의 명시적 액션을 트리거합니다. `variant`로 시각적 위계(primary/secondary/destructive), `size`로 높이를 선택합니다. **InteractivePressableProps 포함**.
+화면의 명시적 액션을 트리거합니다. `variant`로 시각적 위계(primary/secondary/destructive), `size`로 높이를 선택합니다. 높이는 sm 32 / md 44 / lg 48이며, **어느 size를 써도 실제 터치 영역은 44 이상입니다**(sm은 hitSlop으로 확보 — ADR-50). **InteractivePressableProps 포함**.
 
 | prop | 타입 | 필수 | 기본값 |
 |---|---|---|---|
@@ -205,6 +224,8 @@ type InteractivePressableProps = Pick<PressableProps,
 | ![Button light](screenshots/button-light.png) | ![Button dark](screenshots/button-dark.png) |
 
 `loading: true`는 자체적으로 `disabled` 효과를 포함합니다. `variant='destructive'`는 `state.errorAction` 배경 + 흰 텍스트로 표시되어 삭제·되돌릴 수 없는 액션에 사용합니다.
+
+`sm`은 카드 안이나 행 끝처럼 좁은 자리를 위한 크기입니다. 시각 높이는 32지만 세로 hitSlop 6으로 터치 영역 44를 채우므로, 접근성 때문에 `md`로 올릴 필요가 없습니다.
 
 ```tsx
 <Button label="저장" onPress={handleSave} />

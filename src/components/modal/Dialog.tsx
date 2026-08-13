@@ -104,6 +104,7 @@ export default function Dialog({ config, onResolve }: DialogProps) {
         <Button
           label={confirmLabel}
           variant="primary"
+          size="md"
           fullWidth
           onPress={() => onResolve(undefined)}
         />
@@ -113,6 +114,7 @@ export default function Dialog({ config, onResolve }: DialogProps) {
             <Button
               label={cancelLabel}
               variant="secondary"
+              size="md"
               fullWidth
               onPress={() =>
                 onResolve(config.variant === 'prompt' ? null : false)
@@ -127,6 +129,7 @@ export default function Dialog({ config, onResolve }: DialogProps) {
                   ? 'destructive'
                   : 'primary'
               }
+              size="md"
               fullWidth
               onPress={() =>
                 onResolve(config.variant === 'prompt' ? inputValue : true)

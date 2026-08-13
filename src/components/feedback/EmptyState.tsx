@@ -29,7 +29,8 @@
 // Title (standard): headlineSm + text.primary
 // Title (subtle):   bodyBase + text.muted
 // Description: bodyBase + text.muted (양 tone 공통)
-// Action: Button variant='primary' (호출처가 size 등은 기본값 사용)
+// Action: Button variant='primary' size='md'(높이 44) — 크기를 호출처에 노출하지
+//         않는다. 최소 터치 44 보장을 API로 뚫지 않기 위해서다(ADR-50).
 // ============================================================================
 
 import type { ReactNode } from 'react';
@@ -117,6 +118,7 @@ export default function EmptyState({
         <Button
           label={action.label}
           variant="primary"
+          size="md"
           onPress={action.onPress}
         />
       )}

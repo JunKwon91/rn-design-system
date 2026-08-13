@@ -22,9 +22,10 @@
 //
 // [디자인 토큰]
 // Size:
-//   - sm: height 32, padding 12, fontSize 14 (bodySm)
-//   - md: height 40, padding 16, fontSize 16 (bodyBase)
+//   - sm: height 32, padding 12, fontSize 14 (bodySm) — hitSlop 6으로 터치 44 확보
+//   - md: height 44, padding 16, fontSize 16 (bodyBase) — 기본값. 그 자체로 터치 44
 //   - lg: height 48, padding 20, fontSize 17 (headlineSm)
+// 최소 터치 영역 44×44는 size와 무관하게 항상 보장된다(ADR-50).
 // radius: theme.radius.base (8)
 // Variant:
 //   - primary:     bg theme.colors.primary.action, text theme.colors.primary.onAction
@@ -60,9 +61,9 @@ export type ButtonVariant =
   | 'destructive';
 
 export type ButtonSize =
-  /** 높이 32 · padding 12 · 14px 텍스트 */
+  /** 높이 32 · padding 12 · 14px 텍스트 (hitSlop으로 터치 44 확보) */
   | 'sm'
-  /** 높이 40 · padding 16 · 16px 텍스트 */
+  /** 높이 44 · padding 16 · 16px 텍스트 — 기본값 */
   | 'md'
   /** 높이 48 · padding 20 · 17px 텍스트 */
   | 'lg';
@@ -94,9 +95,18 @@ export interface ButtonProps extends InteractivePressableProps {
   accessibilityLabel?: string;
 }
 
-const SIZE_HEIGHT: Record<ButtonSize, number> = { sm: 32, md: 40, lg: 48 };
+const SIZE_HEIGHT: Record<ButtonSize, number> = { sm: 32, md: 44, lg: 48 };
 const SIZE_HPAD: Record<ButtonSize, number> = { sm: 12, md: 16, lg: 20 };
 const SIZE_GAP: Record<ButtonSize, number> = { sm: 6, md: 8, lg: 10 };
+
+// hitSlop — sm은 시각 높이 32를 유지하면서 세로로 6씩 넓혀 44를 채운다(ADR-50).
+// 가로는 넓히지 않는다 — 나란히 놓인 버튼끼리 터치 영역이 겹치기 때문.
+// md(44)·lg(48)는 시각 크기만으로 충족하므로 hitSlop이 없다.
+const SIZE_HIT_SLOP: Record<ButtonSize, { top: number; bottom: number } | undefined> = {
+  sm: { top: 6, bottom: 6 },
+  md: undefined,
+  lg: undefined,
+};
 const SIZE_TEXT: Record<ButtonSize, TextVariant> = {
   sm: 'bodySm',
   md: 'bodyBase',
@@ -173,6 +183,7 @@ export default function Button({
       style={computeStyle}
       disabled={blocked}
       onPress={onPress}
+      hitSlop={SIZE_HIT_SLOP[size]}
       {...pressableProps}
       accessibilityRole="button"
       accessibilityState={{ disabled: blocked, busy: loading }}

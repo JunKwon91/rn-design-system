@@ -26,7 +26,8 @@
 // Icon (기본): lucide AlertCircle 32px, color state.error
 // Title: headlineSm + text.primary (항상 강조 톤)
 // Description: bodyBase + text.muted
-// Action: Button variant='primary'
+// Action: Button variant='primary' size='md'(높이 44) — 크기를 호출처에 노출하지
+//         않는다. 최소 터치 44 보장을 API로 뚫지 않기 위해서다(ADR-50).
 //
 // [EmptyState와의 차이]
 // - tone variant 없음 — 에러는 항상 강조 톤
@@ -110,6 +111,7 @@ export default function ErrorView({
         <Button
           label={action.label}
           variant="primary"
+          size="md"
           onPress={action.onPress}
         />
       )}

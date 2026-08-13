@@ -1881,3 +1881,76 @@ Variant를 **`{Outlined, Filled}`**로 재정의(M3 Card 명칭).
 - 이제 앱이 테마에서 폰트를 바꾸면 세 컴포넌트가 함께 따라간다.
 
 **범위 밖(후속 고려)**: `Tooltip`의 `BubbleText`가 `font-size: 12px` / `line-height: 16px`를 하드코딩한다. 대응 토큰이 없다 — `labelCaps`가 12/16이지만 weight 600 + uppercase라 성격이 다르고, Tooltip은 weight 지정 없이 RN 기본(400)을 쓴다. 12/400/16 토큰을 신설할지, Tooltip을 기존 토큰에 맞출지 별도 판단이 필요하다.
+
+---
+
+## ADR-50: 최소 터치 영역 44×44를 기본값으로 (Button md 40→44, 11개 컴포넌트 정비)
+
+### 상황
+
+- ReadyGo 시안 34개 화면을 DS 인스턴스로 조립하면서 **터치 영역 위반이 반복해서 잡혔다.** 시안 쪽에서는 고칠 수 없었다 — 인스턴스에서 크기도 variant도 바꿀 수 없는 자리였기 때문이다.
+- 원인을 라이브러리에서 확인하려고 `Pressable`을 쓰는 컴포넌트 전부의 실제 터치 높이를 조사했더니, **예상한 4건이 아니라 11개 컴포넌트가 44 미만**이었다.
+
+| 컴포넌트 | 이전 터치 높이 | 44 |
+|---|---|---|
+| Button sm / **md(기본값)** / lg | 32 / **40** / 48 | ✗ / **✗** / ✓ |
+| IconButton sm·md·lg | 48 (hitSlop) | ✓ |
+| FAB small / default·large·extended | 40 / 56·96·56 | ✗ / ✓ |
+| Chip sm / md | 28 / 32 | ✗ |
+| Chip 닫기 X | 28~30 (hitSlop 8) | ✗ |
+| Checkbox · Radio | ~24 (행 = max(박스, 라벨)) | ✗ |
+| Switch sm / md / lg | 20 / 32 / 40 | ✗ |
+| SegmentedControl | 36 | ✗ |
+| Tabs | 38 (패딩 12 + 라벨 20 + gap 4 + 밑줄 2) | ✗ |
+| DataTable 정렬 헤더 | 40 / 32 (compact) | ✗ |
+| SearchInput 지우기 X | 38 (hitSlop 10) | ✗ |
+| SettingsRow / OptionCard / Input | 56 / ~52 / 44 | ✓ |
+
+- **기본값이 위반이라는 것이 문제의 핵심이다.** `size`를 명시하지 않은 모든 `Button`이 40이었고, `Dialog`·`EmptyState`·`ErrorView`는 그 기본값을 그대로 쓰면서 호출처에 크기를 노출하지 않아 앱에서 고칠 방법이 없었다.
+
+### 선택
+
+**최소 터치 44×44를 컴포넌트가 보장한다. 호출처가 신경 쓰지 않아도 지켜지고, 호출처가 깨뜨릴 수도 없다.**
+
+수단은 두 가지이며 **인접 요소와 겹치는지**로 갈랐다.
+
+| 수단 | 쓰는 곳 | 적용 |
+|---|---|---|
+| **시각 높이를 44로 올린다** | 세로로 나열되거나 그 자체가 행인 것 | Button md 40→**44**, SegmentedControl 36→**44**, Tabs 38→**44**(패딩 12→18), Checkbox·Radio·Switch 행 **min-height 44** |
+| **hitSlop으로 넓힌다** | 조밀한 표면이라 시각을 키우면 레이아웃이 무너지는 것 | Button sm(+6 세로), Chip sm(+8)·md(+6), Chip 닫기(세로 44), FAB small(+2), SearchInput 지우기(hitSlop 13), DataTable 정렬 헤더(+2/+6) |
+
+- **hitSlop은 세로로만 넓힌다.** 가로로 넓히면 나란히 놓인 버튼·칩끼리 터치 영역이 겹쳐 오탭이 생긴다. IconButton이 이미 쓰던 방식(사방 → 48)을 세로 한정으로 다듬었다.
+- **Dialog·EmptyState·ErrorView는 내부에서 `size="md"`를 명시**한다. 기본값에 기대지 않고 못 박아, 나중에 기본값이 바뀌어도 44 아래로 내려가지 않는다.
+
+### 포기한 옵션
+
+| 옵션 | 사유 |
+|------|------|
+| Button 기본값을 `lg`로 변경 | 40→48로 변화 폭이 크고, `lg`가 "강조된 큰 버튼"이라는 의미를 잃는다. 기본이 가장 큰 크기가 되면 스케일이 뒤집힌다 |
+| Button `md` 44 + `lg` 52 | `lg`는 이미 48로 44를 넘는다. 기준을 맞추려고 충족하는 값을 올릴 이유가 없다. 올리면 `lg`를 쓰는 모든 화면이 함께 커진다 |
+| `sm`도 44로 올림 | `sm`은 카드 안·행 끝처럼 좁은 자리에 쓰라고 있는 크기다. 44로 올리면 `md`와 같아져 존재 이유가 없어진다. 시각 32를 유지하고 hitSlop으로 터치만 확보하는 것이 `sm`의 목적을 지킨다 |
+| `EmptyStateAction`에 `size` 노출 | 호출처가 `sm`을 주면 44가 다시 깨진다. **접근성 보장을 API로 뚫지 않는다.** 같은 이유로 `ErrorView`·`Dialog`도 노출하지 않았다 |
+| Checkbox·Radio·Switch에 hitSlop | 이들은 세로로 나열되는 것이 정상이라 hitSlop이 인접 항목과 겹친다. 행 높이를 44로 잡는 편이 겹침 없이 안전하다 |
+| 명시된 4건만 고치고 나머지는 다음 버전으로 | 기준을 세우는 변경은 한 번에 해야 한다. 절반만 44면 "44가 기준"이라고 말할 수 없고, 다음 시안에서 같은 조사를 다시 해야 한다 |
+
+### 근거
+
+- **44는 시각 크기가 아니라 터치 영역 기준이다.** WCAG 2.5.5·Apple HIG가 요구하는 것은 눌리는 영역이므로, 시각을 키우지 않고 hitSlop으로 채우는 것도 충족이다. 조밀한 UI를 포기하지 않고 기준을 지킬 수 있다.
+- **`md` 40→44는 실제 영향이 작다.** LottoStats의 직접 `<Button>` 4곳은 전부 `size`를 명시(sm 3 / lg 1)하고 있어 **시각 변화가 없다.** 변하는 것은 `EmptyState`·`ErrorView`의 액션 버튼(40→44)과 `SegmentedControl`(36→44)뿐이다.
+- **`Dialog`가 가장 급했다.** 삭제 확인처럼 되돌릴 수 없는 행동의 버튼이 40이었고, 인스턴스에서 `resize`도 `size` 변형 전환도 먹지 않아 앱에서 손쓸 수 없었다. 오탭 비용이 가장 큰 자리가 가장 작았다.
+
+### 결과
+
+- `Button.tsx`: `SIZE_HEIGHT.md` 40→44, `SIZE_HIT_SLOP` 신설(sm 세로 6). `hitSlop`을 `{...pressableProps}` **앞**에 두어 호출처가 덮어쓸 수 있다.
+- `Dialog.tsx`·`EmptyState.tsx`·`ErrorView.tsx`: 액션 버튼에 `size="md"` 명시.
+- `SegmentedControl.tsx`: 컨테이너·인디케이터·세그먼트 36→44, radius 18→22.
+- `Tabs.tsx`: `TabColumn` padding-top 12→18.
+- `Checkbox.tsx`·`Radio.tsx`·`Switch.tsx`: `Row`에 `min-height: 44px`.
+- `Chip.tsx`: `SIZE_HIT_SLOP`·`CLOSE_HIT_SLOP` 신설.
+- `FAB.tsx`: `VARIANT_HIT_SLOP` 신설(small만 2).
+- `SearchInput.tsx`: 지우기 hitSlop 10→13.
+- `DataTable.tsx`: `HEADER_HIT_SLOP` 신설, 정렬 가능한 헤더 셀에만 적용.
+
+**남은 제약**: `Chip`의 닫기 X는 **세로 44는 채우지만 가로는 32~34**에 그친다. 시각 크기가 12~14px인데 가로로 더 넓히면 칩 자신의 press 영역을 삼켜 "칩 선택"이 불가능해진다. 칩의 주 동작은 칩 자체(44 확보)이고 닫기는 보조라 여기서 멈췄다. 완전히 풀려면 input chip의 높이를 키우거나 닫기를 칩 밖으로 빼야 한다.
+
+**범위 밖**: `SegmentedControl`의 세그먼트 라벨은 코드에서 이미 `Text variant="labelLg"`로 토큰을 경유한다 — 하드코딩이 없다. Figma 쪽 컴포넌트에만 텍스트 스타일이 빠져 있으므로 그건 Figma에서 고칠 일이다.
