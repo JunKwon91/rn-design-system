@@ -28,8 +28,9 @@
 //   default — outlined border/control, fill transparent, text text/primary,
 //             leading icon text/secondary
 // Input
-//   default — filled surface/containerHigh, text text/primary,
+//   default — filled surface/containerHigh + 1px border/subtle, text text/primary,
 //             leading icon text/secondary, close X text/secondary
+//             (테두리는 라이트에서 채움이 bg/canvas와 같은 값이라 필요하다 — ADR-51)
 // Suggestion
 //   default — outlined border/control, text text/muted (보조 톤), 아이콘 없음
 //
@@ -197,7 +198,12 @@ function Chip({
     return 'transparent';
   })();
   const borderColor = (() => {
-    if (isFilterSelected || variant === 'input') return 'none';
+    // filter-selected는 primary.action 채움이라 캔버스와 명백히 구분된다 — 테두리 불필요.
+    // input은 surface.containerHigh 채움인데 라이트에서 그 값이 bg.canvas와 같은 칸이라
+    // (둘 다 slate-200) 캔버스 위에서 면이 사라진다. Toast가 같은 토큰에 border.subtle
+    // 1px을 두어 해결한 관례를 따른다(ADR-51).
+    if (isFilterSelected) return 'none';
+    if (variant === 'input') return theme.colors.border.subtle;
     return theme.colors.border.control;
   })();
   const textColor = (() => {
